@@ -1,0 +1,296 @@
+Code Types supported by Artemis
+written by misfire <misfire@xploderfreax.de>
+Last update: Jul 22 2009
+
+
+Overview:
+
+0 - 8-bit constant write
+1 - 16-bit constant write
+2 - 32-bit constant write
+3 - Increment / Decrement
+4 - 32-bit constant serial write
+5 - Copy bytes
+6 - Pointer write
+7 - Boolean operation
+8 - TODO
+9 - Hook code
+A - TODO
+B - TODO
+C - 32-bit do all following codes if equal to
+D - Do multi-lines if conditional
+E - should be converted to D code type for backwards compatibility
+F - TODO
+
+
+"8-bit constant write"
+
+0-aaaaaaa 000000vv
+
+a = address (25 bits)
+v = value (8 bits)
+
+Constantly writes the 8-bit value @v to address @a.
+The address can be odd or even.
+
+Example:
+002BAA31 00000063
+The 8-bit value 0x63 is repeatedly written to memory location 0x002BAA31.
+
+--------------------
+
+"16-bit constant write"
+
+1-aaaaaaa 0000vvvv
+
+a = address (25 bits)
+v = value (16 bits)
+
+Constantly writes the 16-bit value @v to address @a.
+The address must be aligned to 2.
+
+Example:
+107657B2 0000FFFF
+The 16-bit value 0xFFFF is repeatedly written to memory location 0x007657B2.
+
+--------------------
+
+"32-bit constant write"
+
+2-aaaaaaa vvvvvvvv
+
+a = address (25 bits)
+v = value (32 bits)
+
+Constantly writes the 32-bit value @v to address @a.
+The address must be aligned to 4.
+
+Example:
+20417A64 42C80000
+The 32-bit value 0x42C80000 is repeatedly written to memory location 0x00417A64.
+
+--------------------
+
+"Increment / Decrement"
+
+8-bit increment
+3-00000vv 0aaaaaaa
+
+8-bit decrement
+3-01000vv 0aaaaaaa
+
+16-bit increment
+3-020vvvv 0aaaaaaa
+
+16-bit decrement
+3-030vvvv 0aaaaaaa
+
+32-bit increment
+3-0400000 0aaaaaaa
+vvvvvvvv 00000000
+
+32-bit decrement
+3-0500000 0aaaaaaa
+vvvvvvvv 00000000
+
+a = address (25 bit)
+v = value (8/16/32 bit)
+
+It increments/decrements the current value at address @a by value @v.
+Only used with a joker code above it!
+
+Example:
+30000005 0012AC29
+This will add the 8-bit value 0x05 to the value at address 0x0012AC29.
+
+--------------------
+
+"32-bit constant serial write"
+
+4-aaaaaaa nnnnssss
+vvvvvvvv iiiiiiii
+
+a = start address (25 bits)
+n = number of times to write (16 bits)
+s = size of address step (divided by 4) (16 bits)
+v = start value (32 bits)
+i = size of value step (32 bits)
+
+Starting with address @a, this code type will write the 32-bit value @v to @n
+addresses. In each cycle, the address is incremented by @s * 4 and the value is
+incremented by @i.
+
+Example 1:
+402E8390 00040001
+FFFFFFFF 00000000
+- writes 0xFFFFFFFF to 0x002E8390
+- writes 0xFFFFFFFF to 0x002E8394
+- writes 0xFFFFFFFF to 0x002E8398
+- writes 0xFFFFFFFF to 0x002E839C
+
+Example 2:
+4099A20C 00060002
+00000000 00100000
+- writes 0x00000000 to 0x0099A20C
+- writes 0x00100000 to 0x0099A214
+- writes 0x00200000 to 0x0099A21C
+- writes 0x00300000 to 0x0099A224
+- writes 0x00400000 to 0x0099A22C
+- writes 0x00500000 to 0x0099A234
+
+--------------------
+
+"Copy bytes"
+
+5-sssssss nnnnnnnn
+0ddddddd 00000000
+
+s = address to copy from (25 bits)
+n = number of bytes to copy (32 bits)
+d = address to copy to (25 bits)
+
+Copies a block of @n bytes from source address @s to destination address @d.
+This is done repeatedly, so you need a D code in front of it to only copy stuff
+once.
+
+Example:
+50339328 00000008
+0036AED4 00000000
+Copy 8 bytes from memory location 0x00339328 to 0x0036AED4.
+
+--------------------
+
+"Pointer write"
+
+8-bit write
+6-aaaaaaa 000000vv
+00000000 iiiiiiii
+
+16-bit write
+6-aaaaaaa 0000vvvv
+00010000 iiiiiiii
+
+32-bit write
+6-aaaaaaa vvvvvvvv
+00020000 iiiiiiii
+
+a = address to load 32-bit base address from (25 bits)
+v = value to store at base + offset (8/16/32 bits)
+i = 32-bit offset to be added to base
+
+Loads 32-bit base address from address @a, adds offset @i to it, and constantly
+writes the value @v to the final address.
+Note that execution stops if base is equal to 0.
+
+Example:
+6018F6D4 000003E7
+00010000 00000156
+- loads base address from address 0x0018F6D4, say base is 0x001A0000
+- adds offset 0x00000156 to base to make final address 0x001A0156 where 16-bit
+value 0x03E7 will be written to
+
+--------------------
+
+"Boolean operation"
+
+8-bit OR
+7-aaaaaaa 000000vv
+
+16-bit OR
+7-aaaaaaa 0010vvvv
+
+8-bit AND
+7-aaaaaaa 002000vv
+
+16-bit AND
+7-aaaaaaa 0030vvvv
+
+8-bit XOR
+7-aaaaaaa 004000vv
+
+16-bit XOR
+7-aaaaaaa 0050vvvv
+
+a = address (25 bits)
+v = value (8/16 bits)
+
+Performs a bitwise logical operation between value @v and the value stored at
+address @a.
+
+Example:
+7048D402 005014A9
+0x14A9 is XORed to the 16-bit value at address 0x0048D402.
+
+--------------------
+
+"Hook code"
+
+9-aaaaaaa vvvvvvvv
+
+a = address (25 bits)
+v = value (32 bits)
+
+This code will "hook" the game and is essential for most of the other types to
+work. It hard-codes a jal to the cheat engine at address @a if the 32-bit value
+at @a is equal to value @v. The address @a needs to be inside a function which
+is called many times a second, e.g. scePadRead().
+To cheat on multi-ELF games, create a 9 code for each ELF.
+
+Example:
+902D51F8 0C0B95F6
+Insert hook if 32-bit value at address 0x002D51F8 is equal to 0x0C0B95F6.
+
+--------------------
+
+"32-bit do all following codes if equal to"
+
+C-aaaaaaa vvvvvvvv
+
+a = address (25 bits)
+v = value (32 bits)
+
+All following codes will be executed only if 32-bit value at address @a is equal
+to value @v. Can be used to exit the code sequence at any point. To act on all
+codes (like traditional "Auto Activation") put it at the top of the code list.
+
+Example:
+C0153880 03E00008
+If the 32-bit value 0x03E00008 is at address 0x00153880, then activate all
+following codes; otherwise, do nothing.
+
+--------------------
+
+"Do multi-lines if conditional"
+
+16-bit test
+D-aaaaaaa nnt0vvvv
+
+8-bit test
+D-aaaaaaa nnt100vv
+
+a = address (25 bits)
+n = number of lines to execute (8 bits)
+t = test condition (3 bits)
+    0 equal      1 not equal
+    2 less than  3 greater than
+    4 NAND       5 AND
+    6 NOR        7 OR
+v = value (8/16 bits)
+
+Compares value at address @a to value @v, and executes next @n code lines only
+if the test condition @t is true.
+
+Example:
+D00802CC 07002882
+200802CC 8C860000
+200802D0 10C00033
+200802D4 00050C02
+200802D8 00C13021
+200802DC 10000030
+200802E0 A4C50000
+100800BC 00000083
+Activate next 7 lines of code if 16-bit value at address 0x000802CC is equal to
+0x2882; otherwise, skip the 7 code lines.
+
+
+EOF

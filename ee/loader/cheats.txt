@@ -1,0 +1,85 @@
+
+"Devil May Cry PAL /ID SLES_503.58"
+Mastercode
+9010C1DC 0C045528
+Unlimited Health
+205C7654 03F82809
+Unlock all Game Modes
+20742204 FFFFFFFF
+Unlimited Red Orbs
+20742924 280968FF
+Unlimited Yellow Orbs
+20742910 280903E7
+Unlimited Devil Trigger
+205C79F0 1E000000
+
+//--------
+
+"Metal Gear Solid 2-Sons Of Liberty PAL /ID SLES_503.83"
+Mastercode
+901650DC 0C05B3FE
+Infinite Ammo
+//2015CA58 00000000
+Extra Ammo
+2015CA54 00711821
+
+//--------
+
+"Resident Evil 4 PAL /ID SLES_537.02"
+Mastercode
+902A6EDC 0C0A74B2
+Extra Ammo
+1012020C 00000001
+Max Pesetas
+2042DCEC 05F5E0FF
+Always Low Game Save Time
+2042DCD4 00000000
+No Times Saved Recorded
+1042DCDA 00000000
+
+//--------
+
+"Ridge Racer V PAL /ID SCES_500.00"
+Mastercode
+902C8414 0C0B5F42
+All Lap Times 00:00
+41DC8964 00060001
+00000000 00000000
+All Cars and Engines
+41E359C8 00070001
+02020202 00000000
+
+//--------
+
+"TimeSplitters PAL /ID SLES_500.78"
+Mastercode
+902D51F8 0C0B95F6
+Misc
+10B8DAFA 00003F00
+203C86B0 00000001
+203C898C FFFFFFFF
+Invincible
+//203C8728 00000001
+Invisible
+//203C872C 00000001
+
+//--------
+
+"TimeSplitters 2 PAL /ID SLES_508.77"
+Mastercode
+9044DBEC 0C12407B
+Unlimited Ammunition
+202DAFD0 00000000
+Unlock All Levels
+2059E57C FFFFFFFF
+
+//--------
+
+"Tom Clancy's Splinter Cell PAL /ID SLES_514.66"
+Mastercode
+90129A84 0C048534
+Unlock All Levels
+20383A30 00000000
+Unlock Ninja Mode
+203839DC 00000000
+20387CE0 00000000

@@ -1,0 +1,56 @@
+Artemis Software Architecture
+written by misfire <misfire@xploderfreax.de>
+
+NOTE: This document is far from being complete.
+
+
+Software Components:
+
+libconfig
+---------
+
+ee/libconfig/
+
+The current version of Artemis uses a PS2 port of libconfig - a simple library
+for manipulating structured configuration files - to read and store its
+configuration (see config_help.txt for details).
+
+Home of libconfig:
+http://www.hyperrealm.com/libconfig/
+
+
+libcheats
+---------
+
+common/libcheats/
+
+Furthermore, Artemis makes use of the libcheats library to read, manipulate, and
+write cheat codes in text format - see cheats_format.txt.
+
+
+Cheat engine
+------------
+
+ee/engine/
+
+The cheat engine's primary task is to run in the game's background and process
+the cheat codes (see code_types.txt for more information).
+
+As the engine is built as an ERL, it can be relocated at any memory address in
+user space.
+
+
+Boot loader
+-----------
+
+ee/loader/
+
+This is where all the components come together. The loader does the following:
+- set up EE and IOP (modules, SBV patches, etc.)
+- read configuration from file
+- install external or built-in cheat engine (hook syscalls, etc.)
+- load cheats from text file and pass them to the cheat engine
+- start the inserted game
+
+
+EOF

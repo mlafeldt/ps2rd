@@ -1,0 +1,28 @@
+To build the PS2 part of Artemis, you need a working PS2DEV toolchain with an
+up-to-date version of the PS2SDK.
+
+Also, you have to install the PS2 ports of libconfig and libcheats to the SDK,
+most likely under /usr/local/ps2dev/ps2sdk/ports/. Both can be compiled and
+installed just by running two commands in the respective project folder:
+
+$ cd ee/libconfig/
+$ make -f Makefile.PS2
+# make -f Makefile.PS2 install
+
+$ cd common/libcheats/
+$ make -f Makefile.PS2
+# make -f Makefile.PS2 install
+
+Afterwards, you can finally build the Artemis executable:
+
+$ cd ee/loader/
+$ make
+
+This will create ee/loader/artemis.elf.
+
+Currently, it is recommended to run the ELF with ps2link + ps2client:
+
+$ make run
+
+
+EOF

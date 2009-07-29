@@ -1,0 +1,46 @@
+Artemis uses libconfig to read and store its configuration:
+http://www.hyperrealm.com/libconfig/libconfig_manual.html
+
+The config file is named artemis.conf and must be in Artemis' root folder.
+
+Here is a list of the available settings:
+
+
+Section "loader"
+----------------
+
+* iop_reset [bool, false by default]
+
+  Set 'iop_reset' to true to reset the IOP on startup.
+
+* sbv_patches [bool, true by default]
+
+  Set it to true to apply all SBV patches on startup:
+   - sbv_patch_enable_lmb
+   - sbv_patch_disable_prefix_check
+   - sbv_patch_user_mem_clear
+
+
+Section "engine"
+----------------
+
+* addr [32-bit offset, 0x00080000 by default]
+
+  Specifies the load address of the cheat engine. This address must belong
+  to user space memory (0x00080000-0x01ffffff).
+
+* file [path, not set by default]
+
+  If you don't want to use the built-in cheat engine, you can specify the
+  filename of an external engine instead.
+
+
+Section "cheats"
+----------------
+
+* file [path, cheats.txt by default]
+
+  Set 'file' to the name of the cheats file to use.
+
+
+EOF

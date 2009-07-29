@@ -1,0 +1,36 @@
+Artemis makes use of the libcheats library to read cheat codes in text format.
+
+The format of the text file is quite simple:
+
+"Game title 1 /ID NAME"
+Cheat description 1
+Cheat code 1
+Cheat code 2
+Cheat description 2
+Cheat code 1
+Cheat code 2
+
+"Game title 2 /ID NAME"
+etc.
+
+The ID is used by the cheat system to auto-detect the inserted game and activate
+codes accordingly. NAME must be the name of the game's start ELF (as specified
+in SYSTEM.CNF but w/o directory suffix).
+Note that the game ID handling will be improved in the future.
+
+Also, two types of comments are allowed in the cheats file:
+- Script-style comments. All text beginning with a ‘#’ character to the end of
+  the line is ignored.
+- C++-style comments. All text beginning with a ‘//’ sequence to the end of the
+  line is ignored.
+
+Sample:
+
+"TimeSplitters PAL /ID SLES_500.78"
+// some senseless comment
+Mastercode
+902D51F8 0C0B95F6
+Invincible
+203C8728 00000001
+
+EOF

@@ -1,0 +1,57 @@
+=======
+ARTEMIS
+=======
+
+About Artemis
+-------------
+
+Artemis comprises of two parts:
+
+1) Cheat System
+
+Artemis is a cheat system which will have all the features people are used to.
+
+The current version already allows you to load cheat codes from a text file and
+to automatically activate them for the inserted game. Take a look at
+doc/code_types.txt for a complete list of available code types.
+
+2) Hacking System
+
+Artemis' killer feature will be the ability to hack/debug commercial PS2 games
+over Ethernet using a PC-side debugger client.
+
+Although we already have the technology to hack many games (thanks to
+jimmikaelkael's Core Launcher), this feature has not been merged yet.
+
+
+More specific documentation can be found in the "doc" directory.
+
+
+Disclaimer
+----------
+
+ARTEMIS IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER
+ENTERTAINMENT, INC. ALL TRADEMARKS ARE PROPERTY OF THEIR RESPECTIVE OWNERS.
+
+Artemis comes with ABSOLUTELY NO WARRANTY. It is covered by the GNU General
+Public License. Please see file COPYING for further information.
+
+Besides the PS2SDK from ps2dev.org, Artemis makes use of these libraries:
+- libconfig by Mark Lindner et al. (http://www.hyperrealm.com/libconfig/)
+- libcheats by misfire <misfire@xploderfreax.de>
+
+Both libraries are covered by the GNU Lesser General Public License. Please see
+file COPYING.LESSER for further information.
+
+
+Contact
+-------
+
+Artemis has a BountySource.com account:
+https://artemis.bountysource.com/
+
+GSHI hacking and development forums:
+http://gshi.org/vb/
+
+
+EOF

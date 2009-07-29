@@ -1,0 +1,10 @@
+ee/loader
+- calculate better game ID for auto-detection
+- add automatic search for hook codes (scePadRead patterns...)
+- add compatibility layer for code types (convert E type to D etc.)
+
+ee/engine
+- implement code type suggestions from http://gshi.org/vb/showthread.php?t=3680
+
+ee/debugger
+- merge Jimmi's code from Core_Launcherv2/ntpbserver/core
