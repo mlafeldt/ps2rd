@@ -21,6 +21,8 @@
 
 #include <tamtypes.h>
 
+char * erl_id = "debugger";
+
 /*
  * TODO: Eventually, this is where all the hacking magic happens:
  * - load our IOP modules on IOP reboot
@@ -33,5 +35,9 @@
  */
 int debugger_main(int argc, char *argv[])
 {
+#if 0
+	/* Emulate code 10B8DAFA 00003F00 */
+	_sh(0x3F00, 0x00B8DAFA);
+#endif
 	return 0;
 }
