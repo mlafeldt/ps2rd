@@ -11,13 +11,13 @@ EE_ASFLAGS +=
 
 EE_BIN = artemis.elf
 
-EE_OBJS = loader.o configman.o engine.o engineman.o \
+EE_OBJS = loader.o configman.o engine.o engineman.o debugger.o \
 	mycdvd.o mypad.o mystring.o myutil.o
 
 EE_LIBS = -lcdvd -ldebug -lpad -lpatches -lerl -lconfig -lcheats
 
 
-all: engine loader debugger
+all: engine debugger loader
 
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS) *.erl
