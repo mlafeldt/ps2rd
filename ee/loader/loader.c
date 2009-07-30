@@ -232,13 +232,15 @@ static int load_cheats(const config_t *config, engine_ctx_t *ctx)
 
 #include <erl.h>
 /*
- * Install external or built-in debugger.
+ * Install built-in debugger.
+ * TODO: move debugger handling to a separate module
  */
 static int install_debugger(const config_t *config, engine_ctx_t *ctx)
 {
 	struct erl_record_t *erl;
 	struct symbol_t *sym;
 	u32 addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+	void *debugger_main;
 
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
@@ -255,10 +257,18 @@ static int install_debugger(const config_t *config, engine_ctx_t *ctx)
 	D_PRINTF("ERL size = %u\n", erl->fullsize);
 	D_PRINTF("Install completed.\n");
 
+#define GETSYM(x, s) \
+	sym = erl_find_local_symbol(s, erl); \
+	if (sym == NULL) { \
+		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, s); \
+		return -2; \
+	} \
+	x = (typeof(x))sym->address; \
+	D_PRINTF("%08x %s\n", sym->address, s)
+
 	/* Set engine callback */
-	sym = erl_find_local_symbol("debugger_main", erl);
-	D_PRINTF("%08x debugger_main\n", sym->address);
-	ctx->callbacks[0] = sym->address;
+	GETSYM(debugger_main, "debugger_main");
+	ctx->callbacks[0] = (u32)debugger_main;
 
 	return 0;
 }
