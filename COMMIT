@@ -8,7 +8,7 @@ Stable trunk strategy
 As we follow the stable trunk strategy, direct changes MUST NOT be made to the
 SVN trunk of this project, that is, trunk/artemis/.
 
-Development must only take place in the development branch(es). If new features,
+Development may only take place in the development branch(es). If new features,
 bug fixes, etc. turn out to be stable, they'll be merged to the trunk later on.
 
 
