@@ -83,6 +83,10 @@ static const char *g_modules[] = {
 extern u8 _binary_engine_erl_start[];
 extern u8 _binary_engine_erl_end[];
 
+/* Built-in debugger (statically linked) */
+extern u8 _binary_debugger_erl_start[];
+extern u8 _binary_debugger_erl_end[];
+
 
 /*
  * Build pathname based on boot device and filename.

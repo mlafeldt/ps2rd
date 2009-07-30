@@ -17,10 +17,10 @@ EE_OBJS = loader.o configman.o engine.o engineman.o \
 EE_LIBS = -lcdvd -ldebug -lpad -lpatches -lerl -lconfig -lcheats
 
 
-all: engine loader
+all: engine loader debugger
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) engine.erl
+	rm -f $(EE_BIN) $(EE_OBJS) *.erl
 
 rebuild: clean all
 
@@ -28,6 +28,11 @@ engine:
 	make -C ../engine engine.erl
 	cp ../engine/engine.erl .
 	bin2o -n engine.erl engine.o _binary_engine_erl
+
+debugger:
+	make -C ../debugger debugger.erl
+	cp ../debugger/debugger.erl .
+	bin2o -n debugger.erl debugger.o _binary_debugger_erl
 
 loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
