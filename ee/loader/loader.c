@@ -35,7 +35,7 @@
 #include "myutil.h"
 
 #define APP_NAME	"Artemis"
-#define APP_VERSION	"0.1"
+#define APP_VERSION	"0.2 WIP"
 #define APP_BUILD_DATE	__DATE__" "__TIME__
 
 #define WELCOME_STRING	"Welcome to "APP_NAME" "APP_VERSION"\n"
