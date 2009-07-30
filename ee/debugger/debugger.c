@@ -20,8 +20,9 @@
  */
 
 #include <tamtypes.h>
-
-char * erl_id = "debugger";
+#include <kernel.h>
+#include <syscallnr.h>
+#include <sifdma.h>
 
 /*
  * TODO: Eventually, this is where all the hacking magic happens:
@@ -30,10 +31,51 @@ char * erl_id = "debugger";
  * - manage code and hook list of cheat engine
  */
 
+char * erl_id = "debugger";
+
+#define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
+
+u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len) = NULL;
+int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
+
+/*
+ * Hook function for syscall SifSetDma().
+ */
+u32 HookSifSetDma(SifDmaTransfer_t *sdd, s32 len)
+{
+	//GS_BGCOLOUR = 0x0000ff;
+	/* TODO: do magic here */
+	return OldSifSetDma(sdd, len);
+}
+
+/*
+ * Hook function for syscall SifSetReg().
+ */
+int HookSifSetReg(u32 register_num, int register_value)
+{
+	/* TODO: do magic here */
+	return OldSifSetReg(register_num, register_value);
+}
+
+/*
+ * Automatically invoked on ERL load.
+ */
+int _init(void)
+{
+	/* Hook syscalls */
+	OldSifSetDma = GetSyscall(__NR_SifSetDma);
+	SetSyscall(__NR_SifSetDma, HookSifSetDma);
+
+	OldSifSetReg = GetSyscall(__NR_SifSetReg);
+	SetSyscall(__NR_SifSetReg, HookSifSetReg);
+
+	return 0;
+}
+
 /*
  * This function is constantly called by the cheat engine.
  */
-int debugger_main(int argc, char *argv[])
+int debugger_main(void)
 {
 #if 0
 	/* Emulate code 10B8DAFA 00003F00 */

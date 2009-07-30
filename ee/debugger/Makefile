@@ -4,19 +4,24 @@
 # Copyright (C) 2009 misfire <misfire@xploderfreax.de>
 ##
 
+KRNL_SYM = -DF___syscall -DF_SifSetDma -DF_SifSetReg -DF_SetSyscall \
+	-DF_GetSyscall -DF_DIntr -DF_EIntr
+
+KRNL_OBJS = libkernel/kernel.S libkernel/getsyscall.o libkernel/glue.o
+
 EE_INCS +=
-EE_CFLAGS +=
+EE_CFLAGS += $(KRNL_SYM)
 EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = debugger.c
+EE_OBJS = debugger.c $(KRNL_OBJS)
 TEST_OBJS = $(EE_OBJS) test.o $(PS2SDK)/ee/startup/crt0.o
 
-all: debugger.erl test.elf
+all: debugger.erl
 
 clean:
-	rm -f *.erl *.rel *.o *.elf
+	rm -f *.o *.elf *.erl libkernel/*.o
 
 rebuild: clean all
 
