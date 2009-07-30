@@ -48,8 +48,13 @@
 #define PAD_PORT	0
 #define PAD_SLOT	0
 
+#define ENGINE_INSTALL
+
 #ifndef ENGINE_ADDR
 #define ENGINE_ADDR	0x00080000
+#endif
+#ifndef DEBUGGER_ADDR
+#define DEBUGGER_ADDR	0x000a0000
 #endif
 #ifndef CHEATS_FILE
 #define CHEATS_FILE	"cheats.txt"
@@ -105,10 +110,29 @@ static char *__pathname(const char *name)
 }
 
 /*
+ * Install external or built-in engine.
+ */
+static int install_engine(const config_t *config, engine_ctx_t *ctx)
+{
+	const char *p = NULL;
+
+	if (!config_get_bool(config, SET_ENGINE_INSTALL))
+		return 0;
+
+	if ((p = config_get_string(config, SET_ENGINE_FILE)) != NULL)
+		return engine_install_from_file(__pathname(p),
+			config_get_u32(config, SET_ENGINE_ADDR), ctx);
+	else
+		return engine_install_from_mem(_binary_engine_erl_start,
+			config_get_u32(config, SET_ENGINE_ADDR), ctx);
+}
+
+/*
  * Load cheats from cheats file and pass them to the engine.
  */
-static int load_cheats(const char *cheatfile, engine_ctx_t *ctx)
+static int load_cheats(const config_t *config, engine_ctx_t *ctx)
 {
+	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
 	char elfname[FIO_PATH_MAX];
 	char *buf = NULL;
 	cheats_t cheats;
@@ -121,7 +145,7 @@ static int load_cheats(const char *cheatfile, engine_ctx_t *ctx)
 	 * Read cheats from text file.
 	 * TODO: this should be done only once or on demand.
 	 */
-	buf = read_text_file(cheatfile, 0);
+	buf = read_text_file(__pathname(cheatfile), 0);
 	if (buf == NULL) {
 		A_PRINTF("Error: could not read cheats file '%s'\n", cheatfile);
 		return -1;
@@ -175,6 +199,12 @@ static int load_cheats(const char *cheatfile, engine_ctx_t *ctx)
 	/*
 	 * Add hooks and codes for found game to cheat engine.
 	 */
+	if (!config_get_bool(config, SET_ENGINE_INSTALL)) {
+		A_PRINTF("Error: cannot add cheats - engine not installed\n");
+		cheats_destroy(&cheats);
+		return -1;
+	}
+
 	engine_clear_hooks(ctx);
 	engine_clear_codes(ctx);
 
@@ -201,7 +231,6 @@ int main(int argc, char *argv[])
 	static u8 padbuf[256] __attribute__((aligned(64)));
 	config_t config;
 	engine_ctx_t ctx;
-	const char *p = NULL;
 	int ret = 0;
 
 	SifInitRpc(0);
@@ -253,14 +282,7 @@ int main(int argc, char *argv[])
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
 	/* Install external or built-in engine */
-	p = config_get_string(&config, SET_ENGINE_FILE);
-	if (p != NULL) {
-		ret = engine_install_from_file(__pathname(p),
-			config_get_u32(&config, SET_ENGINE_ADDR), &ctx);
-	} else {
-		ret = engine_install_from_mem(_binary_engine_erl_start,
-			config_get_u32(&config, SET_ENGINE_ADDR), &ctx);
-	}
+	ret = install_engine(&config, &ctx);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install cheat engine\n");
 		goto end;
@@ -291,8 +313,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (new_pad & PAD_CIRCLE) {
-			p = config_get_string(&config, SET_CHEATS_FILE);
-			load_cheats(__pathname(p), &ctx);
+			load_cheats(&config, &ctx);
 		}
 
 		if (new_pad & PAD_TRIANGLE) {

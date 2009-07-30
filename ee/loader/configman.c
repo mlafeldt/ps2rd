@@ -29,8 +29,12 @@
 static const char *setting_paths[] = {
 	"loader.iop_reset",
 	"loader.sbv_patches",
+	"engine.install",
 	"engine.addr",
 	"engine.file",
+	"debugger.install",
+	"debugger.addr",
+	"debugger.file",
 	"cheats.file",
 	NULL
 };
@@ -133,7 +137,9 @@ void config_build(config_t *config)
 	config_init(config);
 	root = config_root_setting(config);
 
-	/* build "loader" group */
+	/*
+	 * loader section
+	 */
 	group = config_setting_add(root, "loader", CONFIG_TYPE_GROUP);
 
 	set = config_setting_add(group, "iop_reset", CONFIG_TYPE_BOOL);
@@ -144,9 +150,15 @@ void config_build(config_t *config)
 #ifndef _NO_SBV
 	config_setting_set_bool(set, 1);
 #endif
-	/* build "engine" group */
+	/*
+	 * engine section
+	 */
 	group = config_setting_add(root, "engine", CONFIG_TYPE_GROUP);
 
+	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
+#ifdef ENGINE_INSTALL
+	config_setting_set_bool(set, 1);
+#endif
 	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
 #ifdef ENGINE_ADDR
 	config_setting_set_int(set, ENGINE_ADDR);
@@ -155,7 +167,26 @@ void config_build(config_t *config)
 #ifdef ENGINE_FILE
 	config_setting_set_string(set, ENGINE_FILE);
 #endif
-	/* build "cheats" group */
+	/*
+	 * debugger section
+	 */
+	group = config_setting_add(root, "debugger", CONFIG_TYPE_GROUP);
+
+	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
+#ifdef DEBUGGER_INSTALL
+	config_setting_set_bool(set, 1);
+#endif
+	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
+#ifdef DEBUGGER_ADDR
+	config_setting_set_int(set, DEBUGGER_ADDR);
+#endif
+	set = config_setting_add(group, "file", CONFIG_TYPE_STRING);
+#ifdef DEBUGGER_FILE
+	config_setting_set_string(set, DEBUGGER_FILE);
+#endif
+	/*
+	 * cheats section
+	 */
 	group = config_setting_add(root, "cheats", CONFIG_TYPE_GROUP);
 
 	set = config_setting_add(group, "file", CONFIG_TYPE_STRING);
@@ -178,18 +209,29 @@ void config_print(const config_t *config)
 
 	printf("config values:\n");
 
+	/* loader */
 	_config_lookup_bool(config, SET_IOP_RESET, (int*)&value);
 	printf("%s = %i\n", setting_paths[SET_IOP_RESET], value);
-
 	_config_lookup_bool(config, SET_SBV_PATCHES, (int*)&value);
 	printf("%s = %i\n", setting_paths[SET_SBV_PATCHES], value);
 
+	/* engine */
+	_config_lookup_bool(config, SET_ENGINE_INSTALL, (int*)&value);
+	printf("%s = %i\n", setting_paths[SET_ENGINE_INSTALL], value);
 	_config_lookup_u32(config, SET_ENGINE_ADDR, &value);
 	printf("%s = %08x\n", setting_paths[SET_ENGINE_ADDR], value);
-
 	_config_lookup_string(config, SET_ENGINE_FILE, &s);
 	printf("%s = %s\n", setting_paths[SET_ENGINE_FILE], s);
 
+	/* debugger */
+	_config_lookup_bool(config, SET_DEBUGGER_INSTALL, (int*)&value);
+	printf("%s = %i\n", setting_paths[SET_DEBUGGER_INSTALL], value);
+	_config_lookup_u32(config, SET_DEBUGGER_ADDR, &value);
+	printf("%s = %08x\n", setting_paths[SET_DEBUGGER_ADDR], value);
+	_config_lookup_string(config, SET_DEBUGGER_FILE, &s);
+	printf("%s = %s\n", setting_paths[SET_DEBUGGER_FILE], s);
+
+	/* cheats */
 	_config_lookup_string(config, SET_CHEATS_FILE, &s);
 	printf("%s = %s\n", setting_paths[SET_CHEATS_FILE], s);
 }
