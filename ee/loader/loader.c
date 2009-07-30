@@ -230,6 +230,39 @@ static int load_cheats(const config_t *config, engine_ctx_t *ctx)
 	return 0;
 }
 
+#include <erl.h>
+/*
+ * Install external or built-in debugger.
+ */
+static int install_debugger(const config_t *config, engine_ctx_t *ctx)
+{
+	struct erl_record_t *erl;
+	struct symbol_t *sym;
+	u32 addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+
+	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
+		return 0;
+
+	D_PRINTF("* Installing debugger...\n");
+	D_PRINTF("ERL addr = %08x\n", addr);
+
+	erl = load_erl_from_mem_to_addr(_binary_debugger_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
+		return -1;
+	}
+
+	D_PRINTF("ERL size = %u\n", erl->fullsize);
+	D_PRINTF("Install completed.\n");
+
+	/* Set engine callback */
+	sym = erl_find_local_symbol("debugger_main", erl);
+	D_PRINTF("%08x debugger_main\n", sym->address);
+	ctx->callbacks[0] = sym->address;
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	static u8 padbuf[256] __attribute__((aligned(64)));
@@ -285,10 +318,15 @@ int main(int argc, char *argv[])
 	padWaitReady(PAD_PORT, PAD_SLOT);
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
-	/* Install external or built-in engine */
+	/* Install ERL files */
 	ret = install_engine(&config, &ctx);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install cheat engine\n");
+		goto end;
+	}
+	ret = install_debugger(&config, &ctx);
+	if (ret < 0) {
+		A_PRINTF("Error: failed to install debugger\n");
 		goto end;
 	}
 
