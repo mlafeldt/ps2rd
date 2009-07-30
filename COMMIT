@@ -30,4 +30,14 @@ artemis-gui branch where the GUI people to their work without affecting the rest
 of the team.
 
 
+Licensing
+---------
+
+Artemis is written and distributed under the GNU General Public License which
+means that its source code is freely-distributed and available to the general
+public.
+
+You may only contribute to Artemis if you agree with the terms of the GPL.
+
+
 EOF
