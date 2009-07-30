@@ -147,8 +147,9 @@ int engine_install_from_mem(u8 *mem, u32 addr, engine_ctx_t *ctx)
 /**
  * engine_uninstall - Uninstall a cheat engine.
  * @ctx: ptr to engine context
+ * @return: 0: success, <0: error
  */
-void engine_uninstall(engine_ctx_t *ctx)
+int engine_uninstall(engine_ctx_t *ctx)
 {
 	D_PRINTF("* Uninstalling engine (%i)...\n", *ctx->id);
 
@@ -169,7 +170,7 @@ void engine_uninstall(engine_ctx_t *ctx)
 	if (ctx->erl != NULL) {
 		if (!unload_erl(ctx->erl)) {
 			D_PRINTF("%s: ERL unload error\n", __FUNCTION__);
-			return -2;
+			return -1;
 		}
 	}
 
@@ -177,6 +178,8 @@ void engine_uninstall(engine_ctx_t *ctx)
 	memset(ctx, 0, sizeof(engine_ctx_t));
 
 	D_PRINTF("Uninstall complete.\n");
+
+	return 0;
 }
 
 /**

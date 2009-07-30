@@ -69,7 +69,7 @@ typedef struct {
 
 int engine_install_from_file(const char *filename, u32 addr, engine_ctx_t *ctx);
 int engine_install_from_mem(u8 *mem, u32 addr, engine_ctx_t *ctx);
-void engine_uninstall(engine_ctx_t *ctx);
+int engine_uninstall(engine_ctx_t *ctx);
 int engine_add_hook(engine_ctx_t *ctx, u32 addr, u32 val);
 int engine_add_code(engine_ctx_t *ctx, u32 addr, u32 val);
 void engine_clear_hooks(engine_ctx_t *ctx);
