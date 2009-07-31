@@ -219,30 +219,38 @@ static int load_cheats(const config_t *config, engine_t *engine)
 
 #include <erl.h>
 /*
- * Install built-in debugger.
+ * Install external or built-in debugger.
  * TODO: move debugger handling to a separate module
  */
 static int install_debugger(const config_t *config, engine_t *engine)
 {
 	struct erl_record_t *erl;
 	struct symbol_t *sym;
-	u32 addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+	u32 addr;
+	const char *p;
 	void *debugger_loop;
 
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
 
+	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+
 	D_PRINTF("* Installing debugger...\n");
 	D_PRINTF("ERL addr = %08x\n", addr);
 
-	erl = load_erl_from_mem_to_addr(_binary_debugger_erl_start, addr, 0, NULL);
+	/* Relocate debugger */
+	if ((p = config_get_string(config, SET_DEBUGGER_FILE)) != NULL)
+		erl = load_erl_from_file_to_addr(__pathname(p), addr, 0, NULL);
+	else
+		erl = load_erl_from_mem_to_addr(_binary_debugger_erl_start, addr, 0, NULL);
 	if (erl == NULL) {
 		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
 		return -1;
 	}
 
 	D_PRINTF("ERL size = %u\n", erl->fullsize);
-	D_PRINTF("Install completed.\n");
+
+	erl->flags |= ERL_FLAG_CLEAR;
 
 #define GETSYM(x, s) \
 	sym = erl_find_local_symbol(s, erl); \
@@ -256,6 +264,8 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	/* Add debugger_loop() callback to engine */
 	GETSYM(debugger_loop, "debugger_loop");
 	engine->callbacks[0] = (u32)debugger_loop;
+
+	D_PRINTF("Install completed.\n");
 
 	return 0;
 }
