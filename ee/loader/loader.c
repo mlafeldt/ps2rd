@@ -227,7 +227,7 @@ static int install_debugger(const config_t *config, engine_ctx_t *ctx)
 	struct erl_record_t *erl;
 	struct symbol_t *sym;
 	u32 addr = config_get_u32(config, SET_DEBUGGER_ADDR);
-	void *debugger_main;
+	void *debugger_loop;
 
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
@@ -253,9 +253,9 @@ static int install_debugger(const config_t *config, engine_ctx_t *ctx)
 	x = (typeof(x))sym->address; \
 	D_PRINTF("%08x %s\n", sym->address, s)
 
-	/* Set engine callback */
-	GETSYM(debugger_main, "debugger_main");
-	ctx->callbacks[0] = (u32)debugger_main;
+	/* Add debugger_loop() callback to engine */
+	GETSYM(debugger_loop, "debugger_loop");
+	ctx->callbacks[0] = (u32)debugger_loop;
 
 	return 0;
 }

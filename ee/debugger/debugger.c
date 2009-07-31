@@ -95,7 +95,7 @@ int _fini(void)
 /*
  * This function is constantly called by the cheat engine.
  */
-int debugger_main(void)
+int debugger_loop(void)
 {
 #if 0
 	/* Emulate code 10B8DAFA 00003F00 */
