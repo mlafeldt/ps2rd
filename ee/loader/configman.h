@@ -26,6 +26,20 @@
 #include <fileio.h>
 #include <libconfig.h>
 
+/* Define some default settings */
+#define ENGINE_INSTALL
+#define DEBUGGER_INSTALL
+
+#ifndef ENGINE_ADDR
+#define ENGINE_ADDR     0x00080000
+#endif
+#ifndef DEBUGGER_ADDR
+#define DEBUGGER_ADDR   0x000a0000
+#endif
+#ifndef CHEATS_FILE
+#define CHEATS_FILE     "cheats.txt"
+#endif
+
 /* Keys to access different settings in configuration */
 enum setting_key {
 	/* loader */
@@ -58,4 +72,4 @@ const char *config_get_string(const config_t *config, enum setting_key key);
 void config_build(config_t *config);
 void config_print(const config_t *config);
 
-#endif /*_CONFIGMAN_H_*/
+#endif /* _CONFIGMAN_H_ */

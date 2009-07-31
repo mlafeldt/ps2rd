@@ -48,17 +48,6 @@
 #define PAD_PORT	0
 #define PAD_SLOT	0
 
-#define ENGINE_INSTALL
-
-#ifndef ENGINE_ADDR
-#define ENGINE_ADDR	0x00080000
-#endif
-#ifndef DEBUGGER_ADDR
-#define DEBUGGER_ADDR	0x000a0000
-#endif
-#ifndef CHEATS_FILE
-#define CHEATS_FILE	"cheats.txt"
-#endif
 #ifndef CONFIG_FILE
 #define CONFIG_FILE	"artemis.conf"
 #endif
