@@ -38,7 +38,7 @@ typedef struct {
 } syscall_hook_t;
 
 /**
- * engine_ctx_t - cheat engine context
+ * engine_t - cheat engine context
  * @erl: ERL record
  * @info: engine info
  * @id: engine ID
@@ -65,14 +65,15 @@ typedef struct {
 	u32			*codelist;
 	u32			*maxcallbacks;
 	u32			*callbacks;
-} engine_ctx_t;
+} engine_t;
 
-int engine_install_from_file(const char *filename, u32 addr, engine_ctx_t *ctx);
-int engine_install_from_mem(u8 *mem, u32 addr, engine_ctx_t *ctx);
-int engine_uninstall(engine_ctx_t *ctx);
-int engine_add_hook(engine_ctx_t *ctx, u32 addr, u32 val);
-int engine_add_code(engine_ctx_t *ctx, u32 addr, u32 val);
-void engine_clear_hooks(engine_ctx_t *ctx);
-void engine_clear_codes(engine_ctx_t *ctx);
+int engine_install_from_file(const char *filename, u32 addr, engine_t *engine);
+int engine_install_from_mem(u8 *mem, u32 addr, engine_t *engine);
+int engine_uninstall(engine_t *engine);
+
+int engine_add_hook(engine_t *engine, u32 addr, u32 val);
+int engine_add_code(engine_t *engine, u32 addr, u32 val);
+void engine_clear_hooks(engine_t *engine);
+void engine_clear_codes(engine_t *engine);
 
 #endif /*_ENGINEMAN_H_*/

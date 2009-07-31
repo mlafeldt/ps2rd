@@ -103,7 +103,7 @@ static char *__pathname(const char *name)
 /*
  * Install external or built-in engine.
  */
-static int install_engine(const config_t *config, engine_ctx_t *ctx)
+static int install_engine(const config_t *config, engine_t *engine)
 {
 	const char *p = NULL;
 
@@ -112,16 +112,16 @@ static int install_engine(const config_t *config, engine_ctx_t *ctx)
 
 	if ((p = config_get_string(config, SET_ENGINE_FILE)) != NULL)
 		return engine_install_from_file(__pathname(p),
-			config_get_u32(config, SET_ENGINE_ADDR), ctx);
+			config_get_u32(config, SET_ENGINE_ADDR), engine);
 	else
 		return engine_install_from_mem(_binary_engine_erl_start,
-			config_get_u32(config, SET_ENGINE_ADDR), ctx);
+			config_get_u32(config, SET_ENGINE_ADDR), engine);
 }
 
 /*
  * Load cheats from cheats file and pass them to the engine.
  */
-static int load_cheats(const config_t *config, engine_ctx_t *ctx)
+static int load_cheats(const config_t *config, engine_t *engine)
 {
 	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
 	char elfname[FIO_PATH_MAX];
@@ -196,8 +196,8 @@ static int load_cheats(const config_t *config, engine_ctx_t *ctx)
 		return -1;
 	}
 
-	engine_clear_hooks(ctx);
-	engine_clear_codes(ctx);
+	engine_clear_hooks(engine);
+	engine_clear_codes(engine);
 
 	A_PRINTF("Loading cheats for \"%s\"\n", game->title);
 
@@ -206,9 +206,9 @@ static int load_cheats(const config_t *config, engine_ctx_t *ctx)
 			D_PRINTF("%08X %08X\n", code->addr, code->val);
 			/* TODO: improve check for hook */
 			if ((code->addr & 0xfe000000) == 0x90000000)
-				engine_add_hook(ctx, code->addr, code->val);
+				engine_add_hook(engine, code->addr, code->val);
 			else
-				engine_add_code(ctx, code->addr, code->val);
+				engine_add_code(engine, code->addr, code->val);
 		}
 	}
 
@@ -222,7 +222,7 @@ static int load_cheats(const config_t *config, engine_ctx_t *ctx)
  * Install built-in debugger.
  * TODO: move debugger handling to a separate module
  */
-static int install_debugger(const config_t *config, engine_ctx_t *ctx)
+static int install_debugger(const config_t *config, engine_t *engine)
 {
 	struct erl_record_t *erl;
 	struct symbol_t *sym;
@@ -255,7 +255,7 @@ static int install_debugger(const config_t *config, engine_ctx_t *ctx)
 
 	/* Add debugger_loop() callback to engine */
 	GETSYM(debugger_loop, "debugger_loop");
-	ctx->callbacks[0] = (u32)debugger_loop;
+	engine->callbacks[0] = (u32)debugger_loop;
 
 	return 0;
 }
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 {
 	static u8 padbuf[256] __attribute__((aligned(64)));
 	config_t config;
-	engine_ctx_t ctx;
+	engine_t engine;
 	int ret = 0;
 
 	SifInitRpc(0);
@@ -318,12 +318,12 @@ int main(int argc, char *argv[])
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
 	/* Install ERL files */
-	ret = install_engine(&config, &ctx);
+	ret = install_engine(&config, &engine);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install cheat engine\n");
 		goto end;
 	}
-	ret = install_debugger(&config, &ctx);
+	ret = install_debugger(&config, &engine);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install debugger\n");
 		goto end;
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (new_pad & PAD_CIRCLE) {
-			load_cheats(&config, &ctx);
+			load_cheats(&config, &engine);
 		}
 
 		if (new_pad & PAD_TRIANGLE) {
