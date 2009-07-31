@@ -63,8 +63,6 @@ static const char *g_modules[] = {
 	"rom0:MCMAN",
 	"rom0:MCSERV",
 	"rom0:PADMAN",
-	"rom0:CDVDMAN",
-	"rom0:CDVDFSV",
 	NULL
 };
 
