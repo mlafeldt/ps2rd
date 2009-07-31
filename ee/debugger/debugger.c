@@ -58,7 +58,7 @@ int HookSifSetReg(u32 register_num, int register_value)
 }
 
 /*
- * Automatically invoked on ERL load.
+ * _init - Automatically invoked on ERL load.
  */
 int _init(void)
 {
@@ -68,6 +68,18 @@ int _init(void)
 
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
+
+	return 0;
+}
+
+/*
+ * _fini - Automatically invoked on ERL unload.
+ */
+int _fini(void)
+{
+	/* Unhook syscalls */
+	SetSyscall(__NR_SifSetDma, OldSifSetDma);
+	SetSyscall(__NR_SifSetReg, OldSifSetReg);
 
 	return 0;
 }
