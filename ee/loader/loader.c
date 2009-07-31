@@ -160,7 +160,7 @@ static int load_cheats(const config_t *config, engine_ctx_t *ctx)
 	cdSync(CDVD_BLOCK);
 	ret = cdGetElf(elfname);
 	cdStop();
-	cdSync(CDVD_BLOCK);
+	cdSync(CDVD_NOBLOCK);
 	if (ret < 0) {
 		A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
 		cheats_destroy(&cheats);
@@ -308,6 +308,8 @@ int main(int argc, char *argv[])
 	/* Init CDVD (non-blocking) */
 	cdInit(CDVD_INIT_NOCHECK);
 	cdDiskReady(CDVD_NOBLOCK);
+	cdStop();
+	cdSync(CDVD_NOBLOCK);
 
 	/* Init pad */
 	padInit(0);
