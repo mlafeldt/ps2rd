@@ -33,6 +33,14 @@
 
 char * erl_id = "debugger";
 
+/* We will resolve dependencies by statically linking in required sources. */
+#if 0
+char * erl_dependancies[] = {
+	"libkernel",
+	NULL
+};
+#endif
+
 #define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
 
 u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len) = NULL;
