@@ -1,3 +1,5 @@
+$Id$
+
 Artemis Software Architecture
 written by misfire <misfire@xploderfreax.de>
 

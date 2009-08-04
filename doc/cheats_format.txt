@@ -1,3 +1,5 @@
+$Id$
+
 Artemis makes use of the libcheats library to read cheat codes in text format.
 
 The format of the text file is quite simple:
