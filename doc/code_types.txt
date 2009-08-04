@@ -1,6 +1,6 @@
 Code Types supported by Artemis
 written by misfire <misfire@xploderfreax.de>
-Last update: Jul 22 2009
+$Id$
 
 
 Overview:
