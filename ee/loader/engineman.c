@@ -222,10 +222,8 @@ int engine_add_code(engine_t *engine, u32 addr, u32 val)
  */
 void engine_clear_hooks(engine_t *engine)
 {
-	int i;
-
-	for (i = 0; i < *engine->numhooks; i++)
-		_sd(0, (u32)&engine->hooklist[i * 2]);
+	memset(engine->hooklist, 0, *engine->numhooks * 8);
+	*engine->numhooks = 0;
 }
 
 /**
@@ -234,8 +232,6 @@ void engine_clear_hooks(engine_t *engine)
  */
 void engine_clear_codes(engine_t *engine)
 {
-	int i;
-
-	for (i = 0; i < *engine->numcodes; i++)
-		_sd(0, (u32)&engine->codelist[i * 2]);
+	memset(engine->codelist, 0, *engine->numcodes * 8);
+	*engine->numcodes = 0;
 }
