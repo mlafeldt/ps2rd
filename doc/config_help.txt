@@ -9,7 +9,7 @@ Here is a list of the available settings:
 Section "loader"
 ----------------
 
-* iop_reset [bool, false by default]
+* iop_reset [bool, true by default]
 
   Set 'iop_reset' to true to reset the IOP on startup.
 

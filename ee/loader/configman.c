@@ -143,7 +143,7 @@ void config_build(config_t *config)
 	group = config_setting_add(root, "loader", CONFIG_TYPE_GROUP);
 
 	set = config_setting_add(group, "iop_reset", CONFIG_TYPE_BOOL);
-#ifdef _IOPRESET
+#ifndef _NO_IOPRESET
 	config_setting_set_bool(set, 1);
 #endif
 	set = config_setting_add(group, "sbv_patches", CONFIG_TYPE_BOOL);
