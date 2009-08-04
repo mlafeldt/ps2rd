@@ -43,7 +43,7 @@
 #define OPTIONS \
 	"Options:\n" \
 	"START | X - Start Game\n" \
-	"CIRCLE    - Load Cheats\n"
+	"CIRCLE    - Activate Cheats\n"
 
 #define PAD_PORT	0
 #define PAD_SLOT	0
@@ -119,38 +119,45 @@ static int install_engine(const config_t *config, engine_t *engine)
 }
 
 /*
- * Load cheats from cheats file and pass them to the engine.
+ * Load cheats from text file.
  */
-static int load_cheats(const config_t *config, engine_t *engine)
+static int load_cheats(const config_t *config, cheats_t *cheats)
 {
 	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
-	char elfname[FIO_PATH_MAX];
 	char *buf = NULL;
-	cheats_t cheats;
-	game_t *game = NULL;
-	cheat_t *cheat = NULL;
-	code_t *code = NULL;
-	int found, ret;
+	int ret;
 
-	/*
-	 * Read cheats from text file.
-	 * TODO: this should be done only once or on demand.
-	 */
+	cheats_destroy(cheats);
+
 	buf = read_text_file(__pathname(cheatfile), 0);
 	if (buf == NULL) {
 		A_PRINTF("Error: could not read cheats file '%s'\n", cheatfile);
 		return -1;
 	}
 
-	cheats_init(&cheats);
-	ret = cheats_read_buf(&cheats, buf);
+	cheats_init(cheats);
+	ret = cheats_read_buf(cheats, buf);
 	free(buf);
 	if (ret != CHEATS_TRUE) {
-		A_PRINTF("%s: line %i: %s\n", cheatfile, cheats.error_line,
-			cheats.error_text);
-		cheats_destroy(&cheats);
+		A_PRINTF("%s: line %i: %s\n", cheatfile, cheats->error_line,
+			cheats->error_text);
+		cheats_destroy(cheats);
 		return -1;
 	}
+
+	return 0;
+}
+
+/*
+ * Add cheats for inserted game to cheat engine.
+ */
+static int activate_cheats(const cheats_t *cheats, engine_t *engine)
+{
+	char elfname[FIO_PATH_MAX];
+	game_t *game = NULL;
+	cheat_t *cheat = NULL;
+	code_t *code = NULL;
+	int found, ret;
 
 	/*
 	 * Get ELF filename of inserted game.
@@ -163,7 +170,6 @@ static int load_cheats(const config_t *config, engine_t *engine)
 	cdSync(CDVD_NOBLOCK);
 	if (ret < 0) {
 		A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
-		cheats_destroy(&cheats);
 		return -1;
 	}
 
@@ -173,7 +179,7 @@ static int load_cheats(const config_t *config, engine_t *engine)
 	 */
 	get_base_name(elfname, elfname);
 	found = 0;
-	GAMES_FOREACH(game, &cheats.games) {
+	GAMES_FOREACH(game, &cheats->games) {
 		if (strstr(game->title, elfname) != NULL) {
 			found = 1;
 			break;
@@ -183,23 +189,16 @@ static int load_cheats(const config_t *config, engine_t *engine)
 	if (!found) {
 		A_PRINTF("Error: no cheats found for inserted game (%s)\n",
 			elfname);
-		cheats_destroy(&cheats);
 		return -1;
 	}
 
 	/*
 	 * Add hooks and codes for found game to cheat engine.
 	 */
-	if (!config_get_bool(config, SET_ENGINE_INSTALL)) {
-		A_PRINTF("Error: cannot add cheats - engine not installed\n");
-		cheats_destroy(&cheats);
-		return -1;
-	}
-
 	engine_clear_hooks(engine);
 	engine_clear_codes(engine);
 
-	A_PRINTF("Loading cheats for \"%s\"\n", game->title);
+	A_PRINTF("Activate cheats for \"%s\"\n", game->title);
 
 	CHEATS_FOREACH(cheat, &game->cheats) {
 		CODES_FOREACH(code, &cheat->codes) {
@@ -211,8 +210,6 @@ static int load_cheats(const config_t *config, engine_t *engine)
 				engine_add_code(engine, code->addr, code->val);
 		}
 	}
-
-	cheats_destroy(&cheats);
 
 	return 0;
 }
@@ -242,7 +239,8 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	if ((p = config_get_string(config, SET_DEBUGGER_FILE)) != NULL)
 		erl = load_erl_from_file_to_addr(__pathname(p), addr, 0, NULL);
 	else
-		erl = load_erl_from_mem_to_addr(_binary_debugger_erl_start, addr, 0, NULL);
+		erl = load_erl_from_mem_to_addr(_binary_debugger_erl_start,
+			addr, 0, NULL);
 	if (erl == NULL) {
 		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
 		return -1;
@@ -274,6 +272,7 @@ int main(int argc, char *argv[])
 {
 	static u8 padbuf[256] __attribute__((aligned(64)));
 	config_t config;
+	cheats_t cheats;
 	engine_t engine;
 	int ret = 0;
 
@@ -339,6 +338,10 @@ int main(int argc, char *argv[])
 		goto end;
 	}
 
+	/* Load cheats */
+	cheats_init(&cheats);
+	load_cheats(&config, &cheats);
+
 	A_PRINTF(OPTIONS);
 	A_PRINTF("Ready.\n");
 
@@ -364,7 +367,11 @@ int main(int argc, char *argv[])
 		}
 
 		if (new_pad & PAD_CIRCLE) {
-			load_cheats(&config, &engine);
+			if (!config_get_bool(&config, SET_ENGINE_INSTALL))
+				A_PRINTF("Error: could not activate cheats - "
+					"engine not installed\n");
+			else
+				activate_cheats(&cheats, &engine);
 		}
 
 		if (new_pad & PAD_TRIANGLE) {
