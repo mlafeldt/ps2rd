@@ -43,18 +43,7 @@ char * erl_dependancies[] = {
 
 #define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
 
-u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len) = NULL;
 int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
-
-/*
- * Hook function for syscall SifSetDma().
- */
-u32 HookSifSetDma(SifDmaTransfer_t *sdd, s32 len)
-{
-	//GS_BGCOLOUR = 0x0000ff;
-	/* TODO: do magic here */
-	return OldSifSetDma(sdd, len);
-}
 
 /*
  * Hook function for syscall SifSetReg().
@@ -70,10 +59,7 @@ int HookSifSetReg(u32 register_num, int register_value)
  */
 int _init(void)
 {
-	/* Hook syscalls */
-	OldSifSetDma = GetSyscall(__NR_SifSetDma);
-	SetSyscall(__NR_SifSetDma, HookSifSetDma);
-
+	/* Hook syscall */
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
 
@@ -85,8 +71,7 @@ int _init(void)
  */
 int _fini(void)
 {
-	/* Unhook syscalls */
-	SetSyscall(__NR_SifSetDma, OldSifSetDma);
+	/* Unhook syscall */
 	SetSyscall(__NR_SifSetReg, OldSifSetReg);
 
 	return 0;
