@@ -16,7 +16,7 @@ TEST_OBJS = $(EE_OBJS) test.o $(PS2SDK)/ee/startup/crt0.o
 all: engine.erl test.elf
 
 clean:
-	rm -f *.erl *.rel *.o *.elf
+	rm -f *.o *.elf *.erl
 
 rebuild: clean all
 

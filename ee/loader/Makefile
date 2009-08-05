@@ -11,28 +11,19 @@ EE_ASFLAGS +=
 
 EE_BIN = artemis.elf
 
-EE_OBJS = loader.o configman.o engine.o engineman.o debugger.o \
-	mycdvd.o mypad.o mystring.o myutil.o
+EE_OBJS = loader.o configman.o engineman.o \
+	mycdvd.o mypad.o mystring.o myutil.o \
+	engine_erl.o debugger_erl.o
 
 EE_LIBS = -lcdvd -ldebug -lpad -lpatches -lerl -lconfig -lcheats
 
 
-all: engine debugger loader
+all: loader
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) *.erl
+	rm -f $(EE_BIN) $(EE_OBJS)
 
 rebuild: clean all
-
-engine:
-	make -C ../engine engine.erl
-	cp ../engine/engine.erl .
-	bin2o -n engine.erl engine.o _binary_engine_erl
-
-debugger:
-	make -C ../debugger debugger.erl
-	cp ../debugger/debugger.erl .
-	bin2o -n debugger.erl debugger.o _binary_debugger_erl
 
 loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
@@ -43,9 +34,6 @@ pack:
 	ps2-packer $(EE_BIN) foo.elf -v
 	rm -f $(EE_BIN)
 	mv foo.elf $(EE_BIN)
-
-release:
-	@echo TODO
 
 run:
 	ps2client reset; sleep 3
