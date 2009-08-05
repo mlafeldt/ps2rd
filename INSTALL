@@ -15,14 +15,18 @@ $ make -f Makefile.PS2
 
 Afterwards, you can finally build the Artemis executable:
 
-$ cd ee/loader/
+$ cd ee/
 $ make
 
 This will create ee/loader/artemis.elf.
 
 Currently, it is recommended to run the ELF with ps2link + ps2client:
 
+$ cd ee/loader/
 $ make run
+
+If you want to boot it from mass, memory card, etc., make sure that artemis.conf
+and the cheats file are placed in the same folder as the ELF.
 
 
 EOF
