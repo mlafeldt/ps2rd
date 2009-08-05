@@ -5,7 +5,7 @@
 ##
 
 EE_INCS += -I$(PS2SDK)/ports/include
-EE_CFLAGS += -Wall -D_DEBUG -D_NO_HOOK #-D_NO_SBV -D_NO_IOPRESET
+EE_CFLAGS += -Wall -D_DEBUG #-D_NO_HOOK -D_NO_SBV -D_NO_IOPRESET
 EE_LDFLAGS += -L$(PS2SDK)/ports/lib -s
 EE_ASFLAGS +=
 
