@@ -8,12 +8,14 @@ description (D), and snail mail address (S); A or N, and D are mandatory.
 A: misfire
 N: Mathias Lafeldt
 E: misfire@xploderfreax.de
-D: project maintainer
+D: project maintainer and core developer
 D: cheat engine
 D: libcheats
 D: libconfig port
 S: Germany
 
 A: jimmikaelkael
+E: jimmikaelkael@wanadoo.fr
 D: core developer
 D: debugger
+S: France
