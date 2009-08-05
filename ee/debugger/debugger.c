@@ -1,8 +1,8 @@
 /*
  * debugger.c - EE side of remote debugger
  *
- * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
  * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
+ * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
  *
  * This file is part of Artemis, the PS2 game debugger.
  *
@@ -22,8 +22,10 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <iopheap.h>
 #include <loadfile.h>
 #include <sifdma.h>
+#include <sifrpc.h>
 #include <string.h>
 #include <syscallnr.h>
 
@@ -45,15 +47,44 @@ char *erl_dependancies[] = {
 #define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
 
 int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
+extern void OrigSifSetReg(u32 register_num, int register_value);
+extern void HookSifSetReg(u32 register_num, int register_value);
+void NewSifSetReg(u32 register_num, int register_value);
+int PostReset_Hook(void);
+
+extern int __NR_OrigSifSetReg;
+static int set_reg_hook = 0;
+
+/* debugger ready state, to know if we can check remote cmd from IOP */
+static int debugger_ready = 0;
 
 /*
- * Hook function for syscall SifSetReg().
+ * replacement function for SifSetReg().
  */
-int HookSifSetReg(u32 register_num, int register_value)
+void NewSifSetReg(u32 regnum, int regval)
 {
-	GS_BGCOLOUR = 0x0000ff;
-	/* TODO: do magic here */
-	return OldSifSetReg(register_num, register_value);
+	/* perform original SifSetReg */
+	OrigSifSetReg(regnum, regval);
+
+	/* catch new IOP reboot */
+	if ((regnum == SIF_REG_SMFLAG) && (regval == 0x10000)) {
+		debugger_ready = 0;
+		set_reg_hook = 4;
+	}
+
+	if (set_reg_hook) {
+		set_reg_hook--;
+		if (set_reg_hook == 0) {
+			/* IOP reboot done */
+			if ((regnum == 0x80000000) && (regval == 0)) {
+				/* IOP sync */
+				while (!(SifGetReg(SIF_REG_SMFLAG) & 0x40000))
+					;
+				/* reload extra modules */
+				//PostReset_Hook();
+			}
+		}
+	}
 }
 
 /*
@@ -61,9 +92,10 @@ int HookSifSetReg(u32 register_num, int register_value)
  */
 int _init(void)
 {
-	/* Hook syscall */
+	/* Hook syscalls */
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
+	SetSyscall(__NR_OrigSifSetReg, OldSifSetReg);
 
 	return 0;
 }
@@ -73,8 +105,9 @@ int _init(void)
  */
 int _fini(void)
 {
-	/* Unhook syscall */
+	/* Unhook syscalls */
 	SetSyscall(__NR_SifSetReg, OldSifSetReg);
+	SetSyscall(__NR_OrigSifSetReg, 0);
 
 	return 0;
 }
@@ -87,7 +120,7 @@ int debugger_loop(void)
 	return 0;
 }
 
-#if 0
+
 typedef struct {
 	u32	hash;
 	u8	*addr;
@@ -99,6 +132,10 @@ static u8 *g_irx_buf = g_buf;
 
 /* TODO: make this configurable */
 #define IRX_ADDR 0x80030000
+
+#define HASH_PS2DEV9	0x0768ace9
+#define HASH_PS2IP	0x00776900
+#define HASH_PS2SMAP	0x0769a3f0
 
 static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
 {
@@ -131,4 +168,44 @@ static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
 	SifExecModuleBuffer(g_irx_buf, irxsize, arg_len, args, &ret);
 	return ret;
 }
+
+/*
+ * PostReset_Hook: function to be executed after IOP reset to reload needed modules
+ */
+int PostReset_Hook(void)
+{
+	int ret;
+
+	/* Init RPC/IopHeap/loadfile services */
+	GS_BGCOLOUR = 0xff0000;
+	SifInitRpc(0);
+	SifInitIopHeap();
+	SifLoadFileInit();
+
+	GS_BGCOLOUR = 0xffff00;
+
+	/* load additional modules */
+	ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
+	if (ret < 0)
+		while (1) ;
+	ret = load_module_from_kernel(HASH_PS2IP, 0, NULL);
+	if (ret < 0)
+		while (1) ;
+	ret = load_module_from_kernel(HASH_PS2SMAP, 0, NULL);
+	if (ret < 0)
+		while (1) ;
+
+	GS_BGCOLOUR = 0x0000ff;
+
+	/* de-Init RPC/IopHeap/loadfile services */
+	SifExitRpc();
+	SifExitIopHeap();
+	SifLoadFileExit();
+
+	GS_BGCOLOUR = 0x000000;
+
+#ifdef DISABLE_AFTER_IOPRESET
+	_fini();
 #endif
+	return 1;
+}

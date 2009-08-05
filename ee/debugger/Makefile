@@ -4,24 +4,19 @@
 # Copyright (C) 2009 misfire <misfire@xploderfreax.de>
 ##
 
-KRNL_SYM = -DF___syscall -DF_SifSetDma -DF_SifSetReg -DF_SetSyscall \
-	-DF_GetSyscall -DF_DIntr -DF_EIntr
-
-KRNL_OBJS = libkernel/kernel.S libkernel/getsyscall.o libkernel/glue.o
-
 EE_INCS +=
 EE_CFLAGS +=
 EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = debugger.o
+EE_OBJS = debugger.o syscall_hooks.S
 
 
 all: debugger.erl
 
 clean:
-	rm -f $(EE_OBJS) debugger.erl
+	rm -f *.o debugger.erl
 
 rebuild: clean all
 
