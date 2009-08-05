@@ -53,6 +53,10 @@
 #define CONFIG_FILE	"artemis.conf"
 #endif
 
+/* TODO: make those configurable */
+#define IRX_ADDR	0x80030000
+#define LIBKERNEL_ADDR	0x00090000
+
 
 /* Boot information */
 static char g_bootpath[FIO_PATH_MAX];
@@ -117,9 +121,6 @@ u32 strhash(const char *name)
 #define HASH_PS2DEV9	0x0768ace9
 #define HASH_PS2IP	0x00776900
 #define HASH_PS2SMAP	0x0769a3f0
-
-/* TODO: make this configurable */
-#define IRX_ADDR 0x80030000
 
 /*
  * Copy statically linked IRX files to kernel RAM.
@@ -342,10 +343,11 @@ static int install_debugger(const config_t *config, engine_t *engine)
 
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
-#if 0
+
 	/* relocate libkernel.erl */
-	load_erl_from_mem_to_addr(_libkernel_erl_start, 0x90000, 0, NULL);
-#endif
+	load_erl_from_mem_to_addr(_libkernel_erl_start, LIBKERNEL_ADDR, 0, NULL);
+	FlushCache(0);
+
 	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
 
 	D_PRINTF("* Installing debugger...\n");
@@ -364,6 +366,7 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	D_PRINTF("ERL size = %u\n", erl->fullsize);
 
 	erl->flags |= ERL_FLAG_CLEAR;
+	FlushCache(0);
 
 #define GETSYM(x, s) \
 	sym = erl_find_local_symbol(s, erl); \

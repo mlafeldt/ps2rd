@@ -71,6 +71,8 @@ static int __engine_install(const char *filename, u8 *mem, u32 addr, engine_t *e
 	/* Always clear this ERL when unloading */
 	engine->erl->flags |= ERL_FLAG_CLEAR;
 
+	FlushCache(0);
+
 	/* Populate engine context */
 #define GETSYM(x, s) \
 	sym = erl_find_local_symbol(s, engine->erl); \
@@ -112,7 +114,7 @@ static int __engine_install(const char *filename, u8 *mem, u32 addr, engine_t *e
 #else
 	D_PRINTF("No syscalls hooked.\n");
 #endif
-	D_PRINTF("Engine installed (info: %08x id: %i).\n",
+	D_PRINTF("Engine installed (info=%08x id=%i).\n",
 		*engine->info, *engine->id);
 
 	return 0;
