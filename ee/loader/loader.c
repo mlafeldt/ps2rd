@@ -67,13 +67,21 @@ static const char *g_modules[] = {
 	NULL
 };
 
-/* Statically linked binaries */
+/* Statically linked ERL files */
 extern u8 _engine_erl_start[];
 extern u8 _engine_erl_end[];
 extern u8 _debugger_erl_start[];
 extern u8 _debugger_erl_end[];
 extern u8 _libkernel_erl_start[];
 extern u8 _libkernel_erl_end[];
+
+/* Statically linked IRX files */
+extern u8 _ps2dev9_irx_start[];
+extern u8 _ps2dev9_irx_end[];
+extern u8 _ps2ip_irx_start[];
+extern u8 _ps2ip_irx_end[];
+extern u8 _ps2smap_irx_start[];
+extern u8 _ps2smap_irx_end[];
 
 
 /*

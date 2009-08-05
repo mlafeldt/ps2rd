@@ -15,7 +15,6 @@ $ make -f Makefile.PS2
 
 Afterwards, you can finally build the Artemis executable:
 
-$ cd ee/
 $ make
 
 This will create ee/loader/artemis.elf.

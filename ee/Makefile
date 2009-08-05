@@ -10,5 +10,6 @@ clean:
 	make -C engine clean
 	make -C debugger clean
 	make -C loader clean
+	rm -f loader/*_erl.o
 
 rebuild: clean all
