@@ -9,7 +9,6 @@ IOP_LDFLAGS += -s
 
 
 all: $(IOP_BIN)
-	iop-size $(IOP_BIN)
 
 clean:
 	rm -f $(IOP_BIN) $(IOP_OBJS)
