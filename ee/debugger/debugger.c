@@ -2,6 +2,7 @@
  * debugger.c - EE side of remote debugger
  *
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
  * This file is part of Artemis, the PS2 game debugger.
  *
@@ -21,8 +22,10 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
-#include <syscallnr.h>
+#include <loadfile.h>
 #include <sifdma.h>
+#include <string.h>
+#include <syscallnr.h>
 
 /*
  * TODO: Eventually, this is where all the hacking magic happens:
@@ -31,15 +34,11 @@
  * - manage code and hook list of cheat engine
  */
 
-char * erl_id = "debugger";
-
-/* We will resolve dependencies by statically linking in required sources. */
-#if 0
-char * erl_dependancies[] = {
-	"libkernel",
+char *erl_id = "debugger";
+char *erl_dependancies[] = {
+//	"libkernel",
 	NULL
 };
-#endif
 
 #define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
 
@@ -82,9 +81,51 @@ int _fini(void)
  */
 int debugger_loop(void)
 {
-#if 0
-	/* Emulate code 10B8DAFA 00003F00 */
-	_sh(0x3F00, 0x00B8DAFA);
-#endif
 	return 0;
 }
+
+#if 0
+typedef struct {
+	u32	hash;
+	u8	*addr;
+	u32	size;
+} irxent_t;
+
+static u8 g_buf[80*1024] __attribute__((aligned(64)));
+static u8 *g_irx_buf = g_buf;
+
+/* TODO: make this configurable */
+#define IRX_ADDR 0x80030000
+
+static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
+{
+	const irxent_t *irx_ptr = (irxent_t*)IRX_ADDR;
+	int irxsize = 0, ret;
+
+	DI();
+	ee_kmode_enter();
+
+	/*
+	 * find module by hash and copy it to user memory
+	 */
+	while (irx_ptr->hash) {
+		if (irx_ptr->hash == hash) {
+			irxsize = irx_ptr->size;
+			memcpy(g_irx_buf, irx_ptr->addr, irxsize);
+			break;
+		}
+		irx_ptr++;
+	}
+
+	ee_kmode_exit();
+	EI();
+
+	/* not found */
+	if (!irxsize)
+		return -1;
+
+	/* load module */
+	SifExecModuleBuffer(g_irx_buf, irxsize, arg_len, args, &ret);
+	return ret;
+}
+#endif

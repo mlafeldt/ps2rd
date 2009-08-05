@@ -76,13 +76,118 @@ extern u8 _libkernel_erl_start[];
 extern u8 _libkernel_erl_end[];
 
 /* Statically linked IRX files */
-extern u8 _ps2dev9_irx_start[];
-extern u8 _ps2dev9_irx_end[];
-extern u8 _ps2ip_irx_start[];
-extern u8 _ps2ip_irx_end[];
-extern u8 _ps2smap_irx_start[];
-extern u8 _ps2smap_irx_end[];
+extern u8  _ps2dev9_irx_start[];
+extern u8  _ps2dev9_irx_end[];
+extern int _ps2dev9_irx_size;
+extern u8  _ps2ip_irx_start[];
+extern u8  _ps2ip_irx_end[];
+extern int _ps2ip_irx_size;
+extern u8  _ps2smap_irx_start[];
+extern u8  _ps2smap_irx_end[];
+extern int _ps2smap_irx_size;
 
+#define IRX_NUM	3
+
+typedef struct {
+	u32	hash;
+	u8	*addr;
+	u32	size;
+} irxent_t;
+
+/**
+ * strhash - String hashing function as specified by the ELF ABI.
+ * @name: string to calculate hash from
+ * @return: 32-bit hash value
+ */
+u32 strhash(const char *name)
+{
+	const u8 *p = (u8*)name;
+	u32 h = 0, g;
+
+	while (*p) {
+		h = (h << 4) + *p++;
+		if ((g = (h & 0xf0000000)) != 0)
+			h ^= (g >> 24);
+		h &= ~g;
+	}
+
+	return h;
+}
+
+#define HASH_PS2DEV9	0x0768ace9
+#define HASH_PS2IP	0x00776900
+#define HASH_PS2SMAP	0x0769a3f0
+
+/* TODO: make this configurable */
+#define IRX_ADDR 0x80030000
+
+/*
+ * Copy statically linked IRX files to kernel RAM.
+ * They will be loaded by the debugger later...
+ */
+static void copy_modules_to_kernel(u32 addr)
+{
+	irxent_t irx_tab[IRX_NUM + 1];
+	irxent_t *irx_ptr = irx_tab;
+	irxent_t *ktab = NULL;
+
+	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
+
+	/*
+	 * build IRX table
+	 */
+	irx_ptr->hash = HASH_PS2DEV9;
+	irx_ptr->addr = _ps2dev9_irx_start;
+	irx_ptr->size = _ps2dev9_irx_size;
+	D_PRINTF("%s: ps2dev9: hash=%08x addr=%08x size=%i\n", __FUNCTION__,
+		irx_ptr->hash, (u32)irx_ptr->addr, irx_ptr->size);
+
+	irx_ptr++;
+	irx_ptr->hash = HASH_PS2IP;
+	irx_ptr->addr = _ps2ip_irx_start;
+	irx_ptr->size = _ps2ip_irx_size;
+	D_PRINTF("%s: ps2ip: hash=%08x addr=%08x size=%i\n", __FUNCTION__,
+		irx_ptr->hash, (u32)irx_ptr->addr, irx_ptr->size);
+
+	irx_ptr++;
+	irx_ptr->hash = HASH_PS2SMAP;
+	irx_ptr->addr = _ps2smap_irx_start;
+	irx_ptr->size = _ps2smap_irx_size;
+	D_PRINTF("%s: ps2smap: hash=%08x addr=%08x size=%i\n", __FUNCTION__,
+		irx_ptr->hash, (u32)irx_ptr->addr, irx_ptr->size);
+
+	irx_ptr++;
+	irx_ptr->hash = 0;
+	irx_ptr->addr = 0;
+	irx_ptr->size = 0;
+
+	/*
+	 * copy modules to kernel RAM
+	 *
+	 * memory structure at @addr:
+	 * |irx table|irx module #1|irx module #2|etc.
+	 */
+	DI();
+	ee_kmode_enter();
+
+	ktab = (irxent_t*)addr;
+	addr += sizeof(irx_tab);
+	irx_ptr = irx_tab;
+
+	while (irx_ptr->hash) {
+		memcpy((u8*)addr, irx_ptr->addr, irx_ptr->size);
+		irx_ptr->addr = (u8*)addr;
+		addr += irx_ptr->size;
+		irx_ptr++;
+	}
+
+	memcpy(ktab, irx_tab, sizeof(irx_tab));
+
+	ee_kmode_exit();
+	EI();
+
+	FlushCache(0);
+}
 
 /*
  * Build pathname based on boot device and filename.
@@ -239,7 +344,7 @@ static int install_debugger(const config_t *config, engine_t *engine)
 		return 0;
 #if 0
 	/* relocate libkernel.erl */
-	erl = load_erl_from_mem_to_addr(_libkernel_erl_start, 0x90000, 0, NULL);
+	load_erl_from_mem_to_addr(_libkernel_erl_start, 0x90000, 0, NULL);
 #endif
 	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
 
@@ -322,19 +427,7 @@ int main(int argc, char *argv[])
 		goto end;
 	}
 
-	flush_caches();
-
-	/* Init CDVD (non-blocking) */
-	cdInit(CDVD_INIT_NOCHECK);
-	cdDiskReady(CDVD_NOBLOCK);
-	cdStop();
-	cdSync(CDVD_NOBLOCK);
-
-	/* Init pad */
-	padInit(0);
-	padPortOpen(PAD_PORT, PAD_SLOT, padbuf);
-	padWaitReady(PAD_PORT, PAD_SLOT);
-	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
+	copy_modules_to_kernel(IRX_ADDR);
 
 	/* Install ERL files */
 	ret = install_engine(&config, &engine);
@@ -347,6 +440,18 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to install debugger\n");
 		goto end;
 	}
+
+	/* Init CDVD (non-blocking) */
+	cdInit(CDVD_INIT_NOCHECK);
+	cdDiskReady(CDVD_NOBLOCK);
+	cdStop();
+	cdSync(CDVD_NOBLOCK);
+
+	/* Init pad */
+	padInit(0);
+	padPortOpen(PAD_PORT, PAD_SLOT, padbuf);
+	padWaitReady(PAD_PORT, PAD_SLOT);
+	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
 	/* Load cheats */
 	cheats_init(&cheats);

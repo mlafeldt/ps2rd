@@ -15,7 +15,7 @@ EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = debugger.c $(KRNL_OBJS)
+EE_OBJS = debugger.o $(KRNL_OBJS)
 
 
 all: debugger.erl
