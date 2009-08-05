@@ -21,8 +21,9 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
-#include <sifrpc.h>
+#include <erl.h>
 #include <sbv_patches.h>
+#include <sifrpc.h>
 #include <string.h>
 #include <libcheats.h>
 #include <libconfig.h>
@@ -66,13 +67,13 @@ static const char *g_modules[] = {
 	NULL
 };
 
-/* Built-in cheat engine (statically linked) */
-extern u8 _binary_engine_erl_start[];
-extern u8 _binary_engine_erl_end[];
-
-/* Built-in debugger (statically linked) */
-extern u8 _binary_debugger_erl_start[];
-extern u8 _binary_debugger_erl_end[];
+/* Statically linked binaries */
+extern u8 _engine_erl_start[];
+extern u8 _engine_erl_end[];
+extern u8 _debugger_erl_start[];
+extern u8 _debugger_erl_end[];
+extern u8 _libkernel_erl_start[];
+extern u8 _libkernel_erl_end[];
 
 
 /*
@@ -114,7 +115,7 @@ static int install_engine(const config_t *config, engine_t *engine)
 		return engine_install_from_file(__pathname(p),
 			config_get_u32(config, SET_ENGINE_ADDR), engine);
 	else
-		return engine_install_from_mem(_binary_engine_erl_start,
+		return engine_install_from_mem(_engine_erl_start,
 			config_get_u32(config, SET_ENGINE_ADDR), engine);
 }
 
@@ -214,7 +215,6 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 	return 0;
 }
 
-#include <erl.h>
 /*
  * Install external or built-in debugger.
  * TODO: move debugger handling to a separate module
@@ -229,18 +229,20 @@ static int install_debugger(const config_t *config, engine_t *engine)
 
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
-
+#if 0
+	/* relocate libkernel.erl */
+	erl = load_erl_from_mem_to_addr(_libkernel_erl_start, 0x90000, 0, NULL);
+#endif
 	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
 
 	D_PRINTF("* Installing debugger...\n");
 	D_PRINTF("ERL addr = %08x\n", addr);
 
-	/* Relocate debugger */
+	/* relocate debugger */
 	if ((p = config_get_string(config, SET_DEBUGGER_FILE)) != NULL)
 		erl = load_erl_from_file_to_addr(__pathname(p), addr, 0, NULL);
 	else
-		erl = load_erl_from_mem_to_addr(_binary_debugger_erl_start,
-			addr, 0, NULL);
+		erl = load_erl_from_mem_to_addr(_debugger_erl_start, addr, 0, NULL);
 	if (erl == NULL) {
 		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
 		return -1;

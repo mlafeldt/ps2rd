@@ -13,7 +13,7 @@ EE_BIN = artemis.elf
 
 EE_OBJS = loader.o configman.o engineman.o \
 	mycdvd.o mypad.o mystring.o myutil.o \
-	engine_erl.o debugger_erl.o
+	engine_erl.o libkernel_erl.o debugger_erl.o
 
 EE_LIBS = -lcdvd -ldebug -lpad -lpatches -lerl -lconfig -lcheats
 
