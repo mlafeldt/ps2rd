@@ -31,7 +31,6 @@ rebuild: clean all
 loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
-	ee-size $(EE_BIN)
 
 pack:
 	ps2-packer $(EE_BIN) foo.elf -v
