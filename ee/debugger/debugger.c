@@ -35,10 +35,12 @@
  */
 
 char *erl_id = "debugger";
+#if 0
 char *erl_dependancies[] = {
-//	"libkernel",
+	"libkernel",
 	NULL
 };
+#endif
 
 #define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
 
@@ -49,6 +51,7 @@ int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
  */
 int HookSifSetReg(u32 register_num, int register_value)
 {
+	GS_BGCOLOUR = 0x0000ff;
 	/* TODO: do magic here */
 	return OldSifSetReg(register_num, register_value);
 }
