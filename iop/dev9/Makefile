@@ -26,5 +26,6 @@ all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 clean:
 	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
-include $(PS2SDK)/Defs.make
-include Rules.make
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
