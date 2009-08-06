@@ -1,7 +1,8 @@
 /*
- * elfldr.c - Elf loader program
+ * elfldr.c - ELF loader
  *
  * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
+ * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
  *
  * This file is part of Artemis, the PS2 game debugger.
  *
@@ -73,7 +74,7 @@ typedef struct {
 /*
  * Elf loader function
  */
-void NewLoadExecPS2(const char *filename, s32 num_args, char **args)
+void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 {
 	/* Ok it's a shortcut to the real LoadExecPS2 but at least it prevent 
 	 * user mem clear below 0x100000 (for this launch) and allow to swap disc 
@@ -163,20 +164,4 @@ void NewLoadExecPS2(const char *filename, s32 num_args, char **args)
 error:
 	GS_BGCOLOUR = 0xffffff; /* white screen: fatal error */
 	while (1){;}		
-}
-
-/*
- * _init - Automatically invoked on ERL load.
- */
-int _init(void)
-{	
-	return 0;
-}
-
-/*
- * _fini - Automatically invoked on ERL unload.
- */
-int _fini(void)
-{
-	return 0;
 }

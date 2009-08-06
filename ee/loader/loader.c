@@ -101,6 +101,7 @@ typedef struct {
 	u32	size;
 } irxent_t;
 
+#if 0
 /**
  * strhash - String hashing function as specified by the ELF ABI.
  * @name: string to calculate hash from
@@ -120,6 +121,7 @@ u32 strhash(const char *name)
 
 	return h;
 }
+#endif
 
 #define HASH_PS2DEV9	0x0768ace9
 #define HASH_PS2IP	0x00776900
@@ -357,7 +359,7 @@ static int install_libkernel(const config_t *config)
 	return 0;
 }
 
-void (*NewLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
+void (*MyLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
 
 /*
  * Install built-in ELF loader.
@@ -378,8 +380,8 @@ static int install_elfldr(const config_t *config)
 
 	FlushCache(0);
 
-	sym = erl_find_local_symbol("NewLoadExecPS2", erl);
-	NewLoadExecPS2 = (void*)sym->address;
+	sym = erl_find_local_symbol("MyLoadExecPS2", erl);
+	MyLoadExecPS2 = (void*)sym->address;
 
 	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);
