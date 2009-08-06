@@ -74,10 +74,12 @@ static const char *g_modules[] = {
 /* Statically linked ERL files */
 extern u8 _engine_erl_start[];
 extern u8 _engine_erl_end[];
-extern u8 _debugger_erl_start[];
-extern u8 _debugger_erl_end[];
 extern u8 _libkernel_erl_start[];
 extern u8 _libkernel_erl_end[];
+extern u8 _debugger_erl_start[];
+extern u8 _debugger_erl_end[];
+extern u8 _elfldr_erl_start[];
+extern u8 _elfldr_erl_end[];
 
 /* Statically linked IRX files */
 extern u8  _ps2dev9_irx_start[];
@@ -330,8 +332,31 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 }
 
 /*
+ * Install built-in libkernel.erl.
+ */
+static int install_libkernel(const config_t *config)
+{
+	struct erl_record_t *erl;
+	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
+
+	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
+
+	erl = load_erl_from_mem_to_addr(_libkernel_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
+		return -1;
+	}
+
+	FlushCache(0);
+
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+	D_PRINTF("%s: install completed.\n", __FUNCTION__);
+
+	return 0;
+}
+
+/*
  * Install external or built-in debugger.
- * TODO: move debugger handling to a separate module
  */
 static int install_debugger(const config_t *config, engine_t *engine)
 {
@@ -344,14 +369,9 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
 
-	/* relocate libkernel.erl */
-	load_erl_from_mem_to_addr(_libkernel_erl_start, LIBKERNEL_ADDR, 0, NULL);
-	FlushCache(0);
-
 	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
 
-	D_PRINTF("* Installing debugger...\n");
-	D_PRINTF("ERL addr = %08x\n", addr);
+	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
 
 	/* relocate debugger */
 	if ((p = config_get_string(config, SET_DEBUGGER_FILE)) != NULL)
@@ -363,10 +383,9 @@ static int install_debugger(const config_t *config, engine_t *engine)
 		return -1;
 	}
 
-	D_PRINTF("ERL size = %u\n", erl->fullsize);
-
-	erl->flags |= ERL_FLAG_CLEAR;
 	FlushCache(0);
+
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
 
 #define GETSYM(x, s) \
 	sym = erl_find_local_symbol(s, erl); \
@@ -381,7 +400,7 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	GETSYM(debugger_loop, "debugger_loop");
 	engine->callbacks[0] = (u32)debugger_loop;
 
-	D_PRINTF("Install completed.\n");
+	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
 	return 0;
 }
@@ -436,6 +455,11 @@ int main(int argc, char *argv[])
 	ret = install_engine(&config, &engine);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install cheat engine\n");
+		goto end;
+	}
+	ret = install_libkernel(&config);
+	if (ret < 0) {
+		A_PRINTF("Error: failed to install libkernel\n");
 		goto end;
 	}
 	ret = install_debugger(&config, &engine);
