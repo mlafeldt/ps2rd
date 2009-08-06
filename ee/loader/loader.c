@@ -56,6 +56,7 @@
 /* TODO: make those configurable */
 #define IRX_ADDR	0x80030000
 #define LIBKERNEL_ADDR	0x00090000
+#define ELFLDR_ADDR	0x000f6000
 
 
 /* Boot information */
@@ -223,16 +224,17 @@ static char *__pathname(const char *name)
 static int install_engine(const config_t *config, engine_t *engine)
 {
 	const char *p = NULL;
+	u32 addr;
 
 	if (!config_get_bool(config, SET_ENGINE_INSTALL))
 		return 0;
 
+	addr = config_get_u32(config, SET_ENGINE_ADDR);
+
 	if ((p = config_get_string(config, SET_ENGINE_FILE)) != NULL)
-		return engine_install_from_file(__pathname(p),
-			config_get_u32(config, SET_ENGINE_ADDR), engine);
+		return engine_install_from_file(__pathname(p), addr, engine);
 	else
-		return engine_install_from_mem(_engine_erl_start,
-			config_get_u32(config, SET_ENGINE_ADDR), engine);
+		return engine_install_from_mem(_engine_erl_start, addr, engine);
 }
 
 /*
@@ -356,6 +358,30 @@ static int install_libkernel(const config_t *config)
 }
 
 /*
+ * Install built-in ELF loader.
+ */
+static int install_elfldr(const config_t *config)
+{
+	struct erl_record_t *erl;
+	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
+
+	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
+
+	erl = load_erl_from_mem_to_addr(_elfldr_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
+		return -1;
+	}
+
+	FlushCache(0);
+
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+	D_PRINTF("%s: install completed.\n", __FUNCTION__);
+
+	return 0;
+}
+
+/*
  * Install external or built-in debugger.
  */
 static int install_debugger(const config_t *config, engine_t *engine)
@@ -460,6 +486,11 @@ int main(int argc, char *argv[])
 	ret = install_libkernel(&config);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install libkernel\n");
+		goto end;
+	}
+	ret = install_elfldr(&config);
+	if (ret < 0) {
+		A_PRINTF("Error: failed to install ELF loader\n");
 		goto end;
 	}
 	ret = install_debugger(&config, &engine);

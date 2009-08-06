@@ -52,8 +52,7 @@ static int __engine_install(const char *filename, u8 *mem, u32 addr, engine_t *e
 
 	memset(engine, 0, sizeof(engine_t));
 
-	D_PRINTF("* Installing engine...\n");
-	D_PRINTF("ERL addr = %08x\n", addr);
+	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
 
 	/* Relocate engine */
 	if (filename != NULL)
@@ -66,12 +65,12 @@ static int __engine_install(const char *filename, u8 *mem, u32 addr, engine_t *e
 		return -1;
 	}
 
-	D_PRINTF("ERL size = %u\n", engine->erl->fullsize);
+	FlushCache(0);
+
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, engine->erl->fullsize);
 
 	/* Always clear this ERL when unloading */
 	engine->erl->flags |= ERL_FLAG_CLEAR;
-
-	FlushCache(0);
 
 	/* Populate engine context */
 #define GETSYM(x, s) \
@@ -99,7 +98,7 @@ static int __engine_install(const char *filename, u8 *mem, u32 addr, engine_t *e
 
 #ifndef _NO_HOOK
 	/* Hook syscalls */
-	D_PRINTF("Hooking syscalls...\n");
+	D_PRINTF("%s: hooking syscalls...\n", __FUNCTION__);
 	syscall_hook_t *h = engine->syscall_hooks;
 	while (h->syscall) {
 		void *v = hook_syscall(h->syscall, h->vector);
@@ -112,10 +111,10 @@ static int __engine_install(const char *filename, u8 *mem, u32 addr, engine_t *e
 		h++;
 	}
 #else
-	D_PRINTF("No syscalls hooked.\n");
+	D_PRINTF("%s: no syscalls hooked.\n", __FUNCTION__);
 #endif
-	D_PRINTF("Engine installed (info=%08x id=%i).\n",
-		*engine->info, *engine->id);
+	D_PRINTF("%s: install completed (info=%08x id=%i).\n",
+		__FUNCTION__, *engine->info, *engine->id);
 
 	return 0;
 }
@@ -151,11 +150,11 @@ int engine_install_from_mem(u8 *mem, u32 addr, engine_t *engine)
  */
 int engine_uninstall(engine_t *engine)
 {
-	D_PRINTF("* Uninstalling engine (%i)...\n", *engine->id);
+	D_PRINTF("%s: id=%i\n", __FUNCTION__, *engine->id);
 
 #ifndef _NO_HOOK
 	/* Unhook syscalls */
-	D_PRINTF("Unhooking syscalls...\n");
+	D_PRINTF("%s: unhooking syscalls...\n", __FUNCTION__);
 	syscall_hook_t *h = engine->syscall_hooks;
 	while (h->syscall) {
 		if (h->oldvector != NULL)
@@ -164,7 +163,7 @@ int engine_uninstall(engine_t *engine)
 	}
 #endif
 	/* Unload ERL */
-	D_PRINTF("Unloading ERL...\n");
+	D_PRINTF("%s: unloading ERL...\n", __FUNCTION__);
 	if (engine->erl != NULL) {
 		if (!unload_erl(engine->erl)) {
 			D_PRINTF("%s: ERL unload error\n", __FUNCTION__);
@@ -175,7 +174,7 @@ int engine_uninstall(engine_t *engine)
 	/* Empty context */
 	memset(engine, 0, sizeof(engine_t));
 
-	D_PRINTF("Uninstall completed.\n");
+	D_PRINTF("%s: uninstall completed.\n", __FUNCTION__);
 
 	return 0;
 }
