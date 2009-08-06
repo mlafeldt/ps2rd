@@ -2,6 +2,7 @@
  * loader.c - boot loader (main project file)
  *
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
  * This file is part of Artemis, the PS2 game debugger.
  *
@@ -101,13 +102,12 @@ typedef struct {
 	u32	size;
 } irxent_t;
 
-#if 0
 /**
  * strhash - String hashing function as specified by the ELF ABI.
  * @name: string to calculate hash from
  * @return: 32-bit hash value
  */
-u32 strhash(const char *name)
+static u32 strhash(const char *name)
 {
 	const u8 *p = (u8*)name;
 	u32 h = 0, g;
@@ -121,11 +121,19 @@ u32 strhash(const char *name)
 
 	return h;
 }
-#endif
 
-#define HASH_PS2DEV9	0x0768ace9
-#define HASH_PS2IP	0x00776900
-#define HASH_PS2SMAP	0x0769a3f0
+/*
+ * Helper to populate an IRX table entry.
+ */
+static void irxent_set(irxent_t *ent, const char *name, u8 *addr, u32 size)
+{
+	ent->hash = name ? strhash(name) : 0;
+	ent->addr = addr;
+	ent->size = size;
+
+	D_PRINTF("%s: name=%s hash=%08x addr=%08x size=%i\n", __FUNCTION__,
+		name, ent->hash, (u32)ent->addr, ent->size);
+}
 
 /*
  * Copy statically linked IRX files to kernel RAM.
@@ -142,30 +150,10 @@ static void copy_modules_to_kernel(u32 addr)
 	/*
 	 * build IRX table
 	 */
-	irx_ptr->hash = HASH_PS2DEV9;
-	irx_ptr->addr = _ps2dev9_irx_start;
-	irx_ptr->size = _ps2dev9_irx_size;
-	D_PRINTF("%s: ps2dev9: hash=%08x addr=%08x size=%i\n", __FUNCTION__,
-		irx_ptr->hash, (u32)irx_ptr->addr, irx_ptr->size);
-
-	irx_ptr++;
-	irx_ptr->hash = HASH_PS2IP;
-	irx_ptr->addr = _ps2ip_irx_start;
-	irx_ptr->size = _ps2ip_irx_size;
-	D_PRINTF("%s: ps2ip: hash=%08x addr=%08x size=%i\n", __FUNCTION__,
-		irx_ptr->hash, (u32)irx_ptr->addr, irx_ptr->size);
-
-	irx_ptr++;
-	irx_ptr->hash = HASH_PS2SMAP;
-	irx_ptr->addr = _ps2smap_irx_start;
-	irx_ptr->size = _ps2smap_irx_size;
-	D_PRINTF("%s: ps2smap: hash=%08x addr=%08x size=%i\n", __FUNCTION__,
-		irx_ptr->hash, (u32)irx_ptr->addr, irx_ptr->size);
-
-	irx_ptr++;
-	irx_ptr->hash = 0;
-	irx_ptr->addr = 0;
-	irx_ptr->size = 0;
+	irxent_set(irx_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
+	irxent_set(irx_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
+	irxent_set(irx_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
+	irxent_set(irx_ptr, NULL, 0, 0); /* terminator */
 
 	/*
 	 * copy modules to kernel RAM
