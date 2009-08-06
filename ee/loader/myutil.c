@@ -130,13 +130,13 @@ void reset_iop(const char *img)
 	SifExitIopHeap();
 	SifLoadFileExit();
 	SifExitRpc();
-	SifExitCmd();
 
 	SifIopReset(img, 0);
 
 	while (!SifIopSync())
 		;
 	SifInitRpc(0);
+	flush_caches();
 }
 
 /**
