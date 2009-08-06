@@ -492,12 +492,13 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to install ELF loader\n");
 		goto end;
 	}
+#if 0
 	ret = install_debugger(&config, &engine);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install debugger\n");
 		goto end;
 	}
-
+#endif
 	/* Init CDVD (non-blocking) */
 	cdInit(CDVD_INIT_NOCHECK);
 	cdDiskReady(CDVD_NOBLOCK);
