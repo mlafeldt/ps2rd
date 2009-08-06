@@ -357,12 +357,15 @@ static int install_libkernel(const config_t *config)
 	return 0;
 }
 
+void (*NewLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
+
 /*
  * Install built-in ELF loader.
  */
 static int install_elfldr(const config_t *config)
 {
 	struct erl_record_t *erl;
+	struct symbol_t *sym;
 	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
 
 	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
@@ -374,6 +377,9 @@ static int install_elfldr(const config_t *config)
 	}
 
 	FlushCache(0);
+
+	sym = erl_find_local_symbol("NewLoadExecPS2", erl);
+	NewLoadExecPS2 = (void*)sym->address;
 
 	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);

@@ -131,6 +131,8 @@ int cdGetElf(char *elfname)
 	return 0;
 }
 
+extern void (*NewLoadExecPS2)(const char *filename, s32 num_args, char **args);
+
 /**
  * cdRunElf - Run a PS2 game from CD/DVD.
  * @return: does not return on success, -1: error
@@ -147,7 +149,10 @@ int cdRunElf(void)
 	/* Get ELF filename and execute it */
 	if (!cdGetElf(elfname)) {
 		D_PRINTF("Running ELF %s ...\n", elfname);
-		LoadExecPS2(elfname, 0, NULL);
+		if (NewLoadExecPS2 != NULL)
+			NewLoadExecPS2(elfname, 0, NULL);
+		else
+			LoadExecPS2(elfname, 0, NULL);
 	}
 
 	cdStop();
