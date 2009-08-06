@@ -125,10 +125,12 @@ void reset_iop(const char *img)
 
 	SifInitRpc(0);
 
-	/* Exit RPC services */
+	/* Exit services */
+	fioExit();
 	SifExitIopHeap();
 	SifLoadFileExit();
 	SifExitRpc();
+	SifExitCmd();
 
 	SifIopReset(img, 0);
 
