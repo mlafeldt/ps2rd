@@ -359,6 +359,7 @@ static int install_libkernel(const config_t *config)
 	return 0;
 }
 
+/* LoadExecPS2() replacement function from ELF loader */
 void (*MyLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
 
 /*
@@ -380,10 +381,17 @@ static int install_elfldr(const config_t *config)
 
 	FlushCache(0);
 
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+
 	sym = erl_find_local_symbol("MyLoadExecPS2", erl);
+	if (sym == NULL) {
+		D_PRINTF("%s: could not find symbol MyLoadExecPS2\n",
+			__FUNCTION__);
+		return -2;
+	}
+
 	MyLoadExecPS2 = (void*)sym->address;
 
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
 	return 0;
@@ -398,7 +406,6 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	struct symbol_t *sym;
 	u32 addr;
 	const char *p;
-	void *debugger_loop;
 
 	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
 		return 0;
@@ -407,7 +414,6 @@ static int install_debugger(const config_t *config, engine_t *engine)
 
 	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
 
-	/* relocate debugger */
 	if ((p = config_get_string(config, SET_DEBUGGER_FILE)) != NULL)
 		erl = load_erl_from_file_to_addr(__pathname(p), addr, 0, NULL);
 	else
@@ -421,18 +427,15 @@ static int install_debugger(const config_t *config, engine_t *engine)
 
 	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
 
-#define GETSYM(x, s) \
-	sym = erl_find_local_symbol(s, erl); \
-	if (sym == NULL) { \
-		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, s); \
-		return -2; \
-	} \
-	x = (typeof(x))sym->address; \
-	D_PRINTF("%08x %s\n", sym->address, s)
+	sym = erl_find_local_symbol("debugger_loop", erl);
+	if (sym == NULL) {
+		D_PRINTF("%s: could not find symbol debugger_loop\n",
+			__FUNCTION__);
+		return -2;
+	}
 
-	/* Add debugger_loop() callback to engine */
-	GETSYM(debugger_loop, "debugger_loop");
-	engine->callbacks[0] = (u32)debugger_loop;
+	/* add debugger_loop() callback to engine */
+	engine->callbacks[0] = (u32)sym->address;
 
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
