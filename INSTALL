@@ -1,5 +1,5 @@
 To build the PS2 part of Artemis, you need a working PS2DEV toolchain with an
-up-to-date version of the PS2SDK. Also, the PS2SDK sources are required.
+up-to-date version of the PS2SDK.
 
 First, you have to install the PS2 ports of libconfig and libcheats to the SDK,
 most likely under /usr/local/ps2dev/ps2sdk/ports/. Both can be compiled and
@@ -13,9 +13,7 @@ $ cd common/libcheats/
 $ make -f Makefile.PS2
 # make -f Makefile.PS2 install
 
-Afterwards, go to the project's root directory. Make sure that the PS2SDKSRC
-environment variable points to the SDK sources. Now you can finally build the
-Artemis executable:
+Now, go to the project's root directory to finally build the Artemis executable:
 
 $ make
 
