@@ -4,24 +4,21 @@
 
 EE_INCS +=
 EE_CFLAGS +=
-EE_CXXFLAGS +=
-EE_LDFLAGS +=
-EE_ASFLAGS +=
-EE_LIBS +=
+EE_LDFLAGS += -nostartfiles -s
+EE_LIBS =
+
+EE_BIN = elfldr.elf
 EE_OBJS = elfldr.o
 
 
-all: elfldr.erl
+all: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
+	$(EE_CC) -mno-crt0 -Tlinkfile $(EE_CFLAGS) -o $(EE_BIN) \
+	$(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
 clean:
-	rm -f *.o *.erl
+	rm -f $(EE_BIN) $(EE_OBJS)
 
 rebuild: clean all
-
-elfldr.erl: $(EE_OBJS)
-	$(EE_CC) -mno-crt0 -nostartfiles -o $@ $(EE_OBJS) $(EE_CFLAGS) \
-		$(EE_INCS) $(EE_LDFLAGS) -Wl,-r
-	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $@
 
 
 include $(PS2SDK)/samples/Makefile.pref

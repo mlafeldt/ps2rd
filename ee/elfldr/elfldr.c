@@ -31,15 +31,7 @@
 #include <fileio.h>
 #include <io_common.h>
 
-char *erl_id = "elfldr";
-#if 0
-char *erl_dependancies[] = {
-	"libkernel",
-	NULL
-};
-#endif
-
-#define GS_BGCOLOUR *((volatile unsigned long int*)0x120000E0)
+#define GS_BGCOLOUR	*((vu32*)0x120000E0)
 #define ELF_MAGIC	0x464c457f
 #define ELF_PT_LOAD	1
 
@@ -74,16 +66,16 @@ typedef struct {
 /*
  * Elf loader function
  */
-void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
+void loadElf(char *filename, s32 num_args, char **args)
 {
 	/* Ok it's a shortcut to the real LoadExecPS2 but at least it prevent 
-	 * user mem clear below 0x100000 (for this launch) and allow to swap disc 
+	 * user mem clear below 0x100000 and allow to swap disc 
 	 */
 	
 	int i, fd;
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;	
-	
+		
 	SifInitRpc(0);	
 	
 	/* Clearing user mem, so better not to have anything valuable on stack */
@@ -101,8 +93,12 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 	SifResetIop();
 	SifInitRpc(0);
 	
+	FlushCache(0);
+	FlushCache(2);
+		
 	/* Reload modules */
 	SifLoadFileInit();
+	SifInitIopHeap();
 	SifLoadModule("rom0:SIO2MAN", 0, 0);
 	SifLoadModule("rom0:MCMAN", 0, 0);
 	SifLoadModule("rom0:MCSERV", 0, 0);
@@ -164,4 +160,15 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 error:
 	GS_BGCOLOUR = 0xffffff; /* white screen: fatal error */
 	while (1){;}		
+}
+
+/*
+ * MAIN FUNC
+ */
+int main (int argc, char *argv[1])
+{
+ 
+  loadElf(argv[0], 0, NULL);
+
+  return 0;
 }

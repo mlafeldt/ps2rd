@@ -4,7 +4,7 @@ all:
 	make -C debugger
 	bin2o -n debugger/debugger.erl loader/debugger_erl.o _debugger_erl
 	make -C elfldr
-	bin2o -n elfldr/elfldr.erl loader/elfldr_erl.o _elfldr_erl
+	bin2o -n elfldr/elfldr.elf loader/elfldr_elf.o _elfldr_elf
 	bin2o -n $(PS2SDK)/ee/lib/libkernel.erl loader/libkernel_erl.o _libkernel_erl
 	make -C loader
 
@@ -13,6 +13,6 @@ clean:
 	make -C debugger clean
 	make -C elfldr clean
 	make -C loader clean
-	rm -f loader/*_erl.o
+	rm -f loader/*.o
 
 rebuild: clean all

@@ -44,7 +44,7 @@ char *erl_dependancies[] = {
 };
 #endif
 
-#define GS_BGCOLOUR *((volatile unsigned long int*)0x120000e0)
+#define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
 extern void OrigSifSetReg(u32 register_num, int register_value);
 extern void HookSifSetReg(u32 register_num, int register_value);
@@ -114,8 +114,8 @@ static int post_reboot_hook(void)
 	/* init services */
 	GS_BGCOLOUR = 0xff0000;
 	SifInitRpc(0);
-	SifInitIopHeap();
 	SifLoadFileInit();
+	SifInitIopHeap();
 
 	GS_BGCOLOUR = 0xffff00;
 
@@ -133,9 +133,9 @@ static int post_reboot_hook(void)
 	GS_BGCOLOUR = 0x0000ff;
 
 	/* deinit services */
-	SifExitRpc();
 	SifExitIopHeap();
-	SifLoadFileExit();
+	SifLoadFileExit();	
+	SifExitRpc();
 
 	GS_BGCOLOUR = 0x000000;
 
