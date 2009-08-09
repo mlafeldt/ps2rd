@@ -131,7 +131,8 @@ int cdGetElf(char *elfname)
 	return 0;
 }
 
-extern void MyLoadExecPS2(const char *filename);
+/* defined in loader.c */
+extern int MyLoadExecPS2(const char *filename);
 
 /**
  * cdRunElf - Run a PS2 game from CD/DVD.
