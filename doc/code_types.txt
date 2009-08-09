@@ -280,6 +280,7 @@ v = value (8/16 bits)
 
 Compares value at address @a to value @v, and executes next @n code lines only
 if the test condition @t is true.
+Note: If @n is 0, it is internally set to 1 for compatibility.
 
 Example:
 D00802CC 07002882

@@ -452,44 +452,47 @@ type_d:
 	srl	$a3, $a1, 16
 	andi	$a3, 1
 	srl	$t6, $a1, 20
-	andi	$t6, 7
-	beqz	$a3, 1f
 	srl	$a2, $a1, 24
-	lbu	$t5, 0($a0)
-	b	2f
-	andi	$a1, 0xff
+	beqzl	$a2, 1f		/* set @n to 1 if 0 for compatibility */
+	li	$a2, 1
 1:
+	beqz	$a3, 2f
+	andi	$t6, 7
+	lbu	$t5, 0($a0)
+	b	3f
+	andi	$a1, 0xff
+2:
 	lhu	$t5, 0($a0)
 	andi	$a1, 0xffff
-2:
-	beqzl	$t6, 3f		/* equal */
+3:
+	beqzl	$t6, 4f		/* equal */
 	subu	$t5, $a1
 	li	$at, 1		/* not equal */
-	beql	$t6, $at, 4f
+	beql	$t6, $at, 5f
 	subu	$t5, $a1
 	li	$at, 2		/* less than */
-	beql	$t6, $at, 4f
+	beql	$t6, $at, 5f
 	sltu	$t5, $a1
 	li	$at, 3		/* greater than */
-	beql	$t6, $at, 4f
+	beql	$t6, $at, 5f
 	sltu	$t5, $a1, $t5
 	li	$at, 4		/* NAND */
-	beql	$t6, $at, 3f
-	and	$t5, $a1
-	li	$at, 5		/* AND */
 	beql	$t6, $at, 4f
 	and	$t5, $a1
+	li	$at, 5		/* AND */
+	beql	$t6, $at, 5f
+	and	$t5, $a1
 	li	$at, 6		/* NOR */
-	beql	$t6, $at, 3f
+	beql	$t6, $at, 4f
 	or	$t5, $a1
-	b	4f		/* OR */
+	b	5f		/* OR */
 	or	$t5, $a1
-3:				/* skip if non-zero */
+4:				/* skip if non-zero */
 	bnezl	$t5, next
 	addu	$t4, $a2
 	b	next
 	nop
-4:				/* skip if zero */
+5:				/* skip if zero */
 	beqzl	$t5, next
 	addu	$t4, $a2
 next:

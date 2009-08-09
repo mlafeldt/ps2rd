@@ -291,7 +291,7 @@ static int test_type_d(void)
 	add_code(addr + 0xd0000008, 0x04401234);
 	add_code(addr + 0xd000000a, 0x03501234);
 	add_code(addr + 0xd000000c, 0x02600000);
-	add_code(addr + 0xd000000e, 0x01701234);
+	add_code(addr + 0xd000000e, 0x00701234);
 	add_code(addr + 0x10000010, 0x00001234);
 	CodeHandler();
 
