@@ -13,7 +13,7 @@ EE_BIN = artemis.elf
 
 ERL_FILES = engine_erl.o libkernel_erl.o debugger_erl.o
 ELF_FILES = elfldr_elf.o
-IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o
+IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o debugger_irx.o
 EE_FILES = loader.o configman.o engineman.o \
 	mycdvd.o mypad.o mystring.o myutil.o
 

@@ -68,6 +68,7 @@ typedef struct {
 #define HASH_PS2DEV9	0x0768ace9
 #define HASH_PS2IP	0x00776900
 #define HASH_PS2SMAP	0x0769a3f0
+#define HASH_DEBUGGER	0x0b9bdb62
 
 /*
  * load_module_from_kernel - Load IOP module from kernel RAM.
@@ -112,12 +113,12 @@ static int post_reboot_hook(void)
 	int ret;
 
 	/* init services */
-	GS_BGCOLOUR = 0xff0000;
+//	GS_BGCOLOUR = 0xff0000;
 	SifInitRpc(0);
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-	GS_BGCOLOUR = 0xffff00;
+//	GS_BGCOLOUR = 0xffff00;
 
 	/* load our modules from kernel */
 	ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
@@ -129,6 +130,9 @@ static int post_reboot_hook(void)
 	ret = load_module_from_kernel(HASH_PS2SMAP, 0, NULL);
 	if (ret < 0)
 		while (1) ;
+	ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
+	if (ret < 0)
+		while (1) ;
 
 	GS_BGCOLOUR = 0x0000ff;
 
@@ -137,7 +141,7 @@ static int post_reboot_hook(void)
 	SifLoadFileExit();	
 	SifExitRpc();
 
-	GS_BGCOLOUR = 0x000000;
+//	GS_BGCOLOUR = 0x000000;
 
 #ifdef DISABLE_AFTER_IOPRESET
 	_fini();

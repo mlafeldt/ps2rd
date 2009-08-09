@@ -94,8 +94,11 @@ extern int _ps2ip_irx_size;
 extern u8  _ps2smap_irx_start[];
 extern u8  _ps2smap_irx_end[];
 extern int _ps2smap_irx_size;
+extern u8  _debugger_irx_start[];
+extern u8  _debugger_irx_end[];
+extern int _debugger_irx_size;
 
-#define IRX_NUM	3
+#define IRX_NUM	4
 
 typedef struct {
 	u32	hash;
@@ -188,6 +191,7 @@ static void copy_modules_to_kernel(u32 addr)
 	irxent_set(irx_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
 	irxent_set(irx_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
 	irxent_set(irx_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
+	irxent_set(irx_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
 	irxent_set(irx_ptr, NULL, 0, 0); /* terminator */
 
 	/*

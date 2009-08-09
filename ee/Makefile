@@ -13,6 +13,6 @@ clean:
 	make -C debugger clean
 	make -C elfldr clean
 	make -C loader clean
-	rm -f loader/*.o
+	rm -f loader/*_erl.o loader/*_elf.o
 
 rebuild: clean all
