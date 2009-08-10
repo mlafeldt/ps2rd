@@ -15,11 +15,12 @@ $ make -f Makefile.PS2
 
 Now, go to the project's root directory to finally build the Artemis executable:
 
-$ make
+$ make rebuild
 
 This will create ee/loader/artemis.elf.
 
-Currently, it is recommended to run the ELF with ps2link + ps2client:
+Currently, it is recommended to run the ELF with ps2link (you need the high-
+loading version) and ps2client:
 
 $ cd ee/loader/
 $ make run
