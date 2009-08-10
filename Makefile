@@ -10,5 +10,14 @@ clean:
 	make -C ee clean
 	rm -f ee/loader/*_irx.o
 	make -C iop clean
+	rm -rf release/
 
 rebuild: clean all
+
+release: all
+	rm -rf release
+	mkdir release
+	cp ee/loader/artemis.elf release/
+	cp ee/loader/artemis.conf release/
+	cp ee/loader/cheats.txt release/
+	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
