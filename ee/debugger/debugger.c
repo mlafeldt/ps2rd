@@ -55,12 +55,12 @@ static int set_reg_hook = 0;
 static int debugger_ready = 0;
 static u8 g_buf[80*1024] __attribute__((aligned(64)));
 
-
+/* RAM file table entry */
 typedef struct {
 	u32	hash;
 	u8	*addr;
 	u32	size;
-} irxent_t;
+} ramfile_t;
 
 /* TODO: make this configurable */
 #define IRX_ADDR	0x80030000
@@ -75,7 +75,7 @@ typedef struct {
  */
 static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
 {
-	const irxent_t *irx_ptr = (irxent_t*)IRX_ADDR;
+	const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
 	int irxsize = 0, ret;
 
 	DI();

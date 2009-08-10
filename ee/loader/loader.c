@@ -106,11 +106,12 @@ extern int _debugger_irx_size;
 
 #define IRX_NUM	4
 
+/* RAM file table entry */
 typedef struct {
 	u32	hash;
 	u8	*addr;
 	u32	size;
-} irxent_t;
+} ramfile_t;
 
 /**
  * strhash - String hashing function as specified by the ELF ABI.
@@ -133,16 +134,16 @@ static u32 strhash(const char *name)
 }
 
 /*
- * Helper to populate an IRX table entry.
+ * Helper to populate an RAM file table entry.
  */
-static void irxent_set(irxent_t *ent, const char *name, u8 *addr, u32 size)
+static void ramfile_set(ramfile_t *file, const char *name, u8 *addr, u32 size)
 {
-	ent->hash = name ? strhash(name) : 0;
-	ent->addr = addr;
-	ent->size = size;
+	file->hash = name ? strhash(name) : 0;
+	file->addr = addr;
+	file->size = size;
 
 	D_PRINTF("%s: name=%s hash=%08x addr=%08x size=%i\n", __FUNCTION__,
-		name, ent->hash, (u32)ent->addr, ent->size);
+		name, file->hash, (u32)file->addr, file->size);
 }
 
 /*
@@ -151,42 +152,42 @@ static void irxent_set(irxent_t *ent, const char *name, u8 *addr, u32 size)
  */
 static void copy_modules_to_kernel(u32 addr)
 {
-	irxent_t irx_tab[IRX_NUM + 1];
-	irxent_t *irx_ptr = irx_tab;
-	irxent_t *ktab = NULL;
+	ramfile_t file_tab[IRX_NUM + 1];
+	ramfile_t *file_ptr = file_tab;
+	ramfile_t *ktab = NULL;
 
 	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
 
 	/*
-	 * build IRX table
+	 * build RAM file table
 	 */
-	irxent_set(irx_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
-	irxent_set(irx_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
-	irxent_set(irx_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
-	irxent_set(irx_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
-	irxent_set(irx_ptr, NULL, 0, 0); /* terminator */
+	ramfile_set(file_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
+	ramfile_set(file_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
+	ramfile_set(file_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
+	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
+	ramfile_set(file_ptr, NULL, 0, 0); /* terminator */
 
 	/*
 	 * copy modules to kernel RAM
 	 *
 	 * memory structure at @addr:
-	 * |irx table|irx module #1|irx module #2|etc.
+	 * |RAM file table|IRX module #1|IRX module #2|etc.
 	 */
 	DI();
 	ee_kmode_enter();
 
-	ktab = (irxent_t*)addr;
-	addr += sizeof(irx_tab);
-	irx_ptr = irx_tab;
+	ktab = (ramfile_t*)addr;
+	addr += sizeof(file_tab);
+	file_ptr = file_tab;
 
-	while (irx_ptr->hash) {
-		memcpy((u8*)addr, irx_ptr->addr, irx_ptr->size);
-		irx_ptr->addr = (u8*)addr;
-		addr += irx_ptr->size;
-		irx_ptr++;
+	while (file_ptr->hash) {
+		memcpy((u8*)addr, file_ptr->addr, file_ptr->size);
+		file_ptr->addr = (u8*)addr;
+		addr += file_ptr->size;
+		file_ptr++;
 	}
 
-	memcpy(ktab, irx_tab, sizeof(irx_tab));
+	memcpy(ktab, file_tab, sizeof(file_tab));
 
 	ee_kmode_exit();
 	EI();
