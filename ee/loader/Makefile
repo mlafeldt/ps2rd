@@ -14,10 +14,9 @@ EE_BIN = artemis.elf
 ERL_FILES = engine_erl.o libkernel_erl.o libc_erl.o libdebug_erl.o debugger_erl.o
 ELF_FILES = elfldr_elf.o
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o debugger_irx.o
-EE_FILES = loader.o configman.o engineman.o \
-	mycdvd.o mypad.o mystring.o myutil.o
+LDR_FILES = loader.o configman.o engineman.o mycdvd.o mypad.o mystring.o myutil.o
 
-EE_OBJS = $(EE_FILES) $(ERL_FILES) $(ELF_FILES) $(IRX_FILES)
+EE_OBJS = $(LDR_FILES) $(ERL_FILES) $(ELF_FILES) $(IRX_FILES)
 
 EE_LIBS = -lcdvd -ldebug -lpad -lpatches -lerl -lconfig -lcheats
 
@@ -25,7 +24,7 @@ EE_LIBS = -lcdvd -ldebug -lpad -lpatches -lerl -lconfig -lcheats
 all: loader
 
 clean:
-	rm -f $(EE_BIN) $(EE_FILES)
+	rm -f $(EE_BIN) $(LDR_FILES)
 
 rebuild: clean all
 
