@@ -345,44 +345,22 @@ static int install_libs(const config_t *config)
 	struct erl_record_t *erl;
 	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
 
-	D_PRINTF("%s: relocate libkernel.erl at %08x\n", __FUNCTION__, addr);
-	erl = load_erl_from_mem_to_addr(_libkernel_erl_start, addr, 0, NULL);
-	if (erl == NULL) {
-		D_PRINTF("%s: libkernel.erl load error\n", __FUNCTION__);
-		return -1;
-	}
-	FlushCache(0);
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+#define LOAD_ERL(name, buf) \
+	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, name, addr); \
+	erl = load_erl_from_mem_to_addr(buf, addr, 0, NULL); \
+	if (erl == NULL) { \
+		D_PRINTF("%s: %s load error\n", __FUNCTION__, name); \
+		return -1; \
+	} \
+	FlushCache(0); \
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize); \
+	addr += ALIGN(erl->fullsize, 64)
+
+	LOAD_ERL("libkernel.erl", _libkernel_erl_start);
 #if 1
-	addr += ALIGN(erl->fullsize, 64);
-	D_PRINTF("%s: relocate libc.erl at %08x\n", __FUNCTION__, addr);
-	erl = load_erl_from_mem_to_addr(_libc_erl_start, addr, 0, NULL);
-	if (erl == NULL) {
-		D_PRINTF("%s: libc.erl load error\n", __FUNCTION__);
-		return -1;
-	}
-	FlushCache(0);
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
-
-	addr += ALIGN(erl->fullsize, 64);
-	D_PRINTF("%s: relocate libdebug.erl at %08x\n", __FUNCTION__, addr);
-	erl = load_erl_from_mem_to_addr(_libdebug_erl_start, addr, 0, NULL);
-	if (erl == NULL) {
-		D_PRINTF("%s: libdebug.erl load error\n", __FUNCTION__);
-		return -1;
-	}
-	FlushCache(0);
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
-
-	addr += ALIGN(erl->fullsize, 64);
-	D_PRINTF("%s: relocate libpatches.erl at %08x\n", __FUNCTION__, addr);
-	erl = load_erl_from_mem_to_addr(_libpatches_erl_start, addr, 0, NULL);
-	if (erl == NULL) {
-		D_PRINTF("%s: libpatches.erl load error\n", __FUNCTION__);
-		return -1;
-	}
-	FlushCache(0);
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+	LOAD_ERL("libc.erl", _libc_erl_start);
+	LOAD_ERL("libdebug.erl", _libdebug_erl_start);
+	LOAD_ERL("libpatches.erl", _libpatches_erl_start);
 #endif
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
