@@ -84,6 +84,8 @@ extern u8 _libc_erl_start[];
 extern u8 _libc_erl_end[];
 extern u8 _libdebug_erl_start[];
 extern u8 _libdebug_erl_end[];
+extern u8 _libpatches_erl_start[];
+extern u8 _libpatches_erl_end[];
 extern u8 _debugger_erl_start[];
 extern u8 _debugger_erl_end[];
 
@@ -367,6 +369,16 @@ static int install_libs(const config_t *config)
 	erl = load_erl_from_mem_to_addr(_libdebug_erl_start, addr, 0, NULL);
 	if (erl == NULL) {
 		D_PRINTF("%s: libdebug.erl load error\n", __FUNCTION__);
+		return -1;
+	}
+	FlushCache(0);
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+
+	addr += ALIGN(erl->fullsize, 64);
+	D_PRINTF("%s: relocate libpatches.erl at %08x\n", __FUNCTION__, addr);
+	erl = load_erl_from_mem_to_addr(_libpatches_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: libpatches.erl load error\n", __FUNCTION__);
 		return -1;
 	}
 	FlushCache(0);
