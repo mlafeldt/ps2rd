@@ -21,3 +21,4 @@ release: all
 	cp ee/loader/artemis.conf release/
 	cp ee/loader/cheats.txt release/
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
+	cd release; tar czf artemis-bin.tar.gz *
