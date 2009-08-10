@@ -24,10 +24,6 @@
 
 #define NUM_SYSCALLS	256
 
-#define SYSCALL_SETGSCRT	0x02
-#define SYSCALL_EXECPS2		0x07
-#define SYSCALL_SETUPTHREAD	0x3C
-
 #define KSEG0(x)	((void*)(((u32)(x)) | 0x80000000))
 #define MAKE_J(addr)	(u32)(0x08000000 | (0x03FFFFFF & ((u32)addr >> 2)))
 #define MAKE_JAL(addr)	(u32)(0x0C000000 | (0x03FFFFFF & ((u32)addr >> 2)))

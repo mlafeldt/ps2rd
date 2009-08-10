@@ -60,6 +60,8 @@
 #define IRX_ADDR	0x80030000
 #define LIBKERNEL_ADDR	0x00090000
 
+#define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
+
 /* Boot information */
 static char g_bootpath[FIO_PATH_MAX];
 static enum bootdev g_bootdev = BOOT_UNKN;
@@ -78,6 +80,10 @@ extern u8 _engine_erl_start[];
 extern u8 _engine_erl_end[];
 extern u8 _libkernel_erl_start[];
 extern u8 _libkernel_erl_end[];
+extern u8 _libc_erl_start[];
+extern u8 _libc_erl_end[];
+extern u8 _libdebug_erl_start[];
+extern u8 _libdebug_erl_end[];
 extern u8 _debugger_erl_start[];
 extern u8 _debugger_erl_end[];
 
@@ -329,24 +335,42 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 }
 
 /*
- * Install built-in libkernel.erl.
+ * Install built-in ERL libraries.
  */
-static int install_libkernel(const config_t *config)
+static int install_libs(const config_t *config)
 {
 	struct erl_record_t *erl;
 	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
 
-	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
-
+	D_PRINTF("%s: relocate libkernel.erl at %08x\n", __FUNCTION__, addr);
 	erl = load_erl_from_mem_to_addr(_libkernel_erl_start, addr, 0, NULL);
 	if (erl == NULL) {
-		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
+		D_PRINTF("%s: libkernel.erl load error\n", __FUNCTION__);
 		return -1;
 	}
-
 	FlushCache(0);
-
 	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+#if 1
+	addr += ALIGN(erl->fullsize, 64);
+	D_PRINTF("%s: relocate libc.erl at %08x\n", __FUNCTION__, addr);
+	erl = load_erl_from_mem_to_addr(_libc_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: libc.erl load error\n", __FUNCTION__);
+		return -1;
+	}
+	FlushCache(0);
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+
+	addr += ALIGN(erl->fullsize, 64);
+	D_PRINTF("%s: relocate libdebug.erl at %08x\n", __FUNCTION__, addr);
+	erl = load_erl_from_mem_to_addr(_libdebug_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: libdebug.erl load error\n", __FUNCTION__);
+		return -1;
+	}
+	FlushCache(0);
+	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+#endif
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
 	return 0;
@@ -527,9 +551,9 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to install cheat engine\n");
 		goto end;
 	}
-	ret = install_libkernel(&config);
+	ret = install_libs(&config);
 	if (ret < 0) {
-		A_PRINTF("Error: failed to install libkernel\n");
+		A_PRINTF("Error: failed to install ERL libs\n");
 		goto end;
 	}
 	ret = install_debugger(&config, &engine);

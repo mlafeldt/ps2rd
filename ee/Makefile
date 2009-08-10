@@ -6,6 +6,8 @@ all:
 	make -C elfldr
 	bin2o -n elfldr/elfldr.elf loader/elfldr_elf.o _elfldr_elf
 	bin2o -n $(PS2SDK)/ee/lib/libkernel.erl loader/libkernel_erl.o _libkernel_erl
+	bin2o -n $(PS2SDK)/ee/lib/libc.erl loader/libc_erl.o _libc_erl
+	bin2o -n $(PS2SDK)/ee/lib/libdebug.erl loader/libdebug_erl.o _libdebug_erl
 	make -C loader
 
 clean:
