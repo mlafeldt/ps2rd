@@ -59,6 +59,7 @@
 /* TODO: make those configurable */
 #define IRX_ADDR	0x80030000
 #define LIBKERNEL_ADDR	0x00090000
+#define ELFLDR_ADDR	0x000f6000
 
 #define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
 
@@ -88,9 +89,8 @@ extern u8 _libpatches_erl_start[];
 extern u8 _libpatches_erl_end[];
 extern u8 _debugger_erl_start[];
 extern u8 _debugger_erl_end[];
-
-/* Statically linked ELF files */
-extern u8 _elfldr_elf_start[];
+extern u8 _elfldr_erl_start[];
+extern u8 _elfldr_erl_end[];
 
 /* Statically linked IRX files */
 extern u8  _ps2dev9_irx_start[];
@@ -368,6 +368,45 @@ static int install_libs(const config_t *config)
 	return 0;
 }
 
+/* LoadExecPS2() replacement function from ELF loader */
+void (*MyLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
+
+/*
+ * Install built-in ELF loader.
+ */
+static int install_elfldr(const config_t *config)
+{
+	struct erl_record_t *erl;
+	struct symbol_t *sym;
+	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
+
+	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
+
+	erl = load_erl_from_mem_to_addr(_elfldr_erl_start, addr, 0, NULL);
+	if (erl == NULL) {
+		D_PRINTF("%s: elfldr.erl load error\n", __FUNCTION__);
+		return -1;
+	}
+
+	FlushCache(0);
+
+	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, erl->fullsize,
+		addr + erl->fullsize);
+
+	sym = erl_find_local_symbol("MyLoadExecPS2", erl);
+	if (sym == NULL) {
+		D_PRINTF("%s: could not find symbol MyLoadExecPS2\n",
+			__FUNCTION__);
+		return -2;
+	}
+
+	MyLoadExecPS2 = (void*)sym->address;
+
+	D_PRINTF("%s: install completed.\n", __FUNCTION__);
+
+	return 0;
+}
+
 /*
  * Install external or built-in debugger.
  */
@@ -412,84 +451,6 @@ static int install_debugger(const config_t *config, engine_t *engine)
 	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
 	return 0;
-}
-
-/* ELF defines */
-#define ELF_MAGIC	0x464c457f
-#define ELF_PT_LOAD	1
-
-/* ELF file header */
-typedef struct {
-	u8	ident[16];
-	u16	type;
-	u16	machine;
-	u32	version;
-	u32	entry;
-	u32	phoff;
-	u32	shoff;
-	u32	flags;
-	u16	ehsize;
-	u16	phentsize;
-	u16	phnum;
-	u16	shentsize;
-	u16	shnum;
-	u16	shstrndx;
-} elf_header_t;
-
-/* ELF program segment header */
-typedef struct {
-	u32	type;
-	u32	offset;
-	void	*vaddr;
-	u32	paddr;
-	u32	filesz;
-	u32	memsz;
-	u32	flags;
-	u32	align;
-} elf_pheader_t;
-
-/*
- * LoadExecPS2() replacement.
- */
-int MyLoadExecPS2(const char *filename)
-{
-	char *argv[1];
-	u8 *boot_elf;
-	elf_header_t *eh;
-	elf_pheader_t *eph;
-	int i;
-
-	/* the loader is embedded */
-	boot_elf = (u8*)&_elfldr_elf_start;
-	eh = (elf_header_t *)boot_elf;
-
-	if (*(u32*)&eh->ident != ELF_MAGIC)
-		return -1;
-
-	eph = (elf_pheader_t*)(boot_elf + eh->phoff);
-
-	for (i = 0; i < eh->phnum; i++) {
-		if (eph[i].type != ELF_PT_LOAD)
-			continue;
-
-		memcpy(eph[i].vaddr, (void*)(boot_elf + eph[i].offset), eph[i].filesz);
-
-		if (eph[i].memsz > eph[i].filesz)
-			memset(eph[i].vaddr + eph[i].filesz, 0, eph[i].memsz - eph[i].filesz);
-	}
-
-	argv[0] = (char*)filename;
-
-	fioExit();
-	SifInitRpc(0);
-	SifExitIopHeap();
-	SifLoadFileExit();
-	SifExitRpc();
-
-	FlushCache(0);
-	FlushCache(2);
-
-	return ExecPS2((void*)eh->entry, NULL, 1, argv);
 }
 
 int main(int argc, char *argv[])
@@ -547,6 +508,11 @@ int main(int argc, char *argv[])
 	ret = install_libs(&config);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install ERL libs\n");
+		goto end;
+	}
+	ret = install_elfldr(&config);
+	if (ret < 0) {
+		A_PRINTF("Error: failed to install ELF loader\n");
 		goto end;
 	}
 	ret = install_debugger(&config, &engine);
