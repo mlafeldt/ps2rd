@@ -76,6 +76,9 @@ static const char *g_modules[] = {
 	NULL
 };
 
+/* Statically linked ELF files */
+extern u8 _elfldr_elf_start[];
+
 /* Statically linked ERL files */
 extern u8 _engine_erl_start[];
 extern u8 _engine_erl_end[];
@@ -91,6 +94,86 @@ extern u8 _debugger_erl_start[];
 extern u8 _debugger_erl_end[];
 extern u8 _elfldr_erl_start[];
 extern u8 _elfldr_erl_end[];
+
+
+typedef struct {
+	char name[20];
+	u8 *start;
+	u8 *end;
+	struct erl_record_t *erl;
+} erl_file_t;
+
+enum {
+	ERL_FILE_ENGINE = 0,
+	ERL_FILE_LIBKERNEL,
+	ERL_FILE_LIBC,
+	ERL_FILE_LIBDEBUG,
+	ERL_FILE_LIBPATCHES,
+	ERL_FILE_DEBUGGER,
+	ERL_FILE_ELFLDR,
+
+	ERL_FILE_NUM /* tricky */
+};
+
+static erl_file_t _erl_files[ERL_FILE_NUM] = {
+	{
+		.name = "engine",
+		.start = _engine_erl_start,
+		.end = _engine_erl_end,
+	},
+	{
+		.name = "libkernel",
+		.start = _libkernel_erl_start,
+		.end = _libkernel_erl_end,
+	},
+	{
+		.name = "libc",
+		.start = _libc_erl_start,
+		.end = _libc_erl_end,
+	},
+	{
+		.name = "libdebug",
+		.start = _libdebug_erl_start,
+		.end = _libdebug_erl_end,
+	},
+	{
+		.name = "libpatches",
+		.start = _libpatches_erl_start,
+		.end = _libpatches_erl_end,
+	},
+	{
+		.name = "debugger",
+		.start = _debugger_erl_start,
+		.end = _debugger_erl_end,
+	},
+	{
+		.name = "elfldr",
+		.start = _elfldr_erl_start,
+		.end = _elfldr_erl_end,
+	}
+};
+
+static int install_erl(erl_file_t *file, u32 addr)
+{
+	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, file->name, addr);
+
+	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
+	if (file->erl == NULL) {
+		D_PRINTF("%s: %s load error\n", __FUNCTION__, file->name);
+		return -1;
+	}
+
+	FlushCache(0);
+
+	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, file->erl->fullsize,
+		addr + file->erl->fullsize);
+
+	D_PRINTF("%s: install completed.\n", __FUNCTION__);
+
+	return 0;
+}
+
+
 
 /* Statically linked IRX files */
 extern u8  _ps2dev9_irx_start[];
@@ -342,32 +425,32 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
  */
 static int install_libs(const config_t *config)
 {
-	struct erl_record_t *erl;
+	erl_file_t *file;
 	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
 
-#define LOAD_ERL(name, buf) \
-	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, name, addr); \
-	erl = load_erl_from_mem_to_addr(buf, addr, 0, NULL); \
-	if (erl == NULL) { \
-		D_PRINTF("%s: %s load error\n", __FUNCTION__, name); \
-		return -1; \
-	} \
-	FlushCache(0); \
-	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, erl->fullsize, \
-		addr + erl->fullsize); \
-	addr += ALIGN(erl->fullsize, 64)
+	file = &_erl_files[ERL_FILE_LIBKERNEL];
+	if (install_erl(file, addr) < 0)
+		return -1;
+	addr += ALIGN(file->erl->fullsize, 64);
 
-	LOAD_ERL("libkernel.erl", _libkernel_erl_start);
-#if 1
-	LOAD_ERL("libc.erl", _libc_erl_start);
-	LOAD_ERL("libdebug.erl", _libdebug_erl_start);
-	LOAD_ERL("libpatches.erl", _libpatches_erl_start);
-#endif
-	D_PRINTF("%s: install completed.\n", __FUNCTION__);
+	file = &_erl_files[ERL_FILE_LIBC];
+	if (install_erl(file, addr) < 0)
+		return -1;
+	addr += ALIGN(file->erl->fullsize, 64);
+
+	file = &_erl_files[ERL_FILE_LIBDEBUG];
+	if (install_erl(file, addr) < 0)
+		return -1;
+	addr += ALIGN(file->erl->fullsize, 64);
+
+	file = &_erl_files[ERL_FILE_LIBPATCHES];
+	if (install_erl(file, addr) < 0)
+		return -1;
 
 	return 0;
 }
 
+#ifdef USE_ELFLDR_ERL
 /* LoadExecPS2() replacement function from ELF loader */
 void (*MyLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
 
@@ -406,6 +489,7 @@ static int install_elfldr(const config_t *config)
 
 	return 0;
 }
+#endif
 
 /*
  * Install external or built-in debugger.
@@ -452,6 +536,86 @@ static int install_debugger(const config_t *config, engine_t *engine)
 
 	return 0;
 }
+
+#ifndef USE_ELFLDR_ERL
+/* ELF defines */
+#define ELF_MAGIC	0x464c457f
+#define ELF_PT_LOAD	1
+
+/* ELF file header */
+typedef struct {
+	u8	ident[16];
+	u16	type;
+	u16	machine;
+	u32	version;
+	u32	entry;
+	u32	phoff;
+	u32	shoff;
+	u32	flags;
+	u16	ehsize;
+	u16	phentsize;
+	u16	phnum;
+	u16	shentsize;
+	u16	shnum;
+	u16	shstrndx;
+} elf_header_t;
+
+/* ELF program segment header */
+typedef struct {
+	u32	type;
+	u32	offset;
+	void	*vaddr;
+	u32	paddr;
+	u32	filesz;
+	u32	memsz;
+	u32	flags;
+	u32	align;
+} elf_pheader_t;
+
+/*
+ * LoadExecPS2() replacement.
+ */
+int MyLoadExecPS2(const char *filename)
+{
+	char *argv[1];
+	u8 *boot_elf;
+	elf_header_t *eh;
+	elf_pheader_t *eph;
+	int i;
+
+	/* the loader is embedded */
+	boot_elf = (u8*)&_elfldr_elf_start;
+	eh = (elf_header_t *)boot_elf;
+
+	if (*(u32*)&eh->ident != ELF_MAGIC)
+		return -1;
+
+	eph = (elf_pheader_t*)(boot_elf + eh->phoff);
+
+	for (i = 0; i < eh->phnum; i++) {
+		if (eph[i].type != ELF_PT_LOAD)
+			continue;
+
+		memcpy(eph[i].vaddr, (void*)(boot_elf + eph[i].offset), eph[i].filesz);
+
+		if (eph[i].memsz > eph[i].filesz)
+			memset(eph[i].vaddr + eph[i].filesz, 0, eph[i].memsz - eph[i].filesz);
+	}
+
+	argv[0] = (char*)filename;
+
+	fioExit();
+	SifInitRpc(0);
+	SifExitIopHeap();
+	SifLoadFileExit();
+	SifExitRpc();
+
+	FlushCache(0);
+	FlushCache(2);
+
+	return ExecPS2((void*)eh->entry, NULL, 1, argv);
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -510,11 +674,13 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to install ERL libs\n");
 		goto end;
 	}
+#ifdef USE_ELFLDR_ERL
 	ret = install_elfldr(&config);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install ELF loader\n");
 		goto end;
 	}
+#endif
 	ret = install_debugger(&config, &engine);
 	if (ret < 0) {
 		A_PRINTF("Error: failed to install debugger\n");
