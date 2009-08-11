@@ -3,7 +3,7 @@ IOP_OBJS = netlog.o udpcl.o xprintf.o exports.o imports.o
 IOP_LIBS =
 
 IOP_INCS +=
-IOP_CFLAGS += -Wall #-DNETLOG_RPC
+IOP_CFLAGS += -Wall -DNETLOG_RPC
 IOP_ASFLAGS +=
 IOP_LDFLAGS += -s
 
