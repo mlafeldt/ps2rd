@@ -353,7 +353,8 @@ static int install_libs(const config_t *config)
 		return -1; \
 	} \
 	FlushCache(0); \
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize); \
+	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, erl->fullsize, \
+		addr + erl->fullsize); \
 	addr += ALIGN(erl->fullsize, 64)
 
 	LOAD_ERL("libkernel.erl", _libkernel_erl_start);
@@ -395,7 +396,8 @@ static int install_debugger(const config_t *config, engine_t *engine)
 
 	FlushCache(0);
 
-	D_PRINTF("%s: size=%u\n", __FUNCTION__, erl->fullsize);
+	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, erl->fullsize,
+		addr + erl->fullsize);
 
 	sym = erl_find_local_symbol("debugger_loop", erl);
 	if (sym == NULL) {
