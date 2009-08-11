@@ -37,6 +37,7 @@
 #include "mypad.h"
 #include "mystring.h"
 #include "myutil.h"
+#include "netlog_rpc.h"
 
 #define APP_NAME	"Artemis"
 #define APP_VERSION	"0.2 WIP"
@@ -60,6 +61,9 @@
 #define IRX_ADDR	0x80030000
 #define LIBKERNEL_ADDR	0x00090000
 #define ELFLDR_ADDR	0x000f6000
+
+#define NETLOG_IP	"192.168.0.2"
+#define NETLOG_PORT	7411
 
 #define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
 
@@ -197,8 +201,11 @@ extern int _ps2smap_irx_size;
 extern u8  _debugger_irx_start[];
 extern u8  _debugger_irx_end[];
 extern int _debugger_irx_size;
+extern u8  _netlog_irx_start[];
+extern u8  _netlog_irx_end[];
+extern int _netlog_irx_size;
 
-#define IRX_NUM	4
+#define IRX_NUM	5
 
 /* RAM file table entry */
 typedef struct {
@@ -259,6 +266,7 @@ static void copy_modules_to_kernel(u32 addr)
 	ramfile_set(file_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
 	ramfile_set(file_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
 	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
+	ramfile_set(file_ptr++, "netlog", _netlog_irx_start, _netlog_irx_size);
 	ramfile_set(file_ptr, NULL, 0, 0); /* terminator */
 
 	/*
@@ -669,6 +677,9 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to load IOP modules\n");
 		goto end;
 	}
+
+	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
+	netlog_init(NETLOG_IP, NETLOG_PORT);
 
 	copy_modules_to_kernel(IRX_ADDR);
 
