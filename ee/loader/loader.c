@@ -77,23 +77,32 @@ static const char *g_modules[] = {
 };
 
 /* Statically linked ELF files */
-extern u8 _elfldr_elf_start[];
+extern u8  _elfldr_elf_start[];
+extern u8  _elfldr_elf_end[];
+extern int _elfldr_elf_size;
 
 /* Statically linked ERL files */
-extern u8 _engine_erl_start[];
-extern u8 _engine_erl_end[];
-extern u8 _libkernel_erl_start[];
-extern u8 _libkernel_erl_end[];
-extern u8 _libc_erl_start[];
-extern u8 _libc_erl_end[];
-extern u8 _libdebug_erl_start[];
-extern u8 _libdebug_erl_end[];
-extern u8 _libpatches_erl_start[];
-extern u8 _libpatches_erl_end[];
-extern u8 _debugger_erl_start[];
-extern u8 _debugger_erl_end[];
-extern u8 _elfldr_erl_start[];
-extern u8 _elfldr_erl_end[];
+extern u8  _engine_erl_start[];
+extern u8  _engine_erl_end[];
+extern int _engine_erl_size;
+extern u8  _libkernel_erl_start[];
+extern u8  _libkernel_erl_end[];
+extern int _libkernel_erl_size;
+extern u8  _libc_erl_start[];
+extern u8  _libc_erl_end[];
+extern int _libc_erl_size;
+extern u8  _libdebug_erl_start[];
+extern u8  _libdebug_erl_end[];
+extern int _libdebug_erl_size;
+extern u8  _libpatches_erl_start[];
+extern u8  _libpatches_erl_end[];
+extern int _libpatches_erl_size;
+extern u8  _debugger_erl_start[];
+extern u8  _debugger_erl_end[];
+extern int _debugger_erl_size;
+extern u8  _elfldr_erl_start[];
+extern u8  _elfldr_erl_end[];
+extern int _elfldr_erl_size;
 
 
 typedef struct {
