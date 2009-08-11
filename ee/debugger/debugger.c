@@ -44,6 +44,14 @@ char *erl_dependancies[] = {
 };
 #endif
 
+/* debugger_rpc.c functions */
+extern int rpcNTPBinit(void);
+extern int rpcNTPBreset(void);
+extern int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size);
+extern int rpcNTPBsendData(u16 cmd, u8 *buf, int size);
+extern int rpcNTPBEndReply(void);
+extern int rpcNTPBSync(int mode, int *cmd, int *result);
+
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
 extern void OrigSifSetReg(u32 register_num, int register_value);
@@ -53,7 +61,9 @@ extern int __NR_OrigSifSetReg;
 static int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
 static int set_reg_hook = 0;
 static int debugger_ready = 0;
-static u8 g_buf[80*1024] __attribute__((aligned(64)));
+
+#define BUFSIZE 	80*1024
+static u8 g_buf[BUFSIZE] __attribute__((aligned(64)));
 
 /* RAM file table entry */
 typedef struct {
@@ -69,6 +79,34 @@ typedef struct {
 #define HASH_PS2IP	0x00776900
 #define HASH_PS2SMAP	0x0769a3f0
 #define HASH_DEBUGGER	0x0b9bdb62
+
+/* defines for communication with debugger module */
+#define NTPBCMD_PRINT_EEDUMP 		0x301
+#define NTPBCMD_PRINT_IOPDUMP		0x302
+#define NTPBCMD_PRINT_KERNELDUMP 	0x303
+#define NTPBCMD_PRINT_SCRATCHPADDUMP	0x304
+
+#define REMOTE_CMD_NONE			0x000
+#define REMOTE_CMD_DUMPEE		0x101
+#define REMOTE_CMD_DUMPIOP		0x102
+#define REMOTE_CMD_DUMPKERNEL		0x103
+#define REMOTE_CMD_DUMPSCRATCHPAD	0x104
+#define REMOTE_CMD_HALT			0x201
+#define REMOTE_CMD_RESUME		0x202
+#define REMOTE_CMD_ADDMEMPATCHES	0x501
+#define REMOTE_CMD_CLEARMEMPATCHES	0x502
+#define REMOTE_CMD_ADDRAWCODES		0x601
+#define REMOTE_CMD_CLEARRAWCODES	0x602
+
+#define PRINT_DUMP			0x300
+
+#define EE_DUMP				1
+#define IOP_DUMP			2
+#define KERNEL_DUMP			3
+#define SCRATCHPAD_DUMP			4
+
+/* to control Halted/Resumed game state */
+static int haltState = 0;
 
 /*
  * load_module_from_kernel - Load IOP module from kernel RAM.
@@ -113,12 +151,12 @@ static int post_reboot_hook(void)
 	int ret;
 
 	/* init services */
-//	GS_BGCOLOUR = 0xff0000;
+	GS_BGCOLOUR = 0xff0000;
 	SifInitRpc(0);
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-//	GS_BGCOLOUR = 0xffff00;
+	GS_BGCOLOUR = 0xffff00;
 
 	/* load our modules from kernel */
 	ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
@@ -141,11 +179,12 @@ static int post_reboot_hook(void)
 	SifLoadFileExit();	
 	SifExitRpc();
 
-//	GS_BGCOLOUR = 0x000000;
+	GS_BGCOLOUR = 0x000000;
 
 #ifdef DISABLE_AFTER_IOPRESET
 	_fini();
 #endif
+
 	return 1;
 }
 
@@ -172,8 +211,162 @@ void NewSifSetReg(u32 regnum, int regval)
 				;
 			/* load our modules */
 			post_reboot_hook();
+			debugger_ready = 1;
 		}
 	}
+}
+
+/*
+ * read_mem: this function reads memory
+ */
+static int read_mem(void *addr, int size, void *buf)
+{						
+	DIntr();
+	ee_kmode_enter();
+		
+	memcpy((void *)buf, (void *)addr, size);
+
+	ee_kmode_exit();	
+	EIntr();
+	
+	return 0;
+}
+
+/*
+ * send_dump: this function send a dump to the client
+ */
+static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
+{
+	int r, len, sndSize, dumpSize, dpos, rpos;	
+									
+	if (dump_type == IOP_DUMP) {
+		dump_start |= 0xbc000000;
+		dump_end   |= 0xbc000000;
+	}
+	
+	len = dump_end - dump_start;
+	
+	/* reducing dump size to fit in buffer */
+	if (len > BUFSIZE)
+		dumpSize = BUFSIZE;
+	else		
+		dumpSize = len;
+	
+	dpos = 0;	
+	while (dpos < len) {
+		
+		/* dump mem part */							
+		read_mem((void *)(dump_start + dpos), dumpSize, g_buf);
+			
+		/* reducing send size for rpc if needed */
+		if (dumpSize > 8192)
+			sndSize = 8192;
+		else		
+			sndSize = dumpSize;
+		
+		/* sending dump part datas */		
+		rpos = 0;
+		while (rpos < dumpSize) {
+			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize);
+			rpcNTPBSync(0, NULL, &r);										
+			rpos += sndSize;
+			if ((dumpSize - rpos) < 8192)
+				sndSize = dumpSize - rpos;				
+		}
+		
+		dpos += dumpSize;	
+		if ((len - dpos) < BUFSIZE)
+			dumpSize = len - dpos;				
+	}
+
+	/* send end of reply message */
+	rpcNTPBEndReply();
+	rpcNTPBSync(0, NULL, &r);										
+		
+	return len;
+}
+
+/*
+ * execRemoteCmd: this function retrieve a Request sent by the client and fill it
+ */
+static int execRemoteCmd(void)
+{
+	u16 remote_cmd;
+	int size;
+	int ret;
+	u8 cmd_buf[64]; 
+	
+	/* get the remote command by RPC */
+	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size);
+	rpcNTPBSync(0, NULL, &ret);
+		
+	if (remote_cmd != REMOTE_CMD_NONE) {
+		/* handle Dump requests */
+		if (remote_cmd == REMOTE_CMD_DUMPEE) {
+			sendDump(EE_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
+		}
+		else if (remote_cmd == REMOTE_CMD_DUMPIOP) {
+			sendDump(IOP_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
+		}
+		else if (remote_cmd == REMOTE_CMD_DUMPKERNEL) {
+			sendDump(KERNEL_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
+		}
+		else if (remote_cmd == REMOTE_CMD_DUMPSCRATCHPAD) {
+			sendDump(SCRATCHPAD_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
+		}
+		/* handle Halt request */
+		else if (remote_cmd == REMOTE_CMD_HALT) {
+			rpcNTPBEndReply();
+			rpcNTPBSync(0, NULL, &ret);													
+			if (!haltState) {
+				haltState = 1;
+				while (haltState)
+					execRemoteCmd();
+			}								
+		}
+		/* handle Resume request */
+		else if (remote_cmd == REMOTE_CMD_RESUME) {
+			rpcNTPBEndReply();
+			rpcNTPBSync(0, NULL, &ret);	
+			if (haltState) {			
+				haltState = 0; 
+			}			
+		}
+		/* handle raw mem patches adding */		
+		else if (remote_cmd == REMOTE_CMD_ADDMEMPATCHES) {
+			rpcNTPBEndReply();
+			rpcNTPBSync(0, NULL, &ret);	
+			/*
+			 * TODO ...
+			 */ 
+		}
+		/* handle raw mem patches clearing */
+		else if (remote_cmd == REMOTE_CMD_CLEARMEMPATCHES) {
+			rpcNTPBEndReply();
+			rpcNTPBSync(0, NULL, &ret);	
+			/*
+			 * TODO ...
+			 */ 
+		}
+		/* handle codes adding */
+		else if (remote_cmd == REMOTE_CMD_ADDRAWCODES) {
+			rpcNTPBEndReply();
+			rpcNTPBSync(0, NULL, &ret);	
+			/*
+			 * TODO ...
+			 */ 
+		}
+		/* handle codes clearing */
+		else if (remote_cmd == REMOTE_CMD_CLEARRAWCODES) {
+			rpcNTPBEndReply();
+			rpcNTPBSync(0, NULL, &ret);	
+			/*
+			 * TODO ...
+			 */ 			
+		}
+	}
+	
+	return 1;
 }
 
 /*
@@ -206,6 +399,9 @@ int _fini(void)
  */
 int debugger_loop(void)
 {
-	/* TODO: handle remote debugging here */
+	/* check/execute remote command */
+	if (debugger_ready)
+		execRemoteCmd();
+	
 	return 0;
 }

@@ -10,7 +10,7 @@ EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = debugger.o syscall_hooks.S
+EE_OBJS = debugger.o debugger_rpc.o syscall_hooks.S
 
 
 all: debugger.erl
