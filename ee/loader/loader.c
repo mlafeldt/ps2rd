@@ -590,10 +590,10 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to load IOP modules\n");
 		goto end;
 	}
-
+#if 0
 	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
 	netlog_init(NETLOG_IP, NETLOG_PORT);
-
+#endif
 	copy_modules_to_kernel(IRX_ADDR);
 
 	/* Install ERL files */
