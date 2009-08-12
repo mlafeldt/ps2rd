@@ -170,7 +170,7 @@ error:
  */
 void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 {	
-	strcpy(g_elfpath, filename);
+	strncpy(g_elfpath, filename, sizeof(g_elfpath) - 1);
 	g_argc = num_args;
 	g_argv = args;
 

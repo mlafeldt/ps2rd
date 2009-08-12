@@ -444,7 +444,7 @@ static int install_libs(const config_t *config)
 	if (install_erl(file, addr) < 0)
 		return -1;
 	addr += ALIGN(file->erl->fullsize, 64);
-
+#if 0
 	file = &_erl_files[ERL_FILE_LIBC];
 	if (install_erl(file, addr) < 0)
 		return -1;
@@ -458,7 +458,7 @@ static int install_libs(const config_t *config)
 	file = &_erl_files[ERL_FILE_LIBPATCHES];
 	if (install_erl(file, addr) < 0)
 		return -1;
-
+#endif
 	return 0;
 }
 
