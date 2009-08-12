@@ -59,7 +59,7 @@
 
 /* TODO: make those configurable */
 #define IRX_ADDR	0x80030000
-#define LIBKERNEL_ADDR	0x00090000
+#define LIBKERNEL_ADDR	0x000c0000
 #define ELFLDR_ADDR	0x000ff000
 
 #define NETLOG_IP	"192.168.0.2"
