@@ -132,7 +132,7 @@ int cdGetElf(char *elfname)
 }
 
 /* from loader.c */
-extern void (*MyLoadExecPS2)(const char *filename, s32 num_args, char **args);
+extern void (*MyLoadExecPS2)(const char *filename, s32 num_args, char *args[]);
 
 /**
  * cdRunElf - Run a PS2 game from CD/DVD.

@@ -30,6 +30,7 @@
 #include <iopheap.h>
 #include <fileio.h>
 #include <io_common.h>
+#include <syscallnr.h>
 
 char *erl_id = "elfldr";
 #if 0
@@ -163,18 +164,17 @@ static void loadElf(void)
 	FlushCache(2);
 
 	/* finally, run game ELF ... */
-	ExecPS2((void *)elf_header.entry, NULL, g_argc, g_argv);
+	ExecPS2((void*)elf_header.entry, NULL, g_argc, g_argv);
 error:
 	GS_BGCOLOUR = 0xffffff; /* white screen: error */
-	while (1)
-		;
+	SleepThread();
 }
 
 /*
  * LoadExecPS2 replacement function. The real one is evil...
  * This function is called by the main ELF to start the game.
  */
-void MyLoadExecPS2(const char *filename, int argc, char **argv)
+void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 {
 	char *p = g_argbuf;
 	int i;
@@ -202,3 +202,30 @@ void MyLoadExecPS2(const char *filename, int argc, char **argv)
 	 */ 
 	ExecPS2(loadElf, NULL, 0, NULL);
 }
+
+#if 0
+static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
+
+/*
+ * _init - Automatically invoked on ERL load.
+ */
+int _init(void)
+{
+	/* Hook syscall */
+	OldLoadExecPS2 = GetSyscall(__NR_LoadExecPS2);
+	SetSyscall(__NR_LoadExecPS2, MyLoadExecPS2);
+
+	return 0;
+}
+
+/*
+ * _fini - Automatically invoked on ERL unload.
+ */
+int _fini(void)
+{
+	/* Unhook syscalls */
+	SetSyscall(__NR_LoadExecPS2, OldLoadExecPS2);
+
+	return 0;
+}
+#endif
