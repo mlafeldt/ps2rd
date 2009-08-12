@@ -72,14 +72,14 @@ typedef struct {
 	u32	align;
 } elf_pheader_t;
 
-static char gbl_elfpath[1024];
-static int gbl_argc;
-static char **gbl_argv;
+static char g_elfpath[1024];
+static int g_argc;
+static char **g_argv = NULL;
 
 /*
- * Elf loader function
+ * ELF loader function
  */
-void loadElf(void)
+static void loadElf(void)
 {
 	int i, fd;	
 	elf_header_t elf_header;
@@ -87,7 +87,7 @@ void loadElf(void)
 	
 	SifInitRpc(0);	
 		
-	/* Clearing user mem, so better not to have anything valuable on stack */
+	/* wipe user memory */
 	for (i = 0x100000; i < 0x02000000; i += 64) {
 		asm (
 			"\tsq $0, 0(%0) \n"
@@ -98,48 +98,39 @@ void loadElf(void)
 		);
 	}
 
-	/* Reset IOP */
+	/* reset IOP */
 	SifResetIop();
 	SifInitRpc(0);
 
 	FlushCache(0);
 	FlushCache(2);
 
-	/* Reload modules */
+	/* reload modules */
 	SifLoadFileInit();
 	SifLoadModule("rom0:SIO2MAN", 0, 0);
 	SifLoadModule("rom0:MCMAN", 0, 0);
 	SifLoadModule("rom0:MCSERV", 0, 0);
 
-	/* We load the elf manually */
+	/* load the ELF manually */
 	fioInit();
-
- 	fd = open(gbl_elfpath, O_RDONLY);
+ 	fd = open(g_elfpath, O_RDONLY);
  	if (fd < 0) {
-	 	/* can't open file, exiting... */
-		goto error;
+		goto error; /* can't open file, exiting... */
  	}
 
-	if (!lseek(fd, 0, SEEK_END)) {
+	/* read ELF header */
+	if (read(fd, &elf_header, sizeof(elf_header)) != sizeof(elf_header)) {
 		close(fd);
-		/* Zero size ? something wrong ! */
-		goto error;
+		goto error; /* can't read header, exiting... */
 	}
 
-	/* Read the Elf Header */
-	lseek(fd, 0, SEEK_SET);
-	read(fd, &elf_header, sizeof(elf_header));
-
-	/* Check Elf Magic */
-	if ( (*(u32*)elf_header.ident) != ELF_MAGIC) {
+	/* check ELF magic */
+	if ((*(u32*)elf_header.ident) != ELF_MAGIC) {
 		close(fd);
-		/* not an elf file */
-		goto error;
+		goto error; /* not an ELF file, exiting... */
 	}
-	
-	/* Scan through the ELF's program headers and copy them into apropriate RAM
-	 * section, then padd with zeros if needed.
-	 */
+
+	/* copy loadable program segments to RAM */
 	for (i = 0; i < elf_header.phnum; i++) {
 		lseek(fd, elf_header.phoff+(i*sizeof(elf_pheader)), SEEK_SET);
 		read(fd, &elf_pheader, sizeof(elf_pheader));
@@ -148,14 +139,15 @@ void loadElf(void)
 
 		lseek(fd, elf_pheader.offset, SEEK_SET);
 		read(fd, elf_pheader.vaddr, elf_pheader.filesz);
-		
+
 		if (elf_pheader.memsz > elf_pheader.filesz)
 			memset(elf_pheader.vaddr + elf_pheader.filesz, 0,
 					elf_pheader.memsz - elf_pheader.filesz);
 	}
+
 	close(fd);
 
-	/* Exit services */
+	/* exit services */
 	fioExit();
 	SifLoadFileExit();
 	SifExitIopHeap();
@@ -164,27 +156,29 @@ void loadElf(void)
 	FlushCache(0);
 	FlushCache(2);
 
-	/* Execute... */
-	ExecPS2((void *)elf_header.entry, 0, gbl_argc, gbl_argv);
+	/* finally, run game ELF ... */
+	ExecPS2((void *)elf_header.entry, NULL, g_argc, g_argv);
 error:
-	GS_BGCOLOUR = 0xffffff; /* white screen: fatal error */
-	while (1){;}	 
+	GS_BGCOLOUR = 0xffffff; /* white screen: error */
+	while (1)
+		;
 }
 
 /*
- * LoadExecPS2 replacement function
+ * LoadExecPS2 replacement function. The real one is evil...
+ * This function is called by the main ELF to start the game.
  */
 void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 {	
-	/* copying vars to global ones */	
-	strcpy(gbl_elfpath, filename);
-	gbl_argc = num_args;
-	gbl_argv = args;
+	strcpy(g_elfpath, filename);
+	g_argc = num_args;
+	g_argv = args;
 
-	/* ExecPS2 the loadElf function, it has advantage to do useful stuff for us:
-	 * - Soft EE pheripheral reset
-	 * - Terminate/delete all threads & semaphores
-	 * - Setup the program's thread and execute the program
+	/*
+	 * ExecPS2() does the following for us:
+	 * - do a soft EE peripheral reset
+	 * - terminate all threads and delete all semaphores
+	 * - set up ELF loader thread and run it
 	 */ 
-	ExecPS2(loadElf, 0, 0, NULL);
+	ExecPS2(loadElf, NULL, 0, NULL);
 }
