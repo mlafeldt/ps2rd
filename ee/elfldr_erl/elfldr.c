@@ -39,7 +39,8 @@ char *erl_dependancies[] = {
 };
 #endif
 
-#define GS_BGCOLOUR *((volatile unsigned long int*)0x120000E0)
+#define GS_BGCOLOUR	*((vu32*)0x120000E0)
+
 #define ELF_MAGIC	0x464c457f
 #define ELF_PT_LOAD	1
 
@@ -71,21 +72,21 @@ typedef struct {
 	u32	align;
 } elf_pheader_t;
 
+static char gbl_elfpath[1024];
+static int gbl_argc;
+static char **gbl_argv;
+
 /*
  * Elf loader function
  */
-void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
+void loadElf(void)
 {
-	/* Ok it's a shortcut to the real LoadExecPS2 but at least it prevent 
-	 * user mem clear below 0x100000 (for this launch) and allow to swap disc 
-	 */
-	
-	int i, fd;
+	int i, fd;	
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;	
-
+	
 	SifInitRpc(0);	
-
+		
 	/* Clearing user mem, so better not to have anything valuable on stack */
 	for (i = 0x100000; i < 0x02000000; i += 64) {
 		asm (
@@ -95,7 +96,7 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 			"\tsq $0, 48(%0) \n"
 			:: "r" (i)
 		);
-	}	
+	}
 
 	/* Reset IOP */
 	SifResetIop();
@@ -103,7 +104,7 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 
 	FlushCache(0);
 	FlushCache(2);
-	
+
 	/* Reload modules */
 	SifLoadFileInit();
 	SifLoadModule("rom0:SIO2MAN", 0, 0);
@@ -112,7 +113,8 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 
 	/* We load the elf manually */
 	fioInit();
- 	fd = open(filename, O_RDONLY);
+
+ 	fd = open(gbl_elfpath, O_RDONLY);
  	if (fd < 0) {
 	 	/* can't open file, exiting... */
 		goto error;
@@ -134,7 +136,7 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 		/* not an elf file */
 		goto error;
 	}
-
+	
 	/* Scan through the ELF's program headers and copy them into apropriate RAM
 	 * section, then padd with zeros if needed.
 	 */
@@ -146,13 +148,14 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 
 		lseek(fd, elf_pheader.offset, SEEK_SET);
 		read(fd, elf_pheader.vaddr, elf_pheader.filesz);
-
+		
 		if (elf_pheader.memsz > elf_pheader.filesz)
 			memset(elf_pheader.vaddr + elf_pheader.filesz, 0,
 					elf_pheader.memsz - elf_pheader.filesz);
 	}
 	close(fd);
 
+	/* Exit services */
 	fioExit();
 	SifLoadFileExit();
 	SifExitIopHeap();
@@ -162,8 +165,26 @@ void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
 	FlushCache(2);
 
 	/* Execute... */
-	ExecPS2((void *)elf_header.entry, 0, num_args, args);
+	ExecPS2((void *)elf_header.entry, 0, gbl_argc, gbl_argv);
 error:
 	GS_BGCOLOUR = 0xffffff; /* white screen: fatal error */
-	while (1){;}
+	while (1){;}	 
+}
+
+/*
+ * LoadExecPS2 replacement function
+ */
+void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
+{	
+	/* copying vars to global ones */	
+	strcpy(gbl_elfpath, filename);
+	gbl_argc = num_args;
+	gbl_argv = args;
+
+	/* ExecPS2 the loadElf function, it has advantage to do useful stuff for us:
+	 * - Soft EE pheripheral reset
+	 * - Terminate/delete all threads & semaphores
+	 * - Setup the program's thread and execute the program
+	 */ 
+	ExecPS2(loadElf, 0, 0, NULL);
 }
