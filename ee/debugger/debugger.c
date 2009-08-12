@@ -62,6 +62,12 @@ static int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
 static int set_reg_hook = 0;
 static int debugger_ready = 0;
 
+/* libkernel reboot counter */
+extern int _iop_reboot_count;
+
+/* internal reboot counter */
+static int iop_reboot_count = 0;
+
 #define BUFSIZE 	80*1024
 static u8 g_buf[BUFSIZE] __attribute__((aligned(64)));
 
@@ -177,7 +183,13 @@ static int post_reboot_hook(void)
 	ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
 	if (ret < 0)
 		while (1) ;
-
+		
+	GS_BGCOLOUR = 0xff00ff;
+		
+	/* Binding debugger module RPC server */
+	rpcNTPBreset();	
+	rpcNTPBinit();		
+		
 	GS_BGCOLOUR = 0x0000ff;
 
 	/* deinit services */
@@ -205,6 +217,9 @@ void NewSifSetReg(u32 regnum, int regval)
 	/* catch IOP reboot */
 	if (regnum == SIF_REG_SMFLAG && regval == 0x10000) {
 		debugger_ready = 0;
+		/* by setting set_reg_hook to 4 here, it will reach 0
+		 * at the last sceSifSetReg call in sceSifResetIop
+		 */  
 		set_reg_hook = 4;
 	}
 
@@ -212,12 +227,17 @@ void NewSifSetReg(u32 regnum, int regval)
 		set_reg_hook--;
 		/* check if reboot is done */
 		if (!set_reg_hook && regnum == 0x80000000 && !regval) {
-			/* IOP sync */
-			while (!(SifGetReg(SIF_REG_SMFLAG) & 0x40000))
-				;
-			/* load our modules */
-			post_reboot_hook();
-			debugger_ready = 1;
+			/* we filter the 1st IOP reboot done by LoadExecPS2 or its replacement function */
+			if (iop_reboot_count) { 
+				/* IOP sync, needed since at this point it haven't yet been done by the game */
+				while (!(SifGetReg(SIF_REG_SMFLAG) & 0x40000))
+					;
+				/* load our modules */
+				post_reboot_hook();
+				debugger_ready = 1;
+			}
+			iop_reboot_count++;
+			_iop_reboot_count++;			
 		}
 	}
 }
