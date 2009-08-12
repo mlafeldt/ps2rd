@@ -463,7 +463,7 @@ static int install_libs(const config_t *config)
 }
 
 /* LoadExecPS2() replacement function from ELF loader */
-void (*MyLoadExecPS2)(const char *filename, s32 num_args, char **args) = NULL;
+void (*MyLoadExecPS2)(const char *filename, int argc, char **args) = NULL;
 
 /*
  * Install built-in ELF loader.

@@ -41,6 +41,10 @@ char *erl_dependancies[] = {
 
 #define GS_BGCOLOUR	*((vu32*)0x120000E0)
 
+/* do not link to strcpy() from libc! */
+#define __strcpy(dest, src) \
+	strncpy(dest, src, strlen(src))
+
 #define ELF_MAGIC	0x464c457f
 #define ELF_PT_LOAD	1
 
@@ -72,9 +76,11 @@ typedef struct {
 	u32	align;
 } elf_pheader_t;
 
-static char g_elfpath[1024];
+#define MAX_ARGS 15
+
 static int g_argc;
-static char **g_argv = NULL;
+static char *g_argv[1 + MAX_ARGS];
+static char g_argbuf[1024];
 
 /*
  * ELF loader function
@@ -113,7 +119,7 @@ static void loadElf(void)
 
 	/* load the ELF manually */
 	fioInit();
- 	fd = open(g_elfpath, O_RDONLY);
+ 	fd = open(g_argv[0], O_RDONLY);
  	if (fd < 0) {
 		goto error; /* can't open file, exiting... */
  	}
@@ -168,11 +174,25 @@ error:
  * LoadExecPS2 replacement function. The real one is evil...
  * This function is called by the main ELF to start the game.
  */
-void MyLoadExecPS2(const char *filename, s32 num_args, char **args)
-{	
-	strncpy(g_elfpath, filename, sizeof(g_elfpath) - 1);
-	g_argc = num_args;
-	g_argv = args;
+void MyLoadExecPS2(const char *filename, int argc, char **argv)
+{
+	char *p = g_argbuf;
+	int i;
+
+	/* copy args from main ELF */
+	g_argc = argc > MAX_ARGS ? MAX_ARGS : argc;
+
+	memset(g_argbuf, 0, sizeof(g_argbuf));
+
+	__strcpy(p, filename);
+	g_argv[0] = p;
+	p += strlen(filename) + 1;
+
+	for (i = 0; i < g_argc; i++) {
+		__strcpy(p, argv[i]);
+		g_argv[i + 1] = p;
+		p += strlen(argv[i] + 1);
+	}
 
 	/*
 	 * ExecPS2() does the following for us:
