@@ -175,7 +175,7 @@ static int post_reboot_hook(void)
 	ret = load_module_from_kernel(HASH_PS2SMAP, 0, NULL);
 	if (ret < 0)
 		while (1) ;
-#if 1
+#if 0
 	ret = load_module_from_kernel(HASH_NETLOG, 0, NULL);
 	if (ret < 0)
 		while (1) ;
