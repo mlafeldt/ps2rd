@@ -35,20 +35,24 @@ typedef struct {
 enum {
 //	ERL_FILE_ENGINE = 0,
 	ERL_FILE_LIBKERNEL,
+#ifdef _DEBUG
 	ERL_FILE_LIBC,
 	ERL_FILE_LIBDEBUG,
 	ERL_FILE_LIBPATCHES,
+#endif
 	ERL_FILE_DEBUGGER,
 	ERL_FILE_ELFLDR,
 
-	ERL_FILE_NUM /* tricky */
+	ERL_FILE_NUM /* number of files */
 };
 
 /* Statically linked ERL files */
 extern u8  _libkernel_erl_start[];
+#ifdef _DEBUG
 extern u8  _libc_erl_start[];
 extern u8  _libdebug_erl_start[];
 extern u8  _libpatches_erl_start[];
+#endif
 extern u8  _debugger_erl_start[];
 extern u8  _elfldr_erl_start[];
 
@@ -63,6 +67,7 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 		.name = "libkernel",
 		.start = _libkernel_erl_start,
 	},
+#ifdef _DEBUG
 	{
 		.name = "libc",
 		.start = _libc_erl_start,
@@ -75,6 +80,7 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 		.name = "libpatches",
 		.start = _libpatches_erl_start,
 	},
+#endif
 	{
 		.name = "debugger",
 		.start = _debugger_erl_start,
@@ -103,6 +109,8 @@ static int __install_erl(erl_file_t *file, u32 addr)
 	return 0;
 }
 
+#define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
+
 int erl_install_libs(const config_t *config)
 {
 	erl_file_t *file;
@@ -111,7 +119,7 @@ int erl_install_libs(const config_t *config)
 	file = &_erl_files[ERL_FILE_LIBKERNEL];
 	if (__install_erl(file, addr) < 0)
 		return -1;
-#if 0
+#ifdef _DEBUG
 	addr += ALIGN(file->erl->fullsize, 64);
 	file = &_erl_files[ERL_FILE_LIBC];
 	if (__install_erl(file, addr) < 0)

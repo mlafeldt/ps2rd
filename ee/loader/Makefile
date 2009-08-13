@@ -4,15 +4,27 @@
 # Copyright (C) 2009 misfire <misfire@xploderfreax.de>
 ##
 
+DEBUG = 0
+
+ifeq ($(DEBUG),1)
+EE_CFLAGS += -D_DEBUG -g
+EE_LDFLAGS += -g
+else
+EE_LDFLAGS += -s
+endif
+
 EE_INCS += -I$(PS2SDK)/ports/include
-EE_CFLAGS += -D_DEBUG #-D_NO_HOOK -D_NO_SBV -D_NO_IOPRESET
-EE_LDFLAGS += -L$(PS2SDK)/ports/lib -s
+EE_CFLAGS += #-D_NO_HOOK -D_NO_SBV -D_NO_IOPRESET
+EE_LDFLAGS += -L$(PS2SDK)/ports/lib
 EE_ASFLAGS +=
 
 EE_BIN = artemis.elf
 
-ERL_FILES = engine_erl.o libkernel_erl.o libc_erl.o libdebug_erl.o \
-	libpatches_erl.o debugger_erl.o elfldr_erl.o
+ERL_FILES = engine_erl.o libkernel_erl.o debugger_erl.o elfldr_erl.o
+ifeq ($(DEBUG),1)
+ERL_FILES += libc_erl.o libdebug_erl.o libpatches_erl.o
+endif
+
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o debugger_irx.o netlog_irx.o
 LDR_FILES = loader.o configman.o erlman.o engineman.o mycdvd.o mypad.o \
 	mystring.o myutil.o netlog_rpc.o
