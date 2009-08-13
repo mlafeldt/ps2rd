@@ -432,7 +432,7 @@ static int execRemoteCmd(void)
 int _init(void)
 {
 	/* Set debugger defaults specs */
-	g_debugger_specs.automatic_hook = AUTOMATIC_HOOK_ON;
+	g_debugger_specs.automatic_hook = AUTOMATIC_HOOK_OFF;
 	g_debugger_specs.rpc_mode = RPC_M_NOWAIT;	
 	
 	/* Hook syscalls */
