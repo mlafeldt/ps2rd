@@ -95,7 +95,7 @@ static void loadElf(void)
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;	
 
-	SifInitRpc(0);	
+	ResetEE(0x7f);
 
 	/* wipe user memory */
 	for (i = 0x00100000; i < 0x02000000; i += 64) {
@@ -112,6 +112,7 @@ static void loadElf(void)
 	memset((void*)0x70000000, 0, 16 * 1024);
 
 	/* reset IOP */
+	SifInitRpc(0);
 	SifResetIop();
 	SifInitRpc(0);
 
