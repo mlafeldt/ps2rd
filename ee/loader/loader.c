@@ -337,6 +337,93 @@ static int install_engine(const config_t *config, engine_t *engine)
 }
 
 /*
+ * Install built-in ERL libraries.
+ */
+static int install_libs(const config_t *config)
+{
+	erl_file_t *file;
+	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
+
+	file = &_erl_files[ERL_FILE_LIBKERNEL];
+	if (install_erl(file, addr) < 0)
+		return -1;
+#if 0
+	addr += ALIGN(file->erl->fullsize, 64);
+	file = &_erl_files[ERL_FILE_LIBC];
+	if (install_erl(file, addr) < 0)
+		return -1;
+
+	addr += ALIGN(file->erl->fullsize, 64);
+	file = &_erl_files[ERL_FILE_LIBDEBUG];
+	if (install_erl(file, addr) < 0)
+		return -1;
+
+	addr += ALIGN(file->erl->fullsize, 64);
+	file = &_erl_files[ERL_FILE_LIBPATCHES];
+	if (install_erl(file, addr) < 0)
+		return -1;
+#endif
+	return 0;
+}
+
+/* LoadExecPS2() replacement function from ELF loader */
+void (*MyLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
+
+/*
+ * Install built-in elfldr.erl.
+ */
+static int install_elfldr(const config_t *config)
+{
+	erl_file_t *file = &_erl_files[ERL_FILE_ELFLDR];
+	struct symbol_t *sym;
+	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
+
+	if (install_erl(file, addr) < 0)
+		return -1;
+
+	sym = erl_find_local_symbol("MyLoadExecPS2", file->erl);
+	if (sym == NULL) {
+		D_PRINTF("%s: could not find symbol MyLoadExecPS2\n",
+			__FUNCTION__);
+		return -2;
+	}
+
+	MyLoadExecPS2 = (void*)sym->address;
+
+	return 0;
+}
+
+/*
+ * Install built-in debugger.erl.
+ */
+static int install_debugger(const config_t *config, engine_t *engine)
+{
+	erl_file_t *file = &_erl_files[ERL_FILE_DEBUGGER];
+	struct symbol_t *sym;
+	u32 addr;
+
+	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
+		return 0;
+
+	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+
+	if (install_erl(file, addr) < 0)
+		return -1;
+
+	sym = erl_find_local_symbol("debugger_loop", file->erl);
+	if (sym == NULL) {
+		D_PRINTF("%s: could not find symbol debugger_loop\n",
+			__FUNCTION__);
+		return -2;
+	}
+
+	/* add debugger_loop() callback to engine */
+	engine->callbacks[0] = (u32)sym->address;
+
+	return 0;
+}
+
+/*
  * Load cheats from text file.
  */
 static int load_cheats(const config_t *config, cheats_t *cheats)
@@ -428,121 +515,6 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 				engine_add_code(engine, code->addr, code->val);
 		}
 	}
-
-	return 0;
-}
-
-/*
- * Install built-in ERL libraries.
- */
-static int install_libs(const config_t *config)
-{
-	erl_file_t *file;
-	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
-
-	file = &_erl_files[ERL_FILE_LIBKERNEL];
-	if (install_erl(file, addr) < 0)
-		return -1;
-	addr += ALIGN(file->erl->fullsize, 64);
-#if 0
-	file = &_erl_files[ERL_FILE_LIBC];
-	if (install_erl(file, addr) < 0)
-		return -1;
-	addr += ALIGN(file->erl->fullsize, 64);
-
-	file = &_erl_files[ERL_FILE_LIBDEBUG];
-	if (install_erl(file, addr) < 0)
-		return -1;
-	addr += ALIGN(file->erl->fullsize, 64);
-
-	file = &_erl_files[ERL_FILE_LIBPATCHES];
-	if (install_erl(file, addr) < 0)
-		return -1;
-#endif
-	return 0;
-}
-
-/* LoadExecPS2() replacement function from ELF loader */
-void (*MyLoadExecPS2)(const char *filename, int argc, char **args) = NULL;
-
-/*
- * Install built-in ELF loader.
- */
-static int install_elfldr(const config_t *config)
-{
-	struct erl_record_t *erl;
-	struct symbol_t *sym;
-	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
-
-	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
-
-	erl = load_erl_from_mem_to_addr(_elfldr_erl_start, addr, 0, NULL);
-	if (erl == NULL) {
-		D_PRINTF("%s: elfldr.erl load error\n", __FUNCTION__);
-		return -1;
-	}
-
-	FlushCache(0);
-
-	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, erl->fullsize,
-		addr + erl->fullsize);
-
-	sym = erl_find_local_symbol("MyLoadExecPS2", erl);
-	if (sym == NULL) {
-		D_PRINTF("%s: could not find symbol MyLoadExecPS2\n",
-			__FUNCTION__);
-		return -2;
-	}
-
-	MyLoadExecPS2 = (void*)sym->address;
-
-	D_PRINTF("%s: install completed.\n", __FUNCTION__);
-
-	return 0;
-}
-
-/*
- * Install external or built-in debugger.
- */
-static int install_debugger(const config_t *config, engine_t *engine)
-{
-	struct erl_record_t *erl;
-	struct symbol_t *sym;
-	u32 addr;
-	const char *p;
-
-	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
-		return 0;
-
-	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
-
-	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
-
-	if ((p = config_get_string(config, SET_DEBUGGER_FILE)) != NULL)
-		erl = load_erl_from_file_to_addr(__pathname(p), addr, 0, NULL);
-	else
-		erl = load_erl_from_mem_to_addr(_debugger_erl_start, addr, 0, NULL);
-	if (erl == NULL) {
-		D_PRINTF("%s: ERL load error\n", __FUNCTION__);
-		return -1;
-	}
-
-	FlushCache(0);
-
-	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, erl->fullsize,
-		addr + erl->fullsize);
-
-	sym = erl_find_local_symbol("debugger_loop", erl);
-	if (sym == NULL) {
-		D_PRINTF("%s: could not find symbol debugger_loop\n",
-			__FUNCTION__);
-		return -2;
-	}
-
-	/* add debugger_loop() callback to engine */
-	engine->callbacks[0] = (u32)sym->address;
-
-	D_PRINTF("%s: install completed.\n", __FUNCTION__);
 
 	return 0;
 }
