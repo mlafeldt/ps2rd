@@ -26,6 +26,25 @@
 #include "configman.h"
 #include "erlman.h"
 
+typedef struct {
+	char name[20];
+	u8 *start;
+	u8 *end;
+	struct erl_record_t *erl;
+} erl_file_t;
+
+enum {
+//	ERL_FILE_ENGINE = 0,
+	ERL_FILE_LIBKERNEL,
+	ERL_FILE_LIBC,
+	ERL_FILE_LIBDEBUG,
+	ERL_FILE_LIBPATCHES,
+	ERL_FILE_DEBUGGER,
+	ERL_FILE_ELFLDR,
+
+	ERL_FILE_NUM /* tricky */
+};
+
 /* Statically linked ERL files */
 extern u8  _libkernel_erl_start[];
 extern u8  _libkernel_erl_end[];
