@@ -83,6 +83,9 @@ static int g_argc;
 static char *g_argv[1 + MAX_ARGS];
 static char g_argbuf[1024];
 
+static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
+extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
+
 /*
  * ELF loader function
  */
@@ -91,12 +94,12 @@ static void loadElf(void)
 	int i, fd;	
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;	
-	
+
 	SifInitRpc(0);	
-		
+
 	/* wipe user memory */
-	for (i = 0x100000; i < 0x02000000; i += 64) {
-		asm (
+	for (i = 0x00100000; i < 0x02000000; i += 64) {
+		__asm__ (
 			"\tsq $0, 0(%0) \n"
 			"\tsq $0, 16(%0) \n"
 			"\tsq $0, 32(%0) \n"
@@ -104,6 +107,9 @@ static void loadElf(void)
 			:: "r" (i)
 		);
 	}
+
+	/* clear scratchpad memory */
+	memset((void*)0x70000000, 0, 16 * 1024);
 
 	/* reset IOP */
 	SifResetIop();
@@ -141,6 +147,7 @@ static void loadElf(void)
 	for (i = 0; i < elf_header.phnum; i++) {
 		lseek(fd, elf_header.phoff+(i*sizeof(elf_pheader)), SEEK_SET);
 		read(fd, &elf_pheader, sizeof(elf_pheader));
+
 		if (elf_pheader.type != ELF_PT_LOAD)
 			continue;
 
@@ -203,9 +210,6 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	 */ 
 	ExecPS2(loadElf, NULL, 0, NULL);
 }
-
-static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
-extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
 
 /*
  * _init - Automatically invoked on ERL load.
