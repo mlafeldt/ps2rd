@@ -4,6 +4,10 @@
 # Copyright (C) 2009 misfire <misfire@xploderfreax.de>
 ##
 
+ifeq ($(DEBUG),1)
+EE_CFLAGS += -D_DEBUG
+endif
+
 EE_INCS +=
 EE_CFLAGS +=
 EE_CXXFLAGS +=
