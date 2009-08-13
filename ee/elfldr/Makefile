@@ -8,7 +8,7 @@ EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = elfldr.o
+EE_OBJS = elfldr.o syscall_hooks.S
 
 
 all: elfldr.erl

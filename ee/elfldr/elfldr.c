@@ -205,6 +205,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 
 #if 0
 static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
+extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
 
 /*
  * _init - Automatically invoked on ERL load.
@@ -213,7 +214,7 @@ int _init(void)
 {
 	/* Hook syscall */
 	OldLoadExecPS2 = GetSyscall(__NR_LoadExecPS2);
-	SetSyscall(__NR_LoadExecPS2, MyLoadExecPS2);
+	SetSyscall(__NR_LoadExecPS2, HookLoadExecPS2);
 
 	return 0;
 }
