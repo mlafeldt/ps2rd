@@ -14,8 +14,8 @@ EE_BIN = artemis.elf
 ERL_FILES = engine_erl.o libkernel_erl.o libc_erl.o libdebug_erl.o \
 	libpatches_erl.o debugger_erl.o elfldr_erl.o
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o debugger_irx.o netlog_irx.o
-LDR_FILES = loader.o configman.o engineman.o mycdvd.o mypad.o mystring.o \
-	myutil.o netlog_rpc.o
+LDR_FILES = loader.o configman.o erlman.o engineman.o mycdvd.o mypad.o \
+	mystring.o myutil.o netlog_rpc.o
 
 EE_OBJS = $(LDR_FILES) $(ERL_FILES) $(IRX_FILES)
 

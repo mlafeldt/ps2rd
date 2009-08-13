@@ -33,6 +33,7 @@
 #include "configman.h"
 #include "dbgprintf.h"
 #include "engineman.h"
+#include "erlman.h"
 #include "mycdvd.h"
 #include "mypad.h"
 #include "mystring.h"
@@ -59,8 +60,6 @@
 
 /* TODO: make those configurable */
 #define IRX_ADDR	0x80030000
-#define LIBKERNEL_ADDR	0x000c0000
-#define ELFLDR_ADDR	0x000ff000
 
 #define NETLOG_IP	"192.168.0.2"
 #define NETLOG_PORT	7411
@@ -79,109 +78,6 @@ static const char *g_modules[] = {
 	"rom0:PADMAN",
 	NULL
 };
-
-/* Statically linked ERL files */
-extern u8  _engine_erl_start[];
-extern u8  _engine_erl_end[];
-extern int _engine_erl_size;
-extern u8  _libkernel_erl_start[];
-extern u8  _libkernel_erl_end[];
-extern int _libkernel_erl_size;
-extern u8  _libc_erl_start[];
-extern u8  _libc_erl_end[];
-extern int _libc_erl_size;
-extern u8  _libdebug_erl_start[];
-extern u8  _libdebug_erl_end[];
-extern int _libdebug_erl_size;
-extern u8  _libpatches_erl_start[];
-extern u8  _libpatches_erl_end[];
-extern int _libpatches_erl_size;
-extern u8  _debugger_erl_start[];
-extern u8  _debugger_erl_end[];
-extern int _debugger_erl_size;
-extern u8  _elfldr_erl_start[];
-extern u8  _elfldr_erl_end[];
-extern int _elfldr_erl_size;
-
-
-typedef struct {
-	char name[20];
-	u8 *start;
-	u8 *end;
-	struct erl_record_t *erl;
-} erl_file_t;
-
-enum {
-	ERL_FILE_ENGINE = 0,
-	ERL_FILE_LIBKERNEL,
-	ERL_FILE_LIBC,
-	ERL_FILE_LIBDEBUG,
-	ERL_FILE_LIBPATCHES,
-	ERL_FILE_DEBUGGER,
-	ERL_FILE_ELFLDR,
-
-	ERL_FILE_NUM /* tricky */
-};
-
-static erl_file_t _erl_files[ERL_FILE_NUM] = {
-	{
-		.name = "engine",
-		.start = _engine_erl_start,
-		.end = _engine_erl_end,
-	},
-	{
-		.name = "libkernel",
-		.start = _libkernel_erl_start,
-		.end = _libkernel_erl_end,
-	},
-	{
-		.name = "libc",
-		.start = _libc_erl_start,
-		.end = _libc_erl_end,
-	},
-	{
-		.name = "libdebug",
-		.start = _libdebug_erl_start,
-		.end = _libdebug_erl_end,
-	},
-	{
-		.name = "libpatches",
-		.start = _libpatches_erl_start,
-		.end = _libpatches_erl_end,
-	},
-	{
-		.name = "debugger",
-		.start = _debugger_erl_start,
-		.end = _debugger_erl_end,
-	},
-	{
-		.name = "elfldr",
-		.start = _elfldr_erl_start,
-		.end = _elfldr_erl_end,
-	}
-};
-
-static int install_erl(erl_file_t *file, u32 addr)
-{
-	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, file->name, addr);
-
-	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
-	if (file->erl == NULL) {
-		D_PRINTF("%s: %s load error\n", __FUNCTION__, file->name);
-		return -1;
-	}
-
-	FlushCache(0);
-
-	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, file->erl->fullsize,
-		addr + file->erl->fullsize);
-
-	D_PRINTF("%s: install completed.\n", __FUNCTION__);
-
-	return 0;
-}
-
-
 
 /* Statically linked IRX files */
 extern u8  _ps2dev9_irx_start[];
@@ -317,6 +213,10 @@ static char *__pathname(const char *name)
 	return filename;
 }
 
+extern u8  _engine_erl_start[];
+extern u8  _engine_erl_end[];
+extern int _engine_erl_size;
+
 /*
  * Install external or built-in engine.
  */
@@ -334,93 +234,6 @@ static int install_engine(const config_t *config, engine_t *engine)
 		return engine_install_from_file(__pathname(p), addr, engine);
 	else
 		return engine_install_from_mem(_engine_erl_start, addr, engine);
-}
-
-/*
- * Install built-in ERL libraries.
- */
-static int install_libs(const config_t *config)
-{
-	erl_file_t *file;
-	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
-
-	file = &_erl_files[ERL_FILE_LIBKERNEL];
-	if (install_erl(file, addr) < 0)
-		return -1;
-#if 0
-	addr += ALIGN(file->erl->fullsize, 64);
-	file = &_erl_files[ERL_FILE_LIBC];
-	if (install_erl(file, addr) < 0)
-		return -1;
-
-	addr += ALIGN(file->erl->fullsize, 64);
-	file = &_erl_files[ERL_FILE_LIBDEBUG];
-	if (install_erl(file, addr) < 0)
-		return -1;
-
-	addr += ALIGN(file->erl->fullsize, 64);
-	file = &_erl_files[ERL_FILE_LIBPATCHES];
-	if (install_erl(file, addr) < 0)
-		return -1;
-#endif
-	return 0;
-}
-
-/* LoadExecPS2() replacement function from ELF loader */
-void (*MyLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
-
-/*
- * Install built-in elfldr.erl.
- */
-static int install_elfldr(const config_t *config)
-{
-	erl_file_t *file = &_erl_files[ERL_FILE_ELFLDR];
-	struct symbol_t *sym;
-	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
-
-	if (install_erl(file, addr) < 0)
-		return -1;
-
-	sym = erl_find_local_symbol("MyLoadExecPS2", file->erl);
-	if (sym == NULL) {
-		D_PRINTF("%s: could not find symbol MyLoadExecPS2\n",
-			__FUNCTION__);
-		return -2;
-	}
-
-	MyLoadExecPS2 = (void*)sym->address;
-
-	return 0;
-}
-
-/*
- * Install built-in debugger.erl.
- */
-static int install_debugger(const config_t *config, engine_t *engine)
-{
-	erl_file_t *file = &_erl_files[ERL_FILE_DEBUGGER];
-	struct symbol_t *sym;
-	u32 addr;
-
-	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
-		return 0;
-
-	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
-
-	if (install_erl(file, addr) < 0)
-		return -1;
-
-	sym = erl_find_local_symbol("debugger_loop", file->erl);
-	if (sym == NULL) {
-		D_PRINTF("%s: could not find symbol debugger_loop\n",
-			__FUNCTION__);
-		return -2;
-	}
-
-	/* add debugger_loop() callback to engine */
-	engine->callbacks[0] = (u32)sym->address;
-
-	return 0;
 }
 
 /*
