@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
 		D_PRINTF("config: %s\n", config_error_text(&config));
 	config_print(&config);
 
-	if (config_get_bool(&config, SET_IOP_RESET))
+	if (g_bootdev != BOOT_HOST && config_get_bool(&config, SET_IOP_RESET))
 		reset_iop("rom0:UDNL rom0:EELOADCNF");
 
 	if (config_get_bool(&config, SET_SBV_PATCHES)) {
