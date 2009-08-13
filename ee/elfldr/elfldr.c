@@ -187,6 +187,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	__strcpy(p, filename);
 	g_argv[0] = p;
 	p += strlen(filename) + 1;
+	g_argc++;
 
 	for (i = 0; i < g_argc; i++) {
 		__strcpy(p, argv[i]);
@@ -203,7 +204,6 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	ExecPS2(loadElf, NULL, 0, NULL);
 }
 
-#if 0
 static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
 extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
 
@@ -229,4 +229,3 @@ int _fini(void)
 
 	return 0;
 }
-#endif

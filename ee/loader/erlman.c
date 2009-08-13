@@ -138,26 +138,13 @@ int erl_install_libs(const config_t *config)
 	return 0;
 }
 
-/* LoadExecPS2() replacement function from ELF loader */
-void (*MyLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
-
 int erl_install_elfldr(const config_t *config)
 {
 	erl_file_t *file = &_erl_files[ERL_FILE_ELFLDR];
-	struct symbol_t *sym;
 	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
 
 	if (__install_erl(file, addr) < 0)
 		return -1;
-
-	sym = erl_find_local_symbol("MyLoadExecPS2", file->erl);
-	if (sym == NULL) {
-		D_PRINTF("%s: could not find symbol MyLoadExecPS2\n",
-			__FUNCTION__);
-		return -2;
-	}
-
-	MyLoadExecPS2 = (void*)sym->address;
 
 	return 0;
 }
