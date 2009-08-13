@@ -4,7 +4,7 @@
 # Copyright (C) 2009 misfire <misfire@xploderfreax.de>
 ##
 
-DEBUG = 0
+DEBUG = 1
 
 ifeq ($(DEBUG),1)
 EE_CFLAGS += -D_DEBUG -g
