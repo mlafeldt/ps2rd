@@ -189,10 +189,10 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	p += strlen(filename) + 1;
 	g_argc++;
 
-	for (i = 0; i < g_argc; i++) {
+	for (i = 0; i < argc; i++) {
 		__strcpy(p, argv[i]);
 		g_argv[i + 1] = p;
-		p += strlen(argv[i] + 1);
+		p += strlen(argv[i]);
 	}
 
 	/*
