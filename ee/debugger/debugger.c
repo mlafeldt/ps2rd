@@ -44,12 +44,15 @@ char *erl_dependancies[] = {
 };
 #endif
 
+/* padread_hooks.c function */
+extern int patch_padRead(void);
+
 /* debugger_rpc.c functions */
 extern int rpcNTPBinit(void);
 extern int rpcNTPBreset(void);
-extern int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size);
-extern int rpcNTPBsendData(u16 cmd, u8 *buf, int size);
-extern int rpcNTPBEndReply(void);
+extern int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode);
+extern int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode);
+extern int rpcNTPBEndReply(int rpc_mode);
 extern int rpcNTPBSync(int mode, int *cmd, int *result);
 
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
@@ -110,10 +113,34 @@ typedef struct {
 #define EE_DUMP				1
 #define IOP_DUMP			2
 #define KERNEL_DUMP			3
-#define SCRATCHPAD_DUMP			4
+#define SCRATCHPAD_DUMP		4
 
 /* to control Halted/Resumed game state */
 static int haltState = 0;
+
+/* to control automatic hooking */
+#define AUTOMATIC_HOOK_OFF 		0
+#define AUTOMATIC_HOOK_ON 		1
+
+/* to control debugger RPC mode */
+#define RPC_M_NORMAL			0
+#define RPC_M_NOWAIT			1
+
+typedef struct {
+	int automatic_hook;
+	int rpc_mode;
+} DebuggerSpecs_t;
+
+static DebuggerSpecs_t g_debugger_specs; 
+
+/*
+ * set_debugger_specs - allow to control debugger specs
+ */
+void set_debugger_specs(DebuggerSpecs_t *debugger_specs)
+{
+	g_debugger_specs.automatic_hook = debugger_specs->automatic_hook;
+	g_debugger_specs.rpc_mode = debugger_specs->rpc_mode;	
+}
 
 /*
  * load_module_from_kernel - Load IOP module from kernel RAM.
@@ -197,6 +224,10 @@ static int post_reboot_hook(void)
 	SifLoadFileExit();	
 	SifExitRpc();
 
+	/* automatic padRead hooking is done if needed */
+	if (g_debugger_specs.automatic_hook)
+		patch_padRead();
+	
 	GS_BGCOLOUR = 0x000000;
 
 #ifdef DISABLE_AFTER_IOPRESET
@@ -293,7 +324,7 @@ static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
 		/* sending dump part datas */		
 		rpos = 0;
 		while (rpos < dumpSize) {
-			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize);
+			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize, g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &r);										
 			rpos += sndSize;
 			if ((dumpSize - rpos) < 8192)
@@ -306,7 +337,7 @@ static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
 	}
 
 	/* send end of reply message */
-	rpcNTPBEndReply();
+	rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 	rpcNTPBSync(0, NULL, &r);										
 		
 	return len;
@@ -323,7 +354,7 @@ static int execRemoteCmd(void)
 	u8 cmd_buf[64]; 
 	
 	/* get the remote command by RPC */
-	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size);
+	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, g_debugger_specs.rpc_mode);
 	rpcNTPBSync(0, NULL, &ret);
 		
 	if (remote_cmd != REMOTE_CMD_NONE) {
@@ -342,7 +373,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle Halt request */
 		else if (remote_cmd == REMOTE_CMD_HALT) {
-			rpcNTPBEndReply();
+			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);													
 			if (!haltState) {
 				haltState = 1;
@@ -352,7 +383,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle Resume request */
 		else if (remote_cmd == REMOTE_CMD_RESUME) {
-			rpcNTPBEndReply();
+			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			if (haltState) {			
 				haltState = 0; 
@@ -360,7 +391,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle raw mem patches adding */		
 		else if (remote_cmd == REMOTE_CMD_ADDMEMPATCHES) {
-			rpcNTPBEndReply();
+			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -368,7 +399,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle raw mem patches clearing */
 		else if (remote_cmd == REMOTE_CMD_CLEARMEMPATCHES) {
-			rpcNTPBEndReply();
+			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -376,7 +407,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle codes adding */
 		else if (remote_cmd == REMOTE_CMD_ADDRAWCODES) {
-			rpcNTPBEndReply();
+			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -384,7 +415,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle codes clearing */
 		else if (remote_cmd == REMOTE_CMD_CLEARRAWCODES) {
-			rpcNTPBEndReply();
+			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -400,6 +431,10 @@ static int execRemoteCmd(void)
  */
 int _init(void)
 {
+	/* Set debugger defaults specs */
+	g_debugger_specs.automatic_hook = AUTOMATIC_HOOK_ON;
+	g_debugger_specs.rpc_mode = RPC_M_NOWAIT;	
+	
 	/* Hook syscalls */
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);

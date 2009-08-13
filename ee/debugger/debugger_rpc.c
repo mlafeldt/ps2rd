@@ -91,7 +91,7 @@ int rpcNTPBreset(void)
 /*
  * rpcNTPBgetRemoteCmd: get a NTPB request sent by client to server on IOP 
  */
-int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size)
+int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 {
 	int ret = 0;
 
@@ -99,7 +99,7 @@ int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size)
 	if (!RPCclient_Inited)
 		return -1;
 					 	
-	if((ret = SifCallRpc(&rpcclient, CMD_GETREMOTECMD, SIF_RPC_M_NOWAIT, NULL, 0, &getRemoteCmdParam, sizeof(getRemoteCmdParam), 0, 0)) != 0) {
+	if((ret = SifCallRpc(&rpcclient, CMD_GETREMOTECMD, rpc_mode, NULL, 0, &getRemoteCmdParam, sizeof(getRemoteCmdParam), 0, 0)) != 0) {
 		return ret;
 	}
 
@@ -117,7 +117,7 @@ int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size)
 /*
  * rpcNTPBsendData: send datas to the PC Client
  */
-int rpcNTPBsendData(u16 cmd, u8 *buf, int size)
+int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode)
 {
 	int ret = 0;
 
@@ -134,7 +134,7 @@ int rpcNTPBsendData(u16 cmd, u8 *buf, int size)
 		
 	sendDataParam.size = size;
 	 	
-	if((ret = SifCallRpc(&rpcclient, CMD_SENDDATA, SIF_RPC_M_NOWAIT, &sendDataParam, sizeof(sendDataParam), Rpc_Buffer, 4, 0, 0)) != 0) {
+	if((ret = SifCallRpc(&rpcclient, CMD_SENDDATA, rpc_mode, &sendDataParam, sizeof(sendDataParam), Rpc_Buffer, 4, 0, 0)) != 0) {
 		return ret;
 	}
 			
@@ -148,7 +148,7 @@ int rpcNTPBsendData(u16 cmd, u8 *buf, int size)
 /*
  * rpcNTPBEndReply: Notify the end of reply to the PC Client
  */
-int rpcNTPBEndReply(void)
+int rpcNTPBEndReply(int rpc_mode)
 {
 	int ret = 0;
 
@@ -156,7 +156,7 @@ int rpcNTPBEndReply(void)
 	if (!RPCclient_Inited)
 		return -1;
 				 	
-	if((ret = SifCallRpc(&rpcclient, CMD_ENDREPLY, SIF_RPC_M_NOWAIT, NULL, 0, Rpc_Buffer, 4, 0, 0)) != 0) {
+	if((ret = SifCallRpc(&rpcclient, CMD_ENDREPLY, rpc_mode, NULL, 0, Rpc_Buffer, 4, 0, 0)) != 0) {
 		return ret;
 	}
 			
