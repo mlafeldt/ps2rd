@@ -131,7 +131,7 @@ int cdGetElf(char *elfname)
 	return 0;
 }
 
-/* from loader.c */
+/* imported from elfldr.erl */
 extern void (*MyLoadExecPS2)(const char *filename, s32 num_args, char *args[]);
 
 /**

@@ -30,8 +30,8 @@
 #define LIBKERNEL_ADDR	0x000c0000
 #define ELFLDR_ADDR	0x000ff000
 
-int install_libs(const config_t *config);
-int install_elfldr(const config_t *config);
-int install_debugger(const config_t *config, engine_t *engine);
+int erl_install_libs(const config_t *config);
+int erl_install_elfldr(const config_t *config);
+int erl_install_debugger(const config_t *config, engine_t *engine);
 
 #endif /* _ERLMAN_H_ */
