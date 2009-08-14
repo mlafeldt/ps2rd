@@ -26,6 +26,8 @@
 #include "configman.h"
 #include "erlman.h"
 
+#define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
+
 typedef struct {
 	char name[20];
 	u8 *start;
@@ -109,13 +111,16 @@ static int __install_erl(erl_file_t *file, u32 addr)
 	return 0;
 }
 
-#define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
-
-int erl_install_libs(const config_t *config)
+int install_erls(const config_t *config, engine_t *engine)
 {
 	erl_file_t *file;
-	u32 addr = LIBKERNEL_ADDR; /* TODO: get from config */
+	struct symbol_t *sym;
+	u32 addr;
 
+	/*
+	 * install libraries
+	 */
+	addr = LIBKERNEL_ADDR; /* TODO: get from config */
 	file = &_erl_files[ERL_FILE_LIBKERNEL];
 	if (__install_erl(file, addr) < 0)
 		return -1;
@@ -135,43 +140,35 @@ int erl_install_libs(const config_t *config)
 	if (__install_erl(file, addr) < 0)
 		return -1;
 #endif
-	return 0;
-}
-
-int erl_install_elfldr(const config_t *config)
-{
-	erl_file_t *file = &_erl_files[ERL_FILE_ELFLDR];
-	u32 addr = ELFLDR_ADDR; /* TODO: get from config */
+	/*
+	 * install elfldr
+	 */
+	addr = ELFLDR_ADDR; /* TODO: get from config */
+	file = &_erl_files[ERL_FILE_ELFLDR];
 
 	if (__install_erl(file, addr) < 0)
 		return -1;
 
-	return 0;
-}
+	/*
+	 * install debugger
+	 */
+	if (config_get_bool(config, SET_DEBUGGER_INSTALL)) {
+		addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+		file = &_erl_files[ERL_FILE_DEBUGGER];
 
-int erl_install_debugger(const config_t *config, engine_t *engine)
-{
-	erl_file_t *file = &_erl_files[ERL_FILE_DEBUGGER];
-	struct symbol_t *sym;
-	u32 addr;
+		if (__install_erl(file, addr) < 0)
+			return -1;
 
-	if (!config_get_bool(config, SET_DEBUGGER_INSTALL))
-		return 0;
+		sym = erl_find_local_symbol("debugger_loop", file->erl);
+		if (sym == NULL) {
+			D_PRINTF("%s: could not find symbol debugger_loop\n",
+				__FUNCTION__);
+			return -2;
+		}
 
-	addr = config_get_u32(config, SET_DEBUGGER_ADDR);
-
-	if (__install_erl(file, addr) < 0)
-		return -1;
-
-	sym = erl_find_local_symbol("debugger_loop", file->erl);
-	if (sym == NULL) {
-		D_PRINTF("%s: could not find symbol debugger_loop\n",
-			__FUNCTION__);
-		return -2;
+		/* add debugger_loop() callback to engine */
+		engine->callbacks[0] = (u32)sym->address;
 	}
-
-	/* add debugger_loop() callback to engine */
-	engine->callbacks[0] = (u32)sym->address;
 
 	return 0;
 }

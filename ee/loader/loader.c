@@ -387,19 +387,9 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to install cheat engine\n");
 		goto end;
 	}
-	ret = erl_install_libs(&config);
+	ret = install_erls(&config, &engine);
 	if (ret < 0) {
-		A_PRINTF("Error: failed to install ERL libs\n");
-		goto end;
-	}
-	ret = erl_install_elfldr(&config);
-	if (ret < 0) {
-		A_PRINTF("Error: failed to install ELF loader\n");
-		goto end;
-	}
-	ret = erl_install_debugger(&config, &engine);
-	if (ret < 0) {
-		A_PRINTF("Error: failed to install debugger\n");
+		A_PRINTF("Error: failed to install ERLs\n");
 		goto end;
 	}
 
