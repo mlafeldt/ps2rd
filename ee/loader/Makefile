@@ -43,7 +43,7 @@ loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
-pack:
+pack: all
 	ps2-packer $(EE_BIN) $(EE_BIN).2 -v
 	mv $(EE_BIN).2 $(EE_BIN)
 	chmod +x $(EE_BIN)
