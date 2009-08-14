@@ -44,9 +44,9 @@ loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
 pack:
-	ps2-packer $(EE_BIN) foo.elf -v
-	rm -f $(EE_BIN)
-	mv foo.elf $(EE_BIN)
+	ps2-packer $(EE_BIN) $(EE_BIN).2 -v
+	mv $(EE_BIN).2 $(EE_BIN)
+	chmod +x $(EE_BIN)
 
 run:
 	ps2client reset; sleep 3
