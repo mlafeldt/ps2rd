@@ -61,41 +61,41 @@ extern u8  _elfldr_erl_start[];
 static erl_file_t _erl_files[ERL_FILE_NUM] = {
 #if 0
 	{
-		.name = "engine",
+		.name = "engine.erl",
 		.start = _engine_erl_start,
 	},
 #endif
 	{
-		.name = "libkernel",
+		.name = "libkernel.erl",
 		.start = _libkernel_erl_start,
 	},
 #ifdef _DEBUG
 	{
-		.name = "libc",
+		.name = "libc.erl",
 		.start = _libc_erl_start,
 	},
 	{
-		.name = "libdebug",
+		.name = "libdebug.erl",
 		.start = _libdebug_erl_start,
 	},
 	{
-		.name = "libpatches",
+		.name = "libpatches.erl",
 		.start = _libpatches_erl_start,
 	},
 #endif
 	{
-		.name = "debugger",
+		.name = "debugger.erl",
 		.start = _debugger_erl_start,
 	},
 	{
-		.name = "elfldr",
+		.name = "elfldr.erl",
 		.start = _elfldr_erl_start,
 	}
 };
 
 static int __install_erl(erl_file_t *file, u32 addr)
 {
-	D_PRINTF("%s: relocate %s.erl at %08x\n", __FUNCTION__, file->name, addr);
+	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, file->name, addr);
 
 	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
 	if (file->erl == NULL) {
@@ -103,10 +103,27 @@ static int __install_erl(erl_file_t *file, u32 addr)
 		return -1;
 	}
 
+	file->erl->flags |= ERL_FLAG_CLEAR;
+
 	FlushCache(0);
 
 	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, file->erl->fullsize,
 		addr + file->erl->fullsize);
+
+	return 0;
+}
+
+static int __uninstall_erl(erl_file_t *file)
+{
+	D_PRINTF("%s: uninstall %s from %08x\n", __FUNCTION__, file->name,
+		(u32)file->erl->bytes);
+
+	if (!unload_erl(file->erl)) {
+		D_PRINTF("%s: %s unload error\n", __FUNCTION__, file->name);
+		return -1;
+	}
+
+	file->erl = NULL;
 
 	return 0;
 }
@@ -168,7 +185,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		if (sym == NULL) {
 			D_PRINTF("%s: could not find symbol debugger_loop\n",
 				__FUNCTION__);
-			return -2;
+			return -1;
 		}
 
 		/* add debugger_loop() callback to engine */
@@ -176,4 +193,16 @@ int install_erls(const config_t *config, engine_t *engine)
 	}
 
 	return 0;
+}
+
+void uninstall_erls(void)
+{
+	erl_file_t *file;
+	int i;
+
+	for (i = 0; i < ERL_FILE_NUM; i++) {
+		file = &_erl_files[i];
+		if (file->erl != NULL)
+			__uninstall_erl(file);
+	}
 }

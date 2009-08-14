@@ -28,5 +28,6 @@
 #include "engineman.h"
 
 int install_erls(const config_t *config, engine_t *engine);
+void uninstall_erls(void);
 
 #endif /* _ERLMAN_H_ */
