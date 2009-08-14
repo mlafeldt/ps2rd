@@ -27,9 +27,6 @@
 #include "configman.h"
 #include "engineman.h"
 
-#define LIBKERNEL_ADDR	0x000c0000
-#define ELFLDR_ADDR	0x000ff000
-
 int install_erls(const config_t *config, engine_t *engine);
 
 #endif /* _ERLMAN_H_ */

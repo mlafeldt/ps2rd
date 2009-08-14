@@ -118,36 +118,41 @@ int install_erls(const config_t *config, engine_t *engine)
 	u32 addr;
 
 	/*
-	 * install libraries
+	 * install SDK libraries
 	 */
-	addr = LIBKERNEL_ADDR; /* TODO: get from config */
-	file = &_erl_files[ERL_FILE_LIBKERNEL];
-	if (__install_erl(file, addr) < 0)
-		return -1;
+	if (config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+		addr = config_get_u32(config, SET_SDKLIBS_ADDR);
+		file = &_erl_files[ERL_FILE_LIBKERNEL];
+		if (__install_erl(file, addr) < 0)
+			return -1;
 #ifdef _DEBUG
-	addr += ALIGN(file->erl->fullsize, 64);
-	file = &_erl_files[ERL_FILE_LIBC];
-	if (__install_erl(file, addr) < 0)
-		return -1;
+		addr += ALIGN(file->erl->fullsize, 64);
+		file = &_erl_files[ERL_FILE_LIBC];
+		if (__install_erl(file, addr) < 0)
+			return -1;
 
-	addr += ALIGN(file->erl->fullsize, 64);
-	file = &_erl_files[ERL_FILE_LIBDEBUG];
-	if (__install_erl(file, addr) < 0)
-		return -1;
+		addr += ALIGN(file->erl->fullsize, 64);
+		file = &_erl_files[ERL_FILE_LIBDEBUG];
+		if (__install_erl(file, addr) < 0)
+			return -1;
 
-	addr += ALIGN(file->erl->fullsize, 64);
-	file = &_erl_files[ERL_FILE_LIBPATCHES];
-	if (__install_erl(file, addr) < 0)
-		return -1;
+		addr += ALIGN(file->erl->fullsize, 64);
+		file = &_erl_files[ERL_FILE_LIBPATCHES];
+		if (__install_erl(file, addr) < 0)
+			return -1;
 #endif
+	}
+
 	/*
 	 * install elfldr
 	 */
-	addr = ELFLDR_ADDR; /* TODO: get from config */
-	file = &_erl_files[ERL_FILE_ELFLDR];
+	if (config_get_bool(config, SET_ELFLDR_INSTALL)) {
+		addr = config_get_u32(config, SET_ELFLDR_ADDR);
+		file = &_erl_files[ERL_FILE_ELFLDR];
 
-	if (__install_erl(file, addr) < 0)
-		return -1;
+		if (__install_erl(file, addr) < 0)
+			return -1;
+	}
 
 	/*
 	 * install debugger

@@ -29,15 +29,23 @@
 /* Define some default settings */
 #define ENGINE_INSTALL
 #define DEBUGGER_INSTALL
+#define SDKLIBS_INSTALL
+#define ELFLDR_INSTALL
 
 #ifndef ENGINE_ADDR
-#define ENGINE_ADDR     0x00080000
+#define ENGINE_ADDR	0x00080000
 #endif
 #ifndef DEBUGGER_ADDR
-#define DEBUGGER_ADDR   0x000a0000
+#define DEBUGGER_ADDR	0x00090000
+#endif
+#ifndef SDKLIBS_ADDR
+#define SDKLIBS_ADDR	0x000c0000
+#endif
+#ifndef ELFLDR_ADDR
+#define ELFLDR_ADDR	0x000ff000
 #endif
 #ifndef CHEATS_FILE
-#define CHEATS_FILE     "cheats.txt"
+#define CHEATS_FILE	"cheats.txt"
 #endif
 
 /* Keys to access different settings in configuration */
@@ -53,6 +61,12 @@ enum setting_key {
 	SET_DEBUGGER_INSTALL,
 	SET_DEBUGGER_ADDR,
 	SET_DEBUGGER_FILE,
+	/* sdklibs */
+	SET_SDKLIBS_INSTALL,
+	SET_SDKLIBS_ADDR,
+	/* elfldr */
+	SET_ELFLDR_INSTALL,
+	SET_ELFLDR_ADDR,
 	/* cheats */
 	SET_CHEATS_FILE
 };

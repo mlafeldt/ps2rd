@@ -35,6 +35,10 @@ static const char *setting_paths[] = {
 	"debugger.install",
 	"debugger.addr",
 	"debugger.file",
+	"sdklibs.install",
+	"sdklibs.addr",
+	"elfldr.install",
+	"elfldr.addr",
 	"cheats.file",
 	NULL
 };
@@ -185,6 +189,32 @@ void config_build(config_t *config)
 	config_setting_set_string(set, DEBUGGER_FILE);
 #endif
 	/*
+	 * sdklibs section
+	 */
+	group = config_setting_add(root, "sdklibs", CONFIG_TYPE_GROUP);
+
+	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
+#ifdef SDKLIBS_INSTALL
+	config_setting_set_bool(set, 1);
+#endif
+	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
+#ifdef SDKLIBS_ADDR
+	config_setting_set_int(set, SDKLIBS_ADDR);
+#endif
+	/*
+	 * elfldr section
+	 */
+	group = config_setting_add(root, "elfldr", CONFIG_TYPE_GROUP);
+
+	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
+#ifdef ELFLDR_INSTALL
+	config_setting_set_bool(set, 1);
+#endif
+	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
+#ifdef ELFLDR_ADDR
+	config_setting_set_int(set, ELFLDR_ADDR);
+#endif
+	/*
 	 * cheats section
 	 */
 	group = config_setting_add(root, "cheats", CONFIG_TYPE_GROUP);
@@ -230,6 +260,18 @@ void config_print(const config_t *config)
 	printf("%s = %08x\n", setting_paths[SET_DEBUGGER_ADDR], value);
 	_config_lookup_string(config, SET_DEBUGGER_FILE, &s);
 	printf("%s = %s\n", setting_paths[SET_DEBUGGER_FILE], s);
+
+	/* sdklibs */
+	_config_lookup_bool(config, SET_SDKLIBS_INSTALL, (int*)&value);
+	printf("%s = %i\n", setting_paths[SET_SDKLIBS_INSTALL], value);
+	_config_lookup_u32(config, SET_SDKLIBS_ADDR, &value);
+	printf("%s = %08x\n", setting_paths[SET_SDKLIBS_ADDR], value);
+
+	/* elfldr */
+	_config_lookup_bool(config, SET_ELFLDR_INSTALL, (int*)&value);
+	printf("%s = %i\n", setting_paths[SET_ELFLDR_INSTALL], value);
+	_config_lookup_u32(config, SET_ELFLDR_ADDR, &value);
+	printf("%s = %08x\n", setting_paths[SET_ELFLDR_ADDR], value);
 
 	/* cheats */
 	_config_lookup_string(config, SET_CHEATS_FILE, &s);
