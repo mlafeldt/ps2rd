@@ -4,7 +4,8 @@ ee/loader/
 - add compatibility layer for code types (convert E type to D etc.)
 
 ee/engine/
+- do syscall hooking internally when ERL is loaded
 - implement code type suggestions from http://gshi.org/vb/showthread.php?t=3680
 
 ee/debugger/
-- merge Jimmi's code from Core_Launcherv2/ntpbserver/core
+- pass config from loader to debugger
