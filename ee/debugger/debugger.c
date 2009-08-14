@@ -55,22 +55,46 @@ extern int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode);
 extern int rpcNTPBEndReply(int rpc_mode);
 extern int rpcNTPBSync(int mode, int *cmd, int *result);
 
+/* GS macro */
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
+/* reset packet structs */
+typedef struct {
+	u32 psize:8;
+	u32 dsize:24;
+	u32 daddr;
+	u32 fcode;
+} _sceSifCmdHdr;
+
+typedef struct {
+	_sceSifCmdHdr chdr;
+	int size;
+	int flag;
+	char arg[0x50];
+} _sceSifCmdResetData __attribute__((aligned(16)));
+
+/* for syscall hooks */
 extern void OrigSifSetReg(u32 register_num, int register_value);
 extern void HookSifSetReg(u32 register_num, int register_value);
 extern int __NR_OrigSifSetReg;
 
+static u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len) = NULL;
 static int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
 static int set_reg_hook = 0;
+
+/* debugger ready state, allow it to know when to start RPC transfers */
 static int debugger_ready = 0;
 
 /* libkernel reboot counter */
 extern int _iop_reboot_count;
 
-/* internal reboot counter */
-static int iop_reboot_count = 0;
+/* Reboot Watcher flag */
+static int SifSetReg_RebootWatchFlag = 0;
 
+/* IOPRP/cdrom reboot pattern */
+const char ioprp_pattern[] = "rom0:UDNL cdrom";
+
+/* buffer for modules load and memory reads */
 #define BUFSIZE 	80*1024
 static u8 g_buf[BUFSIZE] __attribute__((aligned(64)));
 
@@ -238,6 +262,34 @@ static int post_reboot_hook(void)
 }
 
 /*
+ * NewSifSetDma - Replacement function for SifSetDma().
+ */  
+u32 NewSifSetDma(SifDmaTransfer_t *sdd, s32 len)
+{
+	/* catch reset packet */
+	if ((sdd->attr == 0x44) && (sdd->size==0x68)) {
+		_sceSifCmdResetData *reset_pkt = (_sceSifCmdResetData*)sdd->src;
+		if (((reset_pkt->chdr.psize == 0x68)) && (reset_pkt->chdr.fcode == 0x80000003))	{
+			/* check for reboot with IOPRP from cdrom */
+			int i, j;
+			for (i=0; i<0x50; i++) {
+				for (j=0; j<15; j++) {
+					if (reset_pkt->arg[i+j] != ioprp_pattern[i+j])
+						break; 
+				}
+				if (j == 15) {
+					/* Set Reboot Watcher flag */
+					SifSetReg_RebootWatchFlag = 1;
+					break;
+				}	
+			}
+		}
+	}
+
+	return OldSifSetDma(sdd, len);
+}
+ 
+/*
  * NewSifSetReg - Replacement function for SifSetReg().
  */
 void NewSifSetReg(u32 regnum, int regval)
@@ -259,15 +311,15 @@ void NewSifSetReg(u32 regnum, int regval)
 		/* check if reboot is done */
 		if (!set_reg_hook && regnum == 0x80000000 && !regval) {
 			/* we filter the 1st IOP reboot done by LoadExecPS2 or its replacement function */
-			if (iop_reboot_count) { 
+			if (SifSetReg_RebootWatchFlag) { 
 				/* IOP sync, needed since at this point it haven't yet been done by the game */
 				while (!(SifGetReg(SIF_REG_SMFLAG) & 0x40000))
 					;
 				/* load our modules */
 				post_reboot_hook();
 				debugger_ready = 1;
+				SifSetReg_RebootWatchFlag = 0;
 			}
-			iop_reboot_count++;
 			_iop_reboot_count++;			
 		}
 	}
@@ -436,6 +488,9 @@ int _init(void)
 	g_debugger_specs.rpc_mode = RPC_M_NOWAIT;	
 	
 	/* Hook syscalls */
+	OldSifSetDma = GetSyscall(__NR_SifSetDma);
+	SetSyscall(__NR_SifSetDma, NewSifSetDma);
+	
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
 	SetSyscall(__NR_OrigSifSetReg, OldSifSetReg);
@@ -449,6 +504,8 @@ int _init(void)
 int _fini(void)
 {
 	/* Unhook syscalls */
+	SetSyscall(__NR_SifSetDma, OldSifSetDma);	
+	
 	SetSyscall(__NR_SifSetReg, OldSifSetReg);
 	SetSyscall(__NR_OrigSifSetReg, 0);
 
