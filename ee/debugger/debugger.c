@@ -143,27 +143,27 @@ typedef struct {
 static int haltState = 0;
 
 /* to control automatic hooking */
-#define AUTOMATIC_HOOK_OFF 		0
-#define AUTOMATIC_HOOK_ON 		1
+#define AUTO_HOOK_OFF	0
+#define AUTO_HOOK_ON	1
 
 /* to control debugger RPC mode */
-#define RPC_M_NORMAL			0
-#define RPC_M_NOWAIT			1
+#define RPC_M_NORMAL	0
+#define RPC_M_NOWAIT	1
 
 typedef struct {
-	int automatic_hook;
+	int auto_hook;
 	int rpc_mode;
-} DebuggerSpecs_t;
+} debugger_opts_t;
 
-static DebuggerSpecs_t g_debugger_specs; 
+static debugger_opts_t g_debugger_opts;
 
 /*
- * set_debugger_specs - allow to control debugger specs
+ * set_debugger_opts - Set debugger options from loader.
  */
-void set_debugger_specs(DebuggerSpecs_t *debugger_specs)
+void set_debugger_opts(const debugger_opts_t *opts)
 {
-	g_debugger_specs.automatic_hook = debugger_specs->automatic_hook;
-	g_debugger_specs.rpc_mode = debugger_specs->rpc_mode;	
+	g_debugger_opts.auto_hook = opts->auto_hook;
+	g_debugger_opts.rpc_mode = opts->rpc_mode;
 }
 
 /*
@@ -249,7 +249,7 @@ static int post_reboot_hook(void)
 	SifExitRpc();
 
 	/* automatic padRead hooking is done if needed */
-	if (g_debugger_specs.automatic_hook)
+	if (g_debugger_opts.auto_hook)
 		patch_padRead();
 	
 	GS_BGCOLOUR = 0x000000;
@@ -376,7 +376,7 @@ static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
 		/* sending dump part datas */		
 		rpos = 0;
 		while (rpos < dumpSize) {
-			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize, g_debugger_specs.rpc_mode);
+			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize, g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &r);										
 			rpos += sndSize;
 			if ((dumpSize - rpos) < 8192)
@@ -389,7 +389,7 @@ static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
 	}
 
 	/* send end of reply message */
-	rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+	rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 	rpcNTPBSync(0, NULL, &r);										
 		
 	return len;
@@ -406,7 +406,7 @@ static int execRemoteCmd(void)
 	u8 cmd_buf[64]; 
 	
 	/* get the remote command by RPC */
-	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, g_debugger_specs.rpc_mode);
+	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, g_debugger_opts.rpc_mode);
 	rpcNTPBSync(0, NULL, &ret);
 		
 	if (remote_cmd != REMOTE_CMD_NONE) {
@@ -425,7 +425,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle Halt request */
 		else if (remote_cmd == REMOTE_CMD_HALT) {
-			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);													
 			if (!haltState) {
 				haltState = 1;
@@ -435,7 +435,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle Resume request */
 		else if (remote_cmd == REMOTE_CMD_RESUME) {
-			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			if (haltState) {			
 				haltState = 0; 
@@ -443,7 +443,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle raw mem patches adding */		
 		else if (remote_cmd == REMOTE_CMD_ADDMEMPATCHES) {
-			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -451,7 +451,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle raw mem patches clearing */
 		else if (remote_cmd == REMOTE_CMD_CLEARMEMPATCHES) {
-			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -459,7 +459,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle codes adding */
 		else if (remote_cmd == REMOTE_CMD_ADDRAWCODES) {
-			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -467,7 +467,7 @@ static int execRemoteCmd(void)
 		}
 		/* handle codes clearing */
 		else if (remote_cmd == REMOTE_CMD_CLEARRAWCODES) {
-			rpcNTPBEndReply(g_debugger_specs.rpc_mode);
+			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &ret);	
 			/*
 			 * TODO ...
@@ -483,9 +483,9 @@ static int execRemoteCmd(void)
  */
 int _init(void)
 {
-	/* Set debugger defaults specs */
-	g_debugger_specs.automatic_hook = AUTOMATIC_HOOK_OFF;
-	g_debugger_specs.rpc_mode = RPC_M_NOWAIT;	
+	/* Set default debugger options */
+	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
+	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;	
 	
 	/* Hook syscalls */
 	OldSifSetDma = GetSyscall(__NR_SifSetDma);

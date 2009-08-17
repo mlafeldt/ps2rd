@@ -34,6 +34,11 @@ typedef struct {
 	struct erl_record_t *erl;
 } erl_file_t;
 
+typedef struct {
+	int auto_hook;
+	int rpc_mode;
+} debugger_opts_t;
+
 enum {
 //	ERL_FILE_ENGINE = 0,
 	ERL_FILE_LIBKERNEL,
@@ -134,6 +139,14 @@ int install_erls(const config_t *config, engine_t *engine)
 	struct symbol_t *sym;
 	u32 addr;
 
+#define GET_SYMBOL(var, name, file) \
+	sym = erl_find_local_symbol(name, file->erl); \
+	if (sym == NULL) { \
+		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, name); \
+		return -1; \
+	} \
+	var = (typeof(var))sym->address
+
 	/*
 	 * install SDK libraries
 	 */
@@ -181,15 +194,18 @@ int install_erls(const config_t *config, engine_t *engine)
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
-		sym = erl_find_local_symbol("debugger_loop", file->erl);
-		if (sym == NULL) {
-			D_PRINTF("%s: could not find symbol debugger_loop\n",
-				__FUNCTION__);
-			return -1;
-		}
-
 		/* add debugger_loop() callback to engine */
-		engine->callbacks[0] = (u32)sym->address;
+		int (*debugger_loop)(void) = NULL;
+		GET_SYMBOL(debugger_loop, "debugger_loop", file);
+		engine->callbacks[0] = (u32)debugger_loop;
+
+		/* set debugger options */
+		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
+		GET_SYMBOL(set_debugger_opts, "set_debugger_opts", file);
+		debugger_opts_t opts;
+		opts.auto_hook = config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
+		opts.rpc_mode = config_get_int(config, SET_DEBUGGER_RPC_MODE);
+		set_debugger_opts(&opts);
 	}
 
 	return 0;
