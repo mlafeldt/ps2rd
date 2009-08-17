@@ -2,7 +2,6 @@
  * loader.c - boot loader (main project file)
  *
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
- * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
  * This file is part of Artemis, the PS2 game debugger.
  *
