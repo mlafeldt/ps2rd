@@ -17,11 +17,11 @@ doc/code_types.txt for a complete list of available code types.
 
 2) Hacking System
 
-Artemis' killer feature will be the ability to hack/debug commercial PS2 games
-over Ethernet using a PC-side debugger client.
+Artemis' killer feature is the ability to hack/debug commercial PS2 games over
+Ethernet using a PC-side debugger client like ps2cc by Viper187.
 
-Although we already have the technology to hack many games (thanks to
-jimmikaelkael's Core Launcher), this feature has not been merged yet.
+There're still a lot of games you can't hack with Artemis, but we're working
+hard on improving compatibility.
 
 
 More specific documentation can be found in the "doc" directory.

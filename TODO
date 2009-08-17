@@ -8,4 +8,7 @@ ee/engine/
 - implement code type suggestions from http://gshi.org/vb/showthread.php?t=3680
 
 ee/debugger/
-- pass config from loader to debugger
+- manage code and hook list from engine
+- pass IP settings to SMAP module
+- add support for DNAS games
+- improve overall game compatibility
