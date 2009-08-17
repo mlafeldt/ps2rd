@@ -58,6 +58,14 @@ Section "debugger"
   If you don't want to use the built-in debugger, you can specify the filename
   of an external debugger instead.
 
+* auto_hook [bool, false by default]
+
+  Enable automatic hooking to hack games without the need for hook codes.
+
+* rpc_mode [integer, 1 by default]
+
+  Set SIF RPC mode to blocking (0) or non-blocking (1).
+
 
 Section "cheats"
 ----------------
