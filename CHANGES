@@ -1,2 +1,10 @@
+0.2 (Aug xx 2009)
+- Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
+- Added ELF loader to replace evil LoadExecPS2() syscall.
+- Stop disc spin on startup to enable swapping.
+- Cheats are only loaded once from text file on startup.
+- With code type D, if the number of lines is 0, it is internally set to 1 for
+  compatibility.
+
 0.1 (Jul 29 2009)
 - Initial public release
