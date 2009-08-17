@@ -34,7 +34,6 @@ static const char *setting_paths[] = {
 	"engine.file",
 	"debugger.install",
 	"debugger.addr",
-	"debugger.file",
 	"debugger.auto_hook",
 	"debugger.rpc_mode",
 	"sdklibs.install",
@@ -186,10 +185,6 @@ void config_build(config_t *config)
 #ifdef DEBUGGER_ADDR
 	config_setting_set_int(set, DEBUGGER_ADDR);
 #endif
-	set = config_setting_add(group, "file", CONFIG_TYPE_STRING);
-#ifdef DEBUGGER_FILE
-	config_setting_set_string(set, DEBUGGER_FILE);
-#endif
 	set = config_setting_add(group, "auto_hook", CONFIG_TYPE_BOOL);
 #ifdef DEBUGGER_AUTO_HOOK
 	config_setting_set_bool(set, 1);
@@ -271,7 +266,6 @@ void config_print(const config_t *config)
 	/* debugger */
 	PRINT_BOOL(SET_DEBUGGER_INSTALL);
 	PRINT_U32(SET_DEBUGGER_ADDR);
-	PRINT_STRING(SET_DEBUGGER_FILE);
 	PRINT_BOOL(SET_DEBUGGER_AUTO_HOOK);
 	PRINT_INT(SET_DEBUGGER_RPC_MODE);
 

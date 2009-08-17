@@ -33,19 +33,22 @@
 #define ELFLDR_INSTALL
 
 #ifndef ENGINE_ADDR
-#define ENGINE_ADDR	0x00080000
+#define ENGINE_ADDR		0x00080000
 #endif
 #ifndef DEBUGGER_ADDR
-#define DEBUGGER_ADDR	0x00090000
+#define DEBUGGER_ADDR		0x00090000
+#endif
+#ifndef DEBUGGER_RPC_MODE
+#define DEBUGGER_RPC_MODE	1
 #endif
 #ifndef SDKLIBS_ADDR
-#define SDKLIBS_ADDR	0x000c0000
+#define SDKLIBS_ADDR		0x000c0000
 #endif
 #ifndef ELFLDR_ADDR
-#define ELFLDR_ADDR	0x000ff000
+#define ELFLDR_ADDR		0x000ff000
 #endif
 #ifndef CHEATS_FILE
-#define CHEATS_FILE	"cheats.txt"
+#define CHEATS_FILE		"cheats.txt"
 #endif
 
 /* Keys to access different settings in configuration */
@@ -60,7 +63,6 @@ enum setting_key {
 	/* debugger */
 	SET_DEBUGGER_INSTALL,
 	SET_DEBUGGER_ADDR,
-	SET_DEBUGGER_FILE,
 	SET_DEBUGGER_AUTO_HOOK,
 	SET_DEBUGGER_RPC_MODE,
 	/* sdklibs */

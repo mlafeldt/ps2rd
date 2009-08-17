@@ -48,15 +48,10 @@ Section "debugger"
 
   Set it to true if you want to install the debugger on startup.
 
-* addr [32-bit offset, 0x000a0000 by default]
+* addr [32-bit offset, 0x00090000 by default]
 
   Specifies the load address of the debugger. This address must belong to user
   space memory (0x00080000-0x01ffffff).
-
-* file [path, not set by default]
-
-  If you don't want to use the built-in debugger, you can specify the filename
-  of an external debugger instead.
 
 * auto_hook [bool, false by default]
 
