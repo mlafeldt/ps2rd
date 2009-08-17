@@ -50,8 +50,7 @@ Section "debugger"
 
 * addr [32-bit offset, 0x00090000 by default]
 
-  Specifies the load address of the debugger. This address must belong to user
-  space memory (0x00080000-0x01ffffff).
+  Specifies the load address of the debugger.
 
 * auto_hook [bool, false by default]
 
@@ -60,6 +59,32 @@ Section "debugger"
 * rpc_mode [integer, 1 by default]
 
   Set SIF RPC mode to blocking (0) or non-blocking (1).
+
+
+Section "sdklibs"
+-----------------
+
+* install [bool, true by default]
+
+  Set to true to install the SDK libraries like libkernel.erl.
+  NOTE: Must be true for debugger and ELF loader to work.
+
+* addr [32-bit offset, 0x000c0000 by default]
+
+  Specifies the load address of the SDK libraries.
+
+
+Section "elfldr"
+----------------
+
+* install [bool, true by default]
+
+  Install the ELF loader to replace the original (evil) LoadExecPS2() syscall.
+  NOTE: Must be true for the debugger to work.
+
+* addr [32-bit offset, 0x000ff000 by default]
+
+  Specifies the load address of the ELF loader.
 
 
 Section "cheats"
