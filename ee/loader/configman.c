@@ -35,6 +35,8 @@ static const char *setting_paths[] = {
 	"debugger.install",
 	"debugger.addr",
 	"debugger.file",
+	"debugger.auto_hook",
+	"debugger.rpc_mode",
 	"sdklibs.install",
 	"sdklibs.addr",
 	"elfldr.install",
@@ -188,6 +190,14 @@ void config_build(config_t *config)
 #ifdef DEBUGGER_FILE
 	config_setting_set_string(set, DEBUGGER_FILE);
 #endif
+	set = config_setting_add(group, "auto_hook", CONFIG_TYPE_BOOL);
+#ifdef DEBUGGER_AUTO_HOOK
+	config_setting_set_bool(set, 1);
+#endif
+	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
+#ifdef DEBUGGER_RPC_MODE
+	config_setting_set_int(set, DEBUGGER_RPC_MODE);
+#endif
 	/*
 	 * sdklibs section
 	 */
@@ -226,7 +236,7 @@ void config_build(config_t *config)
 }
 
 /**
- * config_print - Print out config.
+ * config_print - Print out all config settings.
  * @config: ptr to config
  */
 void config_print(const config_t *config)
@@ -234,46 +244,45 @@ void config_print(const config_t *config)
 	u32 value;
 	const char *s = NULL;
 
-	if (config == NULL)
-		return;
-
 	printf("config values:\n");
 
+#define PRINT_BOOL(key) \
+	_config_lookup_bool(config, key, (int*)&value); \
+	printf("%s = %i\n", setting_paths[key], value)
+#define PRINT_INT(key) \
+	_config_lookup_int(config, key, (long*)&value); \
+	printf("%s = %i\n", setting_paths[key], value)
+#define PRINT_U32(key) \
+	_config_lookup_u32(config, key, &value); \
+	printf("%s = %08x\n", setting_paths[key], value)
+#define PRINT_STRING(key) \
+	_config_lookup_string(config, key, &s); \
+	printf("%s = %s\n", setting_paths[key], s)
+
 	/* loader */
-	_config_lookup_bool(config, SET_IOP_RESET, (int*)&value);
-	printf("%s = %i\n", setting_paths[SET_IOP_RESET], value);
-	_config_lookup_bool(config, SET_SBV_PATCHES, (int*)&value);
-	printf("%s = %i\n", setting_paths[SET_SBV_PATCHES], value);
+	PRINT_BOOL(SET_IOP_RESET);
+	PRINT_BOOL(SET_SBV_PATCHES);
 
 	/* engine */
-	_config_lookup_bool(config, SET_ENGINE_INSTALL, (int*)&value);
-	printf("%s = %i\n", setting_paths[SET_ENGINE_INSTALL], value);
-	_config_lookup_u32(config, SET_ENGINE_ADDR, &value);
-	printf("%s = %08x\n", setting_paths[SET_ENGINE_ADDR], value);
-	_config_lookup_string(config, SET_ENGINE_FILE, &s);
-	printf("%s = %s\n", setting_paths[SET_ENGINE_FILE], s);
+	PRINT_BOOL(SET_ENGINE_INSTALL);
+	PRINT_U32(SET_ENGINE_ADDR);
+	PRINT_STRING(SET_ENGINE_FILE);
 
 	/* debugger */
-	_config_lookup_bool(config, SET_DEBUGGER_INSTALL, (int*)&value);
-	printf("%s = %i\n", setting_paths[SET_DEBUGGER_INSTALL], value);
-	_config_lookup_u32(config, SET_DEBUGGER_ADDR, &value);
-	printf("%s = %08x\n", setting_paths[SET_DEBUGGER_ADDR], value);
-	_config_lookup_string(config, SET_DEBUGGER_FILE, &s);
-	printf("%s = %s\n", setting_paths[SET_DEBUGGER_FILE], s);
+	PRINT_BOOL(SET_DEBUGGER_INSTALL);
+	PRINT_U32(SET_DEBUGGER_ADDR);
+	PRINT_STRING(SET_DEBUGGER_FILE);
+	PRINT_BOOL(SET_DEBUGGER_AUTO_HOOK);
+	PRINT_INT(SET_DEBUGGER_RPC_MODE);
 
 	/* sdklibs */
-	_config_lookup_bool(config, SET_SDKLIBS_INSTALL, (int*)&value);
-	printf("%s = %i\n", setting_paths[SET_SDKLIBS_INSTALL], value);
-	_config_lookup_u32(config, SET_SDKLIBS_ADDR, &value);
-	printf("%s = %08x\n", setting_paths[SET_SDKLIBS_ADDR], value);
+	PRINT_BOOL(SET_SDKLIBS_INSTALL);
+	PRINT_U32(SET_SDKLIBS_ADDR);
 
 	/* elfldr */
-	_config_lookup_bool(config, SET_ELFLDR_INSTALL, (int*)&value);
-	printf("%s = %i\n", setting_paths[SET_ELFLDR_INSTALL], value);
-	_config_lookup_u32(config, SET_ELFLDR_ADDR, &value);
-	printf("%s = %08x\n", setting_paths[SET_ELFLDR_ADDR], value);
+	PRINT_BOOL(SET_ELFLDR_INSTALL);
+	PRINT_U32(SET_ELFLDR_ADDR);
 
 	/* cheats */
-	_config_lookup_string(config, SET_CHEATS_FILE, &s);
-	printf("%s = %s\n", setting_paths[SET_CHEATS_FILE], s);
+	PRINT_STRING(SET_CHEATS_FILE);
 }
