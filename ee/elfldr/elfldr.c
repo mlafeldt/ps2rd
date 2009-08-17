@@ -81,7 +81,7 @@ typedef struct {
 
 static int g_argc;
 static char *g_argv[1 + MAX_ARGS];
-static char g_argbuf[1024];
+static char g_argbuf[256];
 
 static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
 extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
@@ -229,7 +229,7 @@ int _init(void)
  */
 int _fini(void)
 {
-	/* Unhook syscalls */
+	/* Unhook syscall */
 	SetSyscall(__NR_LoadExecPS2, OldLoadExecPS2);
 
 	return 0;
