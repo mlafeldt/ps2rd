@@ -30,7 +30,7 @@ Furthermore, Artemis makes use of the libcheats library to read, manipulate, and
 write cheat codes in text format - see cheats_format.txt.
 
 
-Cheat engine
+Cheat Engine
 ------------
 
 ee/engine/
@@ -42,15 +42,34 @@ As the engine is built as an ERL, it can be relocated at any memory address in
 user space.
 
 
-Boot loader
+Debugger
+--------
+
+ee/debugger/
+iop/debugger/
+
+The debugger allows you to hack/debug commercial PS2 games over Ethernet using a
+PC-side debugger client.
+
+
+ELF Loader
+----------
+
+ee/elfldr/
+
+When the ELF loader is installed, it replaces the original (evil) LoadExecPS2()
+syscall. This component is required by the debugger to work properly.
+
+
+Boot Loader
 -----------
 
 ee/loader/
 
 This is where all the components come together. The loader does the following:
-- set up EE and IOP (modules, SBV patches, etc.)
 - read configuration from file
-- install external or built-in cheat engine (hook syscalls, etc.)
+- set up EE and IOP (modules, SBV patches, etc.)
+- install ERLs (cheat engine, ELF loader, etc.)
 - load cheats from text file and pass them to the cheat engine
 - start the inserted game
 
