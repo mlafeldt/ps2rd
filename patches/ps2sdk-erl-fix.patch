@@ -1,0 +1,198 @@
+[PATCH 1/1] ERL: fix unrelocatable global vars
+
+Under certain circumstances, the ERL library fails to relocate global variables.
+jimmikaelkael noticed that the SifRpcClientData_t structures _lf_cd and _ih_cd
+both point to the same memory address after libkernel.erl has been relocated. As
+a result, you cannot do any SIF communication using the ERL modules.
+
+After doing some research, I found out that ERL fails to relocate uninitialized
+global data in the COMMON and SCOMMON sections.
+
+You can get a list of all affected variables this way:
+$ ee-objdump -t /usr/local/ps2dev/ps2sdk/ee/lib/*.erl | grep COM
+$ ee-objdump -t /usr/local/ps2dev/ps2sdk/ee/lib/*.erl | grep scommon
+
+My patch simply moves those variables to the .data section allowing ERL to work
+properly without breaking things.
+
+This would not have been a problem if the variables had been declared as static.
+Unfortunately, libraries like libkernel are built in such an odd way - each
+function is compiled as a separate object file - that static can't be used.
+
+Note that this patch doesn't fix relocation of libcdvd.erl.
+
+Reported-by: jimmikaelkael <jimmikaelkael@wanadoo.fr>
+Signed-off-by: misfire <misfire@xploderfreax.de>
+
+Index: ps2sdk/ee/kernel/src/loadfile.c
+===================================================================
+--- ps2sdk/ee/kernel/src/loadfile.c	(revision 1596)
++++ ps2sdk/ee/kernel/src/loadfile.c	(working copy)
+@@ -66,7 +66,7 @@
+ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres);
+ 
+ #if defined(F_SifLoadFileInit) || defined(DOXYGEN)
+-SifRpcClientData_t _lf_cd;
++SifRpcClientData_t _lf_cd = { .server = NULL };
+ int _lf_init = 0;
+ 
+ /** Initialize the LOADFILE library.
+Index: ps2sdk/ee/kernel/src/iopheap.c
+===================================================================
+--- ps2sdk/ee/kernel/src/iopheap.c	(revision 1596)
++++ ps2sdk/ee/kernel/src/iopheap.c	(working copy)
+@@ -27,7 +27,7 @@
+ extern int _ih_caps;
+ 
+ #ifdef F_SifInitIopHeap
+-SifRpcClientData_t _ih_cd;
++SifRpcClientData_t _ih_cd = { .server = NULL };
+ int _ih_caps = 0;
+ 
+ int SifInitIopHeap()
+Index: ps2sdk/ee/kernel/src/fileio.c
+===================================================================
+--- ps2sdk/ee/kernel/src/fileio.c	(revision 1596)
++++ ps2sdk/ee/kernel/src/fileio.c	(working copy)
+@@ -66,12 +66,12 @@
+ void _fio_intr();
+ 
+ #ifdef F___fio_internals
+-SifRpcClientData_t _fio_cd;
+-int _fio_recv_data[512] __attribute__((aligned(64)));
+-int _fio_intr_data[32] __attribute__((aligned(64)));
++SifRpcClientData_t _fio_cd = { .server = NULL };
++int _fio_recv_data[512] __attribute__((aligned(64))) = { 0 };
++int _fio_intr_data[32] __attribute__((aligned(64))) = { 0 };
+ int _fio_init = 0;
+-int _fio_block_mode;
+-int _fio_completion_sema;
++int _fio_block_mode = 0;
++int _fio_completion_sema = 0;
+ #endif
+ 
+ #ifdef F_fio_init
+Index: ps2sdk/ee/rpc/camera/src/ps2cam_rpc.c
+===================================================================
+--- ps2sdk/ee/rpc/camera/src/ps2cam_rpc.c	(revision 1596)
++++ ps2sdk/ee/rpc/camera/src/ps2cam_rpc.c	(working copy)
+@@ -27,9 +27,9 @@
+ static char					data[1024]		__attribute__((aligned(64)));
+ static char					campacket[896]	__attribute__((aligned(64)));
+ 
+-ee_sema_t compSema;
++static ee_sema_t compSema;
+ 
+-int sem;
++static int sem;
+ 
+ 
+ 
+Index: ps2sdk/ee/draw/src/draw.c
+===================================================================
+--- ps2sdk/ee/draw/src/draw.c	(revision 1596)
++++ ps2sdk/ee/draw/src/draw.c	(working copy)
+@@ -17,7 +17,7 @@
+  #include <math3d.h>
+  #include <packet.h>
+ 
+- PACKET draw_packet;
++ static PACKET draw_packet;
+ 
+  ////////////////////
+  // DRAW FUNCTIONS //
+Index: ps2sdk/ee/libgs/src/libgs.c
+===================================================================
+--- ps2sdk/ee/libgs/src/libgs.c	(revision 1596)
++++ ps2sdk/ee/libgs/src/libgs.c	(working copy)
+@@ -28,10 +28,10 @@
+ 
+ 
+ 
+-QWORD		prim_work[64] __attribute__((aligned(16))); /*aligne to 128bits*/
++static QWORD	prim_work[64] __attribute__((aligned(16))); /*aligne to 128bits*/
+ 
+-GS_TEST		GSGLOBAL_TEST1;
+-GS_TEST		GSGLOBAL_TEST2;
++static GS_TEST	GSGLOBAL_TEST1;
++static GS_TEST	GSGLOBAL_TEST2;
+ 
+ static int	gs_db_draw_buffer=0;
+ 
+Index: ps2sdk/ee/graph/src/graph.c
+===================================================================
+--- ps2sdk/ee/graph/src/graph.c	(revision 1596)
++++ ps2sdk/ee/graph/src/graph.c	(working copy)
+@@ -19,7 +19,7 @@
+  #include <packet.h>
+  #include <osd_config.h>
+ 
+- GRAPH_MODE graph_mode[21] = {
++ static const GRAPH_MODE graph_mode[21] = {
+   {  640,  448, 0x02, 1,  286720, GS_SET_DISPLAY(632, 50, 3, 0, 2559,  447) },
+   {  640,  512, 0x03, 1,  327680, GS_SET_DISPLAY(652, 72, 3, 0, 2559,  511) },
+   {  720,  480, 0x50, 0,  368640, GS_SET_DISPLAY(232, 35, 1, 0, 1439,  479) },
+@@ -43,23 +43,23 @@
+   {  640,  224, 0x02, 0,  143360, GS_SET_DISPLAY(632, 30, 3, 0, 2559,  223) },
+  };
+ 
+- PACKET graph_packet;
++ static PACKET graph_packet;
+ 
+- GRAPH_MODE current_graph_mode;
++ static GRAPH_MODE current_graph_mode;
+ 
+- int current_mode = -1;
++ static int current_mode = -1;
+ 
+- int current_psm = -1;
++ static int current_psm = -1;
+ 
+- int current_displaybuffer = -1;
++ static int current_displaybuffer = -1;
+ 
+- int current_drawbuffer = -1;
++ static int current_drawbuffer = -1;
+ 
+- int current_drawfield = -1;
++ static int current_drawfield = -1;
+ 
+- int current_zbuffer = -1;
++ static int current_zbuffer = -1;
+ 
+- int current_zpsm = -1;
++ static int current_zpsm = -1;
+ 
+  /////////////////////
+  // GRAPH FUNCTIONS //
+Index: ps2sdk/ee/libc/src/stdlib.c
+===================================================================
+--- ps2sdk/ee/libc/src/stdlib.c	(revision 1596)
++++ ps2sdk/ee/libc/src/stdlib.c	(working copy)
+@@ -802,8 +802,8 @@
+ 
+ #ifdef F___stdlib_internals
+ /* stdlib data variables. */
+-environvariable_t    __stdlib_env[32];
+-void                 (* __stdlib_exit_func[32])(void);
++environvariable_t    __stdlib_env[32] = { { .name = "\0" } };
++void                 (* __stdlib_exit_func[32])(void) = { NULL };
+ int                  __stdlib_exit_index = 0;
+ int                  __stdlib_mb_shift = 0;
+ unsigned int         __stdlib_rand_seed = 92384729;
+Index: ps2sdk/ee/libc/src/stdio.c
+===================================================================
+--- ps2sdk/ee/libc/src/stdio.c	(revision 1596)
++++ ps2sdk/ee/libc/src/stdio.c	(working copy)
+@@ -1366,9 +1366,9 @@
+   { STD_IOBUF_TYPE_STDOUTHOST, 0, 0, 0 }, // stdout
+ #endif
+ };
+-char __stdio_tmpnam[256];
++char __stdio_tmpnam[256] = { 0 };
+ #ifdef USE_GS
+-int  __stdio_stdout_xy[2];
++int  __stdio_stdout_xy[2] = { 0 };
+ #endif
+ #endif
+ 
