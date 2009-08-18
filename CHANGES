@@ -1,10 +1,14 @@
 0.2 (Aug xx 2009)
 - Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
 - Added ELF loader to replace evil LoadExecPS2() syscall.
-- Stop disc spin on startup to enable swapping.
+- Except for the boot loader, all code was made relocatable.
+- Reset IOP on startup by default; never do it when run from host.
+- Stop disc spin after initialization to enable swapping.
 - Cheats are only loaded once from text file on startup.
+- Increased maximum number of active codes from 50 to 100.
 - With code type D, if the number of lines is 0, it is internally set to 1 for
   compatibility.
+- Added global debug mode (set DEBUG to 1 in root Makefile).
 
 0.1 (Jul 29 2009)
 - Initial public release
