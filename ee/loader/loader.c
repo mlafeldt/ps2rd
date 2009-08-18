@@ -63,8 +63,6 @@
 #define NETLOG_IP	"192.168.0.2"
 #define NETLOG_PORT	7411
 
-#define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
-
 /* Boot information */
 static char g_bootpath[FIO_PATH_MAX];
 static enum bootdev g_bootdev = BOOT_UNKN;
