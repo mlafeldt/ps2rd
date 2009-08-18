@@ -189,7 +189,7 @@ void config_build(config_t *config)
 #ifdef DEBUGGER_AUTO_HOOK
 	config_setting_set_bool(set, 1);
 #endif
-	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
+	set = config_setting_add(group, "rpc_mode", CONFIG_TYPE_INT);
 #ifdef DEBUGGER_RPC_MODE
 	config_setting_set_int(set, DEBUGGER_RPC_MODE);
 #endif

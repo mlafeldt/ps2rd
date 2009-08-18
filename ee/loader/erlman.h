@@ -22,8 +22,6 @@
 #ifndef _ERLMAN_H_
 #define _ERLMAN_H_
 
-#include <tamtypes.h>
-#include <erl.h>
 #include "configman.h"
 #include "engineman.h"
 

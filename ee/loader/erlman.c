@@ -22,9 +22,9 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <erl.h>
-#include "dbgprintf.h"
 #include "configman.h"
 #include "erlman.h"
+#include "dbgprintf.h"
 
 #define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
 
@@ -201,8 +201,8 @@ int install_erls(const config_t *config, engine_t *engine)
 
 		/* set debugger options */
 		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
-		GET_SYMBOL(set_debugger_opts, "set_debugger_opts", file);
 		debugger_opts_t opts;
+		GET_SYMBOL(set_debugger_opts, "set_debugger_opts", file);
 		opts.auto_hook = config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
 		opts.rpc_mode = config_get_int(config, SET_DEBUGGER_RPC_MODE);
 		set_debugger_opts(&opts);

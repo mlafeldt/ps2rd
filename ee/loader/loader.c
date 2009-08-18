@@ -331,6 +331,8 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 	return 0;
 }
 
+extern void *_ps2sdk_libc_deinit();
+
 int main(int argc, char *argv[])
 {
 	static u8 padbuf[256] __attribute__((aligned(64)));
@@ -426,6 +428,7 @@ int main(int argc, char *argv[])
 			A_PRINTF("Starting game...\n");
 			padPortClose(PAD_PORT, PAD_SLOT);
 			padReset();
+			//_ps2sdk_libc_deinit();
 			if (cdRunElf() < 0)
 				A_PRINTF("Error: could not load ELF\n");
 		}
