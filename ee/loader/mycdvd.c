@@ -151,6 +151,6 @@ int cdRunElf(void)
 	}
 
 	cdStop();
-	cdSync(CDVD_BLOCK);
+	cdSync(CDVD_NOBLOCK);
 	return -1;
 }
