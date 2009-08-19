@@ -23,7 +23,6 @@
 #define _CONFIGMAN_H_
 
 #include <tamtypes.h>
-#include <fileio.h>
 #include <libconfig.h>
 
 /* Define some default settings */
@@ -79,8 +78,9 @@ enum setting_key {
 	SET_CHEATS_FILE
 };
 
+/* libconfig wrapper functions */
 int _config_lookup_int(const config_t *config, enum setting_key key, long *value);
-int _config_lookup_int64(const config_t *config, enum setting_key key, long long *value);
+int _config_lookup_u32(const config_t *config, enum setting_key key, u32 *value);
 int _config_lookup_float(const config_t *config, enum setting_key key, double *value);
 int _config_lookup_bool(const config_t *config, enum setting_key key, int *value);
 int _config_lookup_string(const config_t *config, enum setting_key key, const char **value);

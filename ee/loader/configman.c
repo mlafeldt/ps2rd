@@ -245,7 +245,7 @@ void config_print(const config_t *config)
 	u32 value;
 	const char *s = NULL;
 
-	printf("config values:\n");
+	printf("config settings:\n");
 
 #define PRINT_BOOL(key) \
 	_config_lookup_bool(config, key, (int*)&value); \
