@@ -448,39 +448,35 @@ int main(int argc, char *argv[])
 			//_ps2sdk_libc_deinit();
 			LoadExecPS2(boot2, 0, NULL);
 
-			padInit(0);
-			padPortOpen(PAD_PORT, PAD_SLOT, padbuf);
+			A_PRINTF("Error: could not load ELF %s\n", boot2);
 			cdStop();
 			cdSync(CDVD_NOBLOCK);
-			A_PRINTF("Error: could not load ELF %s\n", boot2);
-		}
-		else if (new_pad & PAD_SELECT) {
+			padInit(0);
+			padPortOpen(PAD_PORT, PAD_SLOT, padbuf);
+		} else if (new_pad & PAD_SELECT) {
 			/* Do nothing */
-		}
-		else if (new_pad & PAD_CIRCLE) {
+		} else if (new_pad & PAD_CIRCLE) {
 			if (!config_get_bool(&config, SET_ENGINE_INSTALL))
 				A_PRINTF("Error: could not activate cheats - "
 					"engine not installed\n");
 			else
 				activate_cheats(&cheats, &engine);
-		}
-		else if (new_pad & PAD_TRIANGLE) {
+		} else if (new_pad & PAD_TRIANGLE) {
 			/* Do nothing */
-		}
-		else if (new_pad & PAD_SQUARE) {
+		} else if (new_pad & PAD_SQUARE) {
 			/* Do nothing */
-		}
-		else if (new_pad & PAD_L1) {
+		} else if (new_pad & PAD_L1) {
 			boot2 = config_get_string(&config, SET_BOOT2_L1);
-		}
-		else if (new_pad & PAD_L2) {
+			D_PRINTF("boot2 set to %s\n", boot2);
+		} else if (new_pad & PAD_L2) {
 			boot2 = config_get_string(&config, SET_BOOT2_L2);
-		}
-		else if (new_pad & PAD_R1) {
+			D_PRINTF("boot2 set to %s\n", boot2);
+		} else if (new_pad & PAD_R1) {
 			boot2 = config_get_string(&config, SET_BOOT2_R1);
-		}
-		else if (new_pad & PAD_R2) {
+			D_PRINTF("boot2 set to %s\n", boot2);
+		} else if (new_pad & PAD_R2) {
 			boot2 = config_get_string(&config, SET_BOOT2_R2);
+			D_PRINTF("boot2 set to %s\n", boot2);
 		}
 	}
 end:
