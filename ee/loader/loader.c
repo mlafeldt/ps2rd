@@ -60,7 +60,7 @@
 
 /* Boot information */
 static char g_bootpath[FIO_PATH_MAX];
-static enum bootdev g_bootdev = BOOT_UNKN;
+static enum dev g_bootdev = DEV_UNKN;
 
 /* IOP modules to load */
 static const char *g_modules[] = {
@@ -189,18 +189,18 @@ static void copy_modules_to_kernel(u32 addr)
 static char *__pathname(const char *name)
 {
 	static char filename[FIO_PATH_MAX];
-	enum bootdev dev;
+	enum dev dev;
 
 	filename[0] = '\0';
-	dev = get_bootdev(name);
+	dev = get_dev(name);
 
 	/* Add boot path if name is relative */
-	if (dev == BOOT_UNKN)
+	if (dev == DEV_UNKN)
 		strcpy(filename, g_bootpath);
 
 	strcat(filename, name);
 
-	if (dev == BOOT_CD) {
+	if (dev == DEV_CD) {
 		to_upper_str(filename);
 		strcat(filename, ";1");
 	}
@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
 
 	strcpy(g_bootpath, argv[0]);
 	set_dir_name(g_bootpath);
-	g_bootdev = get_bootdev(g_bootpath);
+	g_bootdev = get_dev(g_bootpath);
 	A_PRINTF("Booting from: %s\n", g_bootpath);
 	A_PRINTF("Initializing...\n");
 
@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 		D_PRINTF("config: %s\n", config_error_text(&config));
 	config_print(&config);
 
-	if (g_bootdev != BOOT_HOST && config_get_bool(&config, SET_IOP_RESET))
+	if (g_bootdev != DEV_HOST && config_get_bool(&config, SET_IOP_RESET))
 		reset_iop("rom0:UDNL rom0:EELOADCNF");
 
 	if (config_get_bool(&config, SET_SBV_PATCHES)) {

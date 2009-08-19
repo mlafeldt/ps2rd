@@ -229,33 +229,30 @@ char *get_base_name(const char *full, char *base)
 	return base;
 }
 
-/* Prefix of boot devices */
-const char *g_bootdev_prefix[] = {
-	"cdrom0:",
-	"host:",
-	"mass:"
-	"mc0:",
-	"mc1:",
-	NULL
-};
-
 /**
- * get_bootdev - Get boot device.
+ * get_dev - Get device from path.
  * @path: path information
  * @return: boot device
  */
-enum bootdev get_bootdev(const char *path)
+enum dev get_dev(const char *path)
 {
+	const char *prefix[] = {
+		"cdrom0:",
+		"host:",
+		"mass:"
+		"mc0:",
+		"mc1:",
+		NULL
+	};
 	int i = 0;
 
-	while (g_bootdev_prefix[i] != NULL) {
-		if (!strncmp(path, g_bootdev_prefix[i],
-			strlen(g_bootdev_prefix[i])))
-				return i;
+	while (prefix[i] != NULL) {
+		if (!strncmp(path, prefix[i], strlen(prefix[i])))
+			return i;
 		i++;
 	}
 
-	return BOOT_UNKN;
+	return DEV_UNKN;
 }
 
 /**

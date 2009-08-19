@@ -34,14 +34,14 @@
 #define JR_RA		0x03E00008
 #define NOP		0x00000000
 
-/* Boot devices */
-enum bootdev {
-	BOOT_CD,
-	BOOT_HOST,
-	BOOT_MASS,
-	BOOT_MC0,
-	BOOT_MC1,
-	BOOT_UNKN
+/* Devices returned by get_dev() */
+enum dev {
+	DEV_CD,
+	DEV_HOST,
+	DEV_MASS,
+	DEV_MC0,
+	DEV_MC1,
+	DEV_UNKN
 };
 
 u32 kmem_read(void *addr, void *buf, u32 size);
@@ -52,7 +52,7 @@ void reset_iop(const char *img);
 int load_modules(const char **modv);
 int set_dir_name(char *filename);
 char *get_base_name(const char *full, char *base);
-enum bootdev get_bootdev(const char *path);
+enum dev get_dev(const char *path);
 int file_exists(const char *filename);
 char *read_text_file(const char *filename, int maxsize);
 int upload_file(const char *filename, u32 addr, int *size);
