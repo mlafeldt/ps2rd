@@ -34,6 +34,8 @@ int cdCloseTray(void);
 void cdToggleTray(void);
 int cdIsPS2Game(void);
 #endif
+void _cdStandby(int mode);
+void _cdStop(int mode);
 int cdGetElf(char *elfname);
 int cdRunElf(void);
 

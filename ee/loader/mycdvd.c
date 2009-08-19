@@ -74,6 +74,20 @@ int cdIsPS2Game(void)
 }
 #endif
 
+void _cdStandby(int mode)
+{
+	cdDiskReady(mode);
+	cdStandby();
+	cdSync(mode);
+}
+
+void _cdStop(int mode)
+{
+	cdDiskReady(mode);
+	cdStop();
+	cdSync(mode);
+}
+
 /**
  * cdGetElf - Parse "cdrom0:\\SYSTEM.CNF;1" for ELF filename.
  * @elfname: ptr to where filename is written to
@@ -140,9 +154,7 @@ int cdRunElf(void)
 	char elfname[FIO_PATH_MAX];
 
 	/* Spin up drive */
-	cdDiskReady(CDVD_BLOCK);
-	cdStandby();
-	cdSync(CDVD_BLOCK);
+	_cdStandby(CDVD_BLOCK);
 
 	/* Get ELF filename and execute it */
 	if (!cdGetElf(elfname)) {
@@ -150,7 +162,7 @@ int cdRunElf(void)
 		LoadExecPS2(elfname, 0, NULL);
 	}
 
-	cdStop();
-	cdSync(CDVD_NOBLOCK);
+	_cdStop(CDVD_NOBLOCK);
+
 	return -1;
 }
