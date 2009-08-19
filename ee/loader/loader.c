@@ -62,6 +62,8 @@
 static char g_bootpath[FIO_PATH_MAX];
 static enum dev g_bootdev = DEV_UNKN;
 
+static u8 g_padbuf[256] __attribute__((aligned(64)));
+
 /* IOP modules to load */
 static const char *g_modules[] = {
 	"rom0:SIO2MAN",
@@ -70,6 +72,11 @@ static const char *g_modules[] = {
 	"rom0:PADMAN",
 	NULL
 };
+
+/* Statically linked ERL files */
+extern u8  _engine_erl_start[];
+extern u8  _engine_erl_end[];
+extern int _engine_erl_size;
 
 /* Statically linked IRX files */
 extern u8  _ps2dev9_irx_start[];
@@ -208,10 +215,6 @@ static char *__pathname(const char *name)
 	return filename;
 }
 
-extern u8  _engine_erl_start[];
-extern u8  _engine_erl_end[];
-extern int _engine_erl_size;
-
 /*
  * Install external or built-in engine.
  */
@@ -275,12 +278,9 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 	/*
 	 * Get ELF filename of inserted game.
 	 */
-	cdDiskReady(CDVD_BLOCK);
-	cdStandby();
-	cdSync(CDVD_BLOCK);
+	_cdStandby(CDVD_BLOCK);
 	ret = cdGetElf(elfname);
-	cdStop();
-	cdSync(CDVD_NOBLOCK);
+	_cdStop(CDVD_NOBLOCK);
 	if (ret < 0) {
 		A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
 		return -1;
@@ -329,9 +329,47 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 
 extern void *_ps2sdk_libc_deinit();
 
+/*
+ * Start ELF specified by @boot2, or parse SYSTEM.CNF if @boot2 is NULL.
+ */
+static int start_game(const char *boot2)
+{
+	char elfname[FIO_PATH_MAX];
+
+	A_PRINTF("Starting game...\n");
+
+	if (boot2 == NULL || (boot2 != NULL && get_dev(boot2) == DEV_CD))
+		_cdStandby(CDVD_BLOCK);
+
+	if (boot2 == NULL) {
+		if (cdGetElf(elfname) < 0) {
+			A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
+			_cdStop(CDVD_NOBLOCK);
+			return -1;
+		}
+		boot2 = elfname;
+	}
+
+	D_PRINTF("Running ELF %s ...\n", boot2);
+
+	padPortClose(PAD_PORT, PAD_SLOT);
+	padReset();
+	//_ps2sdk_libc_deinit();
+
+	/* TODO pass args to ELF */
+	LoadExecPS2(boot2, 0, NULL);
+
+	_cdStop(CDVD_NOBLOCK);
+	padInit(0);
+	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
+
+	A_PRINTF("Error: could not load ELF %s\n", boot2);
+
+	return -1;
+}
+
 int main(int argc, char *argv[])
 {
-	static u8 padbuf[256] __attribute__((aligned(64)));
 	config_t config;
 	cheats_t cheats;
 	engine_t engine;
@@ -393,13 +431,11 @@ int main(int argc, char *argv[])
 
 	/* Init CDVD (non-blocking) */
 	cdInit(CDVD_INIT_NOCHECK);
-	cdDiskReady(CDVD_NOBLOCK);
-	cdStop();
-	cdSync(CDVD_NOBLOCK);
+	_cdStop(CDVD_NOBLOCK);
 
 	/* Init pad */
 	padInit(0);
-	padPortOpen(PAD_PORT, PAD_SLOT, padbuf);
+	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
 	padWaitReady(PAD_PORT, PAD_SLOT);
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
@@ -422,37 +458,7 @@ int main(int argc, char *argv[])
 		old_pad = paddata;
 
 		if ((new_pad & PAD_START) || (new_pad & PAD_CROSS)) {
-			char elfname[FIO_PATH_MAX];
-
-			A_PRINTF("Starting game...\n");
-
-			/* TODO check if ELF is really on cdrom */
-			cdDiskReady(CDVD_BLOCK);
-			cdStandby();
-			cdSync(CDVD_BLOCK);
-
-			if (boot2 == NULL) {
-				if (cdGetElf(elfname) < 0) {
-					A_PRINTF("Error: could not get ELF name\n");
-					cdStop();
-					cdSync(CDVD_NOBLOCK);
-					continue;
-				}
-				boot2 = elfname;
-			}
-
-			/* TODO pass args to ELF */
-			D_PRINTF("Running ELF %s ...\n", boot2);
-			padPortClose(PAD_PORT, PAD_SLOT);
-			padReset();
-			//_ps2sdk_libc_deinit();
-			LoadExecPS2(boot2, 0, NULL);
-
-			A_PRINTF("Error: could not load ELF %s\n", boot2);
-			cdStop();
-			cdSync(CDVD_NOBLOCK);
-			padInit(0);
-			padPortOpen(PAD_PORT, PAD_SLOT, padbuf);
+			start_game(boot2);
 		} else if (new_pad & PAD_SELECT) {
 			/* Do nothing */
 		} else if (new_pad & PAD_CIRCLE) {
