@@ -23,6 +23,7 @@ release: all
 	rm -rf release
 	mkdir release
 	ps2-packer -v ee/loader/artemis.elf release/artemis.elf
+	chmod +x release/artemis.elf
 	cp ee/loader/artemis.conf release/
 	cp ee/loader/cheats.txt release/
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
