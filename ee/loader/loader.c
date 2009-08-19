@@ -374,7 +374,6 @@ int main(int argc, char *argv[])
 	cheats_t cheats;
 	engine_t engine;
 	const char *boot2 = NULL;
-	int ret = 0;
 
 	SifInitRpc(0);
 	init_scr();
@@ -406,26 +405,8 @@ int main(int argc, char *argv[])
 	}
 
 	D_PRINTF("* Loading modules...\n");
-	ret = load_modules(g_modules);
-	if (ret < 0) {
+	if (load_modules(g_modules) < 0) {
 		A_PRINTF("Error: failed to load IOP modules\n");
-		goto end;
-	}
-#if 0
-	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
-	netlog_init(NETLOG_IP, NETLOG_PORT);
-#endif
-	copy_modules_to_kernel(IRX_ADDR);
-
-	/* Install ERL files */
-	ret = install_engine(&config, &engine);
-	if (ret < 0) {
-		A_PRINTF("Error: failed to install cheat engine\n");
-		goto end;
-	}
-	ret = install_erls(&config, &engine);
-	if (ret < 0) {
-		A_PRINTF("Error: failed to install ERLs\n");
 		goto end;
 	}
 
@@ -438,6 +419,21 @@ int main(int argc, char *argv[])
 	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
 	padWaitReady(PAD_PORT, PAD_SLOT);
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
+#if 0
+	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
+	netlog_init(NETLOG_IP, NETLOG_PORT);
+#endif
+	copy_modules_to_kernel(IRX_ADDR);
+
+	/* Install ERL files */
+	if (install_engine(&config, &engine) < 0) {
+		A_PRINTF("Error: failed to install cheat engine\n");
+		goto end;
+	}
+	if (install_erls(&config, &engine) < 0) {
+		A_PRINTF("Error: failed to install ERLs\n");
+		goto end;
+	}
 
 	/* Load cheats */
 	cheats_init(&cheats);
@@ -487,8 +483,11 @@ int main(int argc, char *argv[])
 	}
 end:
 	A_PRINTF("Exit...\n");
+
 	config_destroy(&config);
+	cheats_destroy(&cheats);
+	uninstall_erls();
 	SleepThread();
 
-	return ret;
+	return 1;
 }
