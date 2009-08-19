@@ -21,9 +21,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
-#include <erl.h>
 #include <loadfile.h>
-#include <iopheap.h>
 #include <sbv_patches.h>
 #include <sifrpc.h>
 #include <string.h>
@@ -40,7 +38,7 @@
 #include "netlog_rpc.h"
 
 #define APP_NAME	"Artemis"
-#define APP_VERSION	"0.2 WIP"
+#define APP_VERSION	"0.2"
 #define APP_BUILD_DATE	__DATE__" "__TIME__
 
 #define WELCOME_STRING	"Welcome to "APP_NAME" "APP_VERSION"\n"
@@ -56,9 +54,6 @@
 #ifndef CONFIG_FILE
 #define CONFIG_FILE	"artemis.conf"
 #endif
-
-/* TODO: make those configurable */
-#define IRX_ADDR	0x80030000
 
 #define NETLOG_IP	"192.168.0.2"
 #define NETLOG_PORT	7411
@@ -93,7 +88,10 @@ extern u8  _netlog_irx_start[];
 extern u8  _netlog_irx_end[];
 extern int _netlog_irx_size;
 
-#define IRX_NUM	5
+/* TODO: make it configurable */
+#define IRX_ADDR	0x80030000
+
+#define IRX_NUM		5
 
 /* RAM file table entry */
 typedef struct {

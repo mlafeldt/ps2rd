@@ -1,4 +1,4 @@
-0.2 (Aug xx 2009)
+0.2 (Aug 19 2009)
 - Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
 - Added ELF loader to replace evil LoadExecPS2() syscall.
 - Except for the boot loader, all code was made relocatable.
@@ -9,6 +9,7 @@
 - With code type D, if the number of lines is 0, it is internally set to 1 for
   compatibility.
 - Added global debug mode (set DEBUG to 1 in root Makefile).
+- Compressed final ELF with ps2-packer.
 
 0.1 (Jul 29 2009)
 - Initial public release
