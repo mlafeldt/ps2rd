@@ -56,6 +56,10 @@ enum setting_key {
 	/* loader */
 	SET_IOP_RESET = 0,
 	SET_SBV_PATCHES,
+	SET_BOOT2_L1,
+	SET_BOOT2_L2,
+	SET_BOOT2_R1,
+	SET_BOOT2_R2,
 	/* engine */
 	SET_ENGINE_INSTALL,
 	SET_ENGINE_ADDR,

@@ -29,6 +29,10 @@
 static const char *setting_paths[] = {
 	"loader.iop_reset",
 	"loader.sbv_patches",
+	"loader.boot2_L1",
+	"loader.boot2_L2",
+	"loader.boot2_R1",
+	"loader.boot2_R2",
 	"engine.install",
 	"engine.addr",
 	"engine.file",
@@ -136,9 +140,6 @@ void config_build(config_t *config)
 {
 	config_setting_t *root, *group, *set;
 
-	if (config == NULL)
-		return;
-
 	config_init(config);
 	root = config_root_setting(config);
 
@@ -155,6 +156,11 @@ void config_build(config_t *config)
 #ifndef _NO_SBV
 	config_setting_set_bool(set, 1);
 #endif
+	set = config_setting_add(group, "boot2_L1", CONFIG_TYPE_STRING);
+	set = config_setting_add(group, "boot2_L2", CONFIG_TYPE_STRING);
+	set = config_setting_add(group, "boot2_R1", CONFIG_TYPE_STRING);
+	set = config_setting_add(group, "boot2_R2", CONFIG_TYPE_STRING);
+
 	/*
 	 * engine section
 	 */
@@ -257,6 +263,10 @@ void config_print(const config_t *config)
 	/* loader */
 	PRINT_BOOL(SET_IOP_RESET);
 	PRINT_BOOL(SET_SBV_PATCHES);
+	PRINT_STRING(SET_BOOT2_L1);
+	PRINT_STRING(SET_BOOT2_L2);
+	PRINT_STRING(SET_BOOT2_R1);
+	PRINT_STRING(SET_BOOT2_R2);
 
 	/* engine */
 	PRINT_BOOL(SET_ENGINE_INSTALL);

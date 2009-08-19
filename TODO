@@ -1,4 +1,5 @@
 ee/loader/
+- add loader.boot2 setting to boot/hack demos
 - calculate better game ID for auto-detection
 - add automatic search for hook codes (scePadRead patterns...)
 - add compatibility layer for code types (convert E type to D etc.)
