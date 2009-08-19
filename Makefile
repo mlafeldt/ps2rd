@@ -1,4 +1,3 @@
-
 DEBUG=1
 
 VARS=DEBUG=$(DEBUG)
@@ -23,8 +22,9 @@ rebuild: clean all
 release: all
 	rm -rf release
 	mkdir release
-	cp ee/loader/artemis.elf release/
+	ps2-packer -v ee/loader/artemis.elf release/artemis.elf
 	cp ee/loader/artemis.conf release/
 	cp ee/loader/cheats.txt release/
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
-	cd release; tar czf artemis-bin.tar.gz *
+	mkdir release/doc
+	cp doc/* release/doc/
