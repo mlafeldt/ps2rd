@@ -335,10 +335,9 @@ extern void *_ps2sdk_libc_deinit();
 static int start_game(const char *boot2)
 {
 	char elfname[FIO_PATH_MAX];
+	enum dev dev = DEV_CD;
 
-	A_PRINTF("Starting game...\n");
-
-	if (boot2 == NULL || (boot2 != NULL && get_dev(boot2) == DEV_CD))
+	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
 		_cdStandby(CDVD_BLOCK);
 
 	if (boot2 == NULL) {
@@ -350,6 +349,14 @@ static int start_game(const char *boot2)
 		boot2 = elfname;
 	}
 
+	if (!file_exists(boot2)) {
+		A_PRINTF("Error: ELF %s not found\n", boot2);
+		if (dev == DEV_CD)
+			_cdStop(CDVD_NOBLOCK);
+		return -1;
+	}
+
+	A_PRINTF("Starting game...\n");
 	D_PRINTF("Running ELF %s ...\n", boot2);
 
 	padPortClose(PAD_PORT, PAD_SLOT);
@@ -359,7 +366,8 @@ static int start_game(const char *boot2)
 	/* TODO pass args to ELF */
 	LoadExecPS2(boot2, 0, NULL);
 
-	_cdStop(CDVD_NOBLOCK);
+	if (dev == DEV_CD)
+		_cdStop(CDVD_NOBLOCK);
 	padInit(0);
 	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
 
