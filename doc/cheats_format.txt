@@ -16,8 +16,8 @@ Cheat code 2
 etc.
 
 The ID is used by the cheat system to auto-detect the inserted game and activate
-codes accordingly. NAME must be the name of the game's start ELF (as specified
-in SYSTEM.CNF but w/o directory suffix).
+codes accordingly. NAME must be the pathname of the game's start ELF (as
+specified in SYSTEM.CNF, but you can leave out the cdrom0:\ prefix).
 Note that the game ID handling will be improved in the future.
 
 Also, two types of comments are allowed in the cheats file:
