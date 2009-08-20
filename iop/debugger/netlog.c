@@ -46,7 +46,7 @@ int netlog_send(const char *format, ...)
 	int ret;
 
 	WaitSema(g_sema);
-	
+
 	va_start(ap, format);
 	vsnprintf(buf, NETLOG_MAX_MSG, format, ap);
 	va_end(ap);
@@ -176,7 +176,7 @@ static int start_netlog_rpc_server(void)
 {
 	iop_thread_t thread;
  	int tid, ret;
- 
+
 	thread.attr = TH_C;
 	thread.option = 0;
 	thread.thread = (void*)rpc_thread;

@@ -91,9 +91,9 @@ extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
  */
 static void loadElf(void)
 {
-	int i, fd;	
+	int i, fd;
 	elf_header_t elf_header;
-	elf_pheader_t elf_pheader;	
+	elf_pheader_t elf_pheader;
 
 	ResetEE(0x7f);
 
@@ -208,7 +208,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	 * - do a soft EE peripheral reset
 	 * - terminate all threads and delete all semaphores
 	 * - set up ELF loader thread and run it
-	 */ 
+	 */
 	ExecPS2(loadElf, NULL, 0, NULL);
 }
 

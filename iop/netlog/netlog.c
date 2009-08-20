@@ -167,7 +167,7 @@ static int start_rpc_server(void)
 {
 	iop_thread_t thread;
  	int tid, ret;
- 
+
 	thread.attr = TH_C;
 	thread.option = 0;
 	thread.thread = (void*)rpc_thread;

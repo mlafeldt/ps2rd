@@ -20,7 +20,7 @@
  * along with Artemis.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <tamtypes.h> 
+#include <tamtypes.h>
 #include <kernel.h>
 
 #include "padread_patterns.h"
@@ -54,7 +54,7 @@ static int Hook_scePadRead(int port, int slot, struct padButtonStat *data)
 
 	ret = scePadRead(port, slot, data);
 	debugger_loop();
-				
+
 	return ret;
 }
 
@@ -66,13 +66,13 @@ static int Hook_scePad2Read(int socket, struct pad2ButtonStat *data)
 	int ret;
 
 	ret = scePad2Read(socket, data);
-	debugger_loop();	
-				
+	debugger_loop();
+
 	return ret;
 }
 
 /*
- * this function retrieve a pattern in a buffer, using a mask  
+ * this function retrieve a pattern in a buffer, using a mask
  */
 u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
 {
@@ -86,7 +86,7 @@ u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
 		if (j == len)
 			return &buf[i];
 	}
-	
+
 	return NULL;
 }
 
@@ -96,21 +96,21 @@ u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
 int patch_padRead(void)
 {
 	u8 *ptr;
-	u32 memscope, inst, fncall;	
+	u32 memscope, inst, fncall;
 	u32 pattern[1], mask[1];
 	u32 start = 0x00100000;
 	int pattern_found = 0;
 
 	GS_BGCOLOUR = 0x800080; /* Purple while padRead pattern search	*/
-			
+
 	memscope = 0x01f00000 - start;
-	
+
 	/* First try to locate the orginal libpad's scePadRead function */
-    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern0, (u8 *)padReadpattern0_mask, sizeof(padReadpattern0));	
+    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern0, (u8 *)padReadpattern0_mask, sizeof(padReadpattern0));
     if (!ptr) {
-	    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern1, (u8 *)padReadpattern1_mask, sizeof(padReadpattern1));	
+	    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern1, (u8 *)padReadpattern1_mask, sizeof(padReadpattern1));
 	    if (!ptr) {
-		    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern2, (u8 *)padReadpattern2_mask, sizeof(padReadpattern2));	
+		    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern2, (u8 *)padReadpattern2_mask, sizeof(padReadpattern2));
 	    	if (!ptr) {
 		    	ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern3, (u8 *)padReadpattern3_mask, sizeof(padReadpattern3));
 		    	if (!ptr) {
@@ -134,11 +134,11 @@ int patch_padRead(void)
 					}
 					else /* If found scePad2Read pattern */
 						scePadRead_style = 2;
-				}		    	
+				}
 	    	}
     	}
     }
-    
+
  	GS_BGCOLOUR = 0x00ff00; /* Lime while padRead patches */
 
 	/* Save original scePadRead ptr */
@@ -150,7 +150,7 @@ int patch_padRead(void)
 	/* Retrieve scePadRead call Instruction code */
 	inst = 0x0c000000;
 	inst |= 0x03ffffff & ((u32)ptr >> 2);
-	
+
 	/* Make pattern with function call code saved above */
 	pattern[0] = inst;
 	mask[0] = 0xffffffff;
@@ -158,17 +158,17 @@ int patch_padRead(void)
 	/* Get Hook_scePadRead call Instruction code */
 	if (scePadRead_style == 2) {
 		inst = 0x0c000000;
-		inst |= 0x03ffffff & ((u32)Hook_scePad2Read >> 2);		
+		inst |= 0x03ffffff & ((u32)Hook_scePad2Read >> 2);
 	}
-	else {	
+	else {
 		inst = 0x0c000000;
 		inst |= 0x03ffffff & ((u32)Hook_scePadRead >> 2);
 	}
-		
+
 	/* Search & patch for calls to scePadRead */
 	ptr = (u8 *)start;
 	while (ptr) {
-		memscope = 0x01f00000 - (u32)ptr;	
+		memscope = 0x01f00000 - (u32)ptr;
 		ptr = find_pattern_with_mask(ptr, memscope, (u8 *)pattern, (u8 *)mask, sizeof(pattern));
 		if (ptr) {
 			pattern_found = 1;
@@ -177,11 +177,11 @@ int patch_padRead(void)
 			ptr += 8;
 		}
 	}
-	
+
 	if (!pattern_found)
 		GS_BGCOLOUR = 0xffffff; /* White, pattern not found */
-	else	
+	else
 		GS_BGCOLOUR = 0x000000; /* Black, done */
-			
-	return 1;			    	   	
+
+	return 1;
 }

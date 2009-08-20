@@ -61,20 +61,20 @@ int rpcNTPBinit(void)
 		return -1;
 
 	SifInitRpc(0);
-		
+
 	/* bind to rpc on iop */
 	do {
 		if ((ret = SifBindRpc(&rpcclient, 0x80000a10, 0)) < 0)
 			return ret;
-			
+
 		if (rpcclient.server == NULL)
 			nopdelay();
-			
+
 	} while (rpcclient.server == NULL);
- 	
+
 	/* successfully inited */
 	RPCclient_Inited = 1;
-		
+
 	return 1;
 }
 
@@ -85,11 +85,11 @@ int rpcNTPBreset(void)
 {
 	RPCclient_Inited = 0;
 	rpcclient.server = NULL;
-	return 1; 
+	return 1;
 }
 
 /*
- * rpcNTPBgetRemoteCmd: get a NTPB request sent by client to server on IOP 
+ * rpcNTPBgetRemoteCmd: get a NTPB request sent by client to server on IOP
  */
 int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 {
@@ -98,7 +98,7 @@ int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 	/* check lib is inited */
 	if (!RPCclient_Inited)
 		return -1;
-					 	
+
 	if((ret = SifCallRpc(&rpcclient, CMD_GETREMOTECMD, rpc_mode, NULL, 0, &getRemoteCmdParam, sizeof(getRemoteCmdParam), 0, 0)) != 0) {
 		return ret;
 	}
@@ -107,10 +107,10 @@ int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 	*size = getRemoteCmdParam.size;
 	if (getRemoteCmdParam.size > 0)
 		memcpy(buf, getRemoteCmdParam.buf, getRemoteCmdParam.size);
-				
+
 	currentCmd = CMD_GETREMOTECMD;
 	*(int*)Rpc_Buffer = 1;
-	
+
 	return 1;
 }
 
@@ -124,24 +124,24 @@ int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode)
 	/* check lib is inited */
 	if (!RPCclient_Inited)
 		return -1;
-			
+
 	/* set global variables */
 	sendDataParam.cmd = cmd;
 	if (buf)
 		memcpy(sendDataParam.buf, buf, size);
 	else
-		memset(sendDataParam.buf, 0, size);	
-		
+		memset(sendDataParam.buf, 0, size);
+
 	sendDataParam.size = size;
-	 	
+
 	if((ret = SifCallRpc(&rpcclient, CMD_SENDDATA, rpc_mode, &sendDataParam, sizeof(sendDataParam), Rpc_Buffer, 4, 0, 0)) != 0) {
 		return ret;
 	}
-			
+
 	currentCmd = CMD_SENDDATA;
-	
+
 	*(int*)Rpc_Buffer = 1;
-	
+
 	return 1;
 }
 
@@ -155,15 +155,15 @@ int rpcNTPBEndReply(int rpc_mode)
 	/* check lib is inited */
 	if (!RPCclient_Inited)
 		return -1;
-				 	
+
 	if((ret = SifCallRpc(&rpcclient, CMD_ENDREPLY, rpc_mode, NULL, 0, Rpc_Buffer, 4, 0, 0)) != 0) {
 		return ret;
 	}
-			
+
 	currentCmd = CMD_ENDREPLY;
-	
+
 	*(int*)Rpc_Buffer = 1;
-	
+
 	return 1;
 }
 
@@ -173,14 +173,14 @@ int rpcNTPBEndReply(int rpc_mode)
 int rpcNTPBSync(int mode, int *cmd, int *result)
 {
 	int funcIsExecuting, i;
-	
+
 	/* check if any functions are registered */
 	if (currentCmd == CMD_NONE)
 		return -1;
-	
+
 	/* check if function is still processing */
 	funcIsExecuting = SifCheckStatRpc(&rpcclient);
-	
+
 	/* if mode = 0, wait for function to finish */
 	if (mode == 0) {
 		while (SifCheckStatRpc(&rpcclient)) {
@@ -189,21 +189,21 @@ int rpcNTPBSync(int mode, int *cmd, int *result)
 		/* function has finished */
 		funcIsExecuting = 0;
 	}
-	
+
 	/* get the function that just finished */
 	if (cmd)
 		*cmd = currentCmd;
-	
+
 	/* if function is still processing, return 0 */
 	if (funcIsExecuting == 1)
 		return 0;
-	
+
 	/* function has finished, so clear last command */
 	currentCmd = CMD_NONE;
-	
+
 	/* get result */
 	if(result)
 		*result = *(int*)Rpc_Buffer;
-	
+
 	return 1;
 }

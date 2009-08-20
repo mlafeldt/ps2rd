@@ -24,7 +24,7 @@
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad		2.1.1.0
  * libpad		2.1.3.0
  * libpad		2.2.0.0
@@ -45,7 +45,7 @@ static u32 padReadpattern0[] = { // type 4
 	0x3c020000,			// lui 	 v0, $XXXX
 	0xff000000,			// sd 	 XX, $XXXX(XX)
 	0xffbf0000,			// sd  	 ra, $XXXX(sp)
-	0x24420000,			// addiu v0, v0, $XXXX 
+	0x24420000,			// addiu v0, v0, $XXXX
 	0x00000000,			// ...
 	0x00000000,			// ...
 	0x00000000, 		// ...
@@ -75,12 +75,12 @@ static u32 padReadpattern0_mask[] = {
 	0x00000000,
 	0x00000000,
 	0x00000000,
-	0xfc000000	   
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad		2.1.0.0
  */
 static u32 padReadpattern1[] = { // type 3
@@ -93,7 +93,7 @@ static u32 padReadpattern1[] = { // type 3
 	0x3c030000,			// lui 	 v1, $XXXX
 	0xff000000,			// sd 	 XX, $XXXX(XX)
 	0xffbf0000,			// sd  	 ra, $XXXX(sp)
-	0x24630000,			// addiu v1, v1, $XXXX 
+	0x24630000,			// addiu v1, v1, $XXXX
 	0x00000000,			// ...
 	0x00000000,			// ...
 	0x00000000, 		// ...
@@ -123,12 +123,12 @@ static u32 padReadpattern1_mask[] = {
 	0x00000000,
 	0x00000000,
 	0x00000000,
-	0xfc000000	   
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad		2.7.1.0
  * libpad		2.8.0.0
  */
@@ -138,23 +138,23 @@ static u32 padReadpattern2[] = { // type 5
 	0xffb10000,			// sd 	 s1, $XXXX(sp)
 	0x3c020000,			// lui	 v0, $XXXX
 	0xffb20000,			// sd 	 s2, $XXXX(sp)
-	0x0080882d,			// daddu s1, a0, zero 
+	0x0080882d,			// daddu s1, a0, zero
 	0x00a0902d,			// daddu s2, a1, zero
 	0x2404001c,			// li 	 a0, $0000001c
-	0x72231818,			// mult1 v1, s1, v1	
-	0x02442018,			// mult  a0, s2, a0	
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
+	0x72231818,			// mult1 v1, s1, v1
+	0x02442018,			// mult  a0, s2, a0
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
 	0x0c000000			// jal   DIntr
 };
 static u32 padReadpattern2_mask[] = {
@@ -164,28 +164,28 @@ static u32 padReadpattern2_mask[] = {
 	0xffff0000,
 	0xffff0000,
 	0xffffffff,
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
 	0x00000000,
 	0x00000000,
-	0x00000000,    
-	0xfc000000	   
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad      3.0.0.0
  */
 static u32 padReadpattern3[] = { //type 6
@@ -194,22 +194,22 @@ static u32 padReadpattern3[] = { //type 6
 	0xffb10000,			// sd 	 s1, $XXXX(sp)
 	0x3c020000,			// lui	 v0, $XXXX
 	0xffb20000,			// sd 	 s2, $XXXX(sp)
-	0x0080882d,			// daddu s1, a0, zero 
+	0x0080882d,			// daddu s1, a0, zero
 	0x00a0902d,			// daddu s2, a1, zero
 	0x2404001c,			// li 	 a0, $0000001c
-	0x72231818,			// mult1 v1, s1, v1	
-	0x02442018,			// mult  a0, s2, a0	
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
-	0x00000000,			// ...  
+	0x72231818,			// mult1 v1, s1, v1
+	0x02442018,			// mult  a0, s2, a0
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
+	0x00000000,			// ...
 	0x0c000000			// jal   DIntr
 };
 static u32 padReadpattern3_mask[] = {
@@ -219,27 +219,27 @@ static u32 padReadpattern3_mask[] = {
 	0xffff0000,
 	0xffff0000,
 	0xffffffff,
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
-	0x00000000,  
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
 	0x00000000,
 	0x00000000,
-	0x00000000,    
-	0xfc000000	   
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad2 support
- * 
+ *
  * libpad2		2.4.0.0
  * libpad2		2.5.0.0
  * libpad2		2.7.0.0
@@ -247,7 +247,7 @@ static u32 padReadpattern3_mask[] = {
  * libpad2		2.8.0.0
  * libpad2      3.0.0.0
  * libpad2      3.0.2.0
- */ 
+ */
 static u32 pad2Readpattern0[] = {
 	0x27bdffc0,			// addiu sp, sp, $ffc0
 	0x24020000, 		// li 	 v0, $XXXX
@@ -256,9 +256,9 @@ static u32 pad2Readpattern0[] = {
 	0x0080882d,			// daddu s1, a0, zero
 	0xffb20020,			// sd 	 s2, $0020(sp)
 	0x02222018,			// mult  a0, s1, v0
-	0x24660000, 		// addiu a2, v1, $XXXX	
+	0x24660000, 		// addiu a2, v1, $XXXX
 	0xffbf0030,			// sd 	 ra, $0030(sp)
-	0x00a0902d,			// daddu s2, a1, zero		
+	0x00a0902d,			// daddu s2, a1, zero
 	0x00000000,			// ...
 	0x00000000,			// ...
 	0x00000000,			// ...
@@ -267,20 +267,20 @@ static u32 pad2Readpattern0[] = {
 	0x00000000,			// ...
 	0x00000000,			// ...
 	0x00000000,			// ...
-	0x00000000,			// ...	
-	0x0c000000			// jal   scePad2LinkDriver	
+	0x00000000,			// ...
+	0x0c000000			// jal   scePad2LinkDriver
 };
 static u32 pad2Readpattern0_mask[] = {
 	0xffffffff,
 	0xffff0000,
 	0xffffffff,
-	0xffff0000,	
-	0xffffffff,	
-	0xffffffff,	
-	0xffffffff,
-	0xffff0000,	
+	0xffff0000,
 	0xffffffff,
 	0xffffffff,
+	0xffffffff,
+	0xffff0000,
+	0xffffffff,
+	0xffffffff,
 	0x00000000,
 	0x00000000,
 	0x00000000,
@@ -289,13 +289,13 @@ static u32 pad2Readpattern0_mask[] = {
 	0x00000000,
 	0x00000000,
 	0x00000000,
-	0x00000000,	
+	0x00000000,
 	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad		1.5.0.0
  */
 static u32 padReadpattern4[] = { //type 0
@@ -320,26 +320,26 @@ static u32 padReadpattern4_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffff0000,
-	0xffffffff,	
 	0xffffffff,
-	0xffffffff,  
-	0xffff0000,	  
-	0xffffffff,  
 	0xffffffff,
-	0xffffffff,  
 	0xffffffff,
-	0xffffffff,  
+	0xffff0000,
 	0xffffffff,
-	0xfc000000	   
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad		1.6.2.0
  * libpad		1.6.3.0
  */
-static u32 padReadpattern5[] = { //type 1	
+static u32 padReadpattern5[] = { //type 1
 	0x24020060,			// li		v0, $00000060
 	0x24070300,			// li		a3, $00000300
 	0x00a21818,			// mult		v1, a1, v0
@@ -365,26 +365,26 @@ static u32 padReadpattern5_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffff0000,
-	0xffffffff,  
-	0xffff0000,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xfc000000	   
+	0xffffffff,
+	0xffff0000,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad		2.0.0.0
  * libpad		2.0.5.0
  */
-static u32 padReadpattern6[] = { //type 2		
+static u32 padReadpattern6[] = { //type 2
 	0x24020060,			// li		v0, $00000060
 	0x24030180,			// li		v1, $00000180
 	0x00a22818,			// mult		a1, a1, v0
@@ -407,23 +407,23 @@ static u32 padReadpattern6_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffff0000,
-	0xffffffff,  
-	0xffff0000,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xffffffff,  
-	0xfc000000	   
+	0xffffffff,
+	0xffff0000,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xffffffff,
+	0xfc000000
 };
 
 /**************************************************************************
  * For libpad support
- * 
+ *
  * libpad          3.0.1.0
  * libpad          3.0.2.0
  */
-static u32 padReadpattern7[] = { //type 7			
+static u32 padReadpattern7[] = { //type 7
 	0x27bdffb0,		// addiu	sp, sp, $ffb0
 	0xffb20020,		// sd		s2, $0020(sp)
 	0xffb10010,		// sd		s1, $0010(sp)
@@ -458,16 +458,16 @@ static u32 padReadpattern7_mask[] = {
 	0xffffffff,
 	0xfc000000,
 	0xffffffff,
-	0x00000000,  	
-	0x00000000,  
-	0x00000000,  	
-	0x00000000,  
-	0x00000000,  	
-	0x00000000,  
-	0x00000000,  	
-	0x00000000,  
-	0x00000000,  	
-	0x00000000,  
-	0x00000000,  	
-	0xfc000000	   
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0xfc000000
 };

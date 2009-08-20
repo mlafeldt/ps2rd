@@ -1,6 +1,6 @@
 /*
  * myutil.h - Useful utility functions
- * 
+ *
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
  *
  * This file is part of Artemis, the PS2 game debugger.

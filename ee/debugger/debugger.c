@@ -210,24 +210,24 @@ static int post_reboot_hook(void)
 	ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
 	if (ret < 0)
 		while (1) ;
-		
+
 	GS_BGCOLOUR = 0xff00ff;
-		
+
 	/* Binding debugger module RPC server */
-	rpcNTPBreset();	
-	rpcNTPBinit();		
-		
+	rpcNTPBreset();
+	rpcNTPBinit();
+
 	GS_BGCOLOUR = 0x0000ff;
 
 	/* deinit services */
 	SifExitIopHeap();
-	SifLoadFileExit();	
+	SifLoadFileExit();
 	SifExitRpc();
 
 	/* automatic padRead hooking is done if needed */
 	if (g_debugger_opts.auto_hook)
 		patch_padRead();
-	
+
 	GS_BGCOLOUR = 0x000000;
 
 #ifdef DISABLE_AFTER_IOPRESET
@@ -250,7 +250,7 @@ void NewSifSetReg(u32 regnum, int regval)
 		debugger_ready = 0;
 		/* by setting set_reg_hook to 4 here, it will reach 0
 		 * at the last sceSifSetReg call in sceSifResetIop
-		 */  
+		 */
 		set_reg_hook = 4;
 	}
 
@@ -259,7 +259,7 @@ void NewSifSetReg(u32 regnum, int regval)
 		/* check if reboot is done */
 		if (!set_reg_hook && regnum == 0x80000000 && !regval) {
 			/* we filter the 1st IOP reboot done by LoadExecPS2 or its replacement function */
-			if (iop_reboot_count) { 
+			if (iop_reboot_count) {
 				/* IOP sync, needed since at this point it haven't yet been done by the game */
 				while (!(SifGetReg(SIF_REG_SMFLAG) & 0x40000))
 					;
@@ -268,7 +268,7 @@ void NewSifSetReg(u32 regnum, int regval)
 				debugger_ready = 1;
 			}
 			iop_reboot_count++;
-			_iop_reboot_count++;			
+			_iop_reboot_count++;
 		}
 	}
 }
@@ -277,15 +277,15 @@ void NewSifSetReg(u32 regnum, int regval)
  * read_mem: this function reads memory
  */
 static int read_mem(void *addr, int size, void *buf)
-{						
+{
 	DIntr();
 	ee_kmode_enter();
-		
+
 	memcpy((void *)buf, (void *)addr, size);
 
-	ee_kmode_exit();	
+	ee_kmode_exit();
 	EIntr();
-	
+
 	return 0;
 }
 
@@ -294,52 +294,52 @@ static int read_mem(void *addr, int size, void *buf)
  */
 static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
 {
-	int r, len, sndSize, dumpSize, dpos, rpos;	
-									
+	int r, len, sndSize, dumpSize, dpos, rpos;
+
 	if (dump_type == IOP_DUMP) {
 		dump_start |= 0xbc000000;
 		dump_end   |= 0xbc000000;
 	}
-	
+
 	len = dump_end - dump_start;
-	
+
 	/* reducing dump size to fit in buffer */
 	if (len > BUFSIZE)
 		dumpSize = BUFSIZE;
-	else		
+	else
 		dumpSize = len;
-	
-	dpos = 0;	
+
+	dpos = 0;
 	while (dpos < len) {
-		
-		/* dump mem part */							
+
+		/* dump mem part */
 		read_mem((void *)(dump_start + dpos), dumpSize, g_buf);
-			
+
 		/* reducing send size for rpc if needed */
 		if (dumpSize > 8192)
 			sndSize = 8192;
-		else		
+		else
 			sndSize = dumpSize;
-		
-		/* sending dump part datas */		
+
+		/* sending dump part datas */
 		rpos = 0;
 		while (rpos < dumpSize) {
 			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize, g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &r);										
+			rpcNTPBSync(0, NULL, &r);
 			rpos += sndSize;
 			if ((dumpSize - rpos) < 8192)
-				sndSize = dumpSize - rpos;				
+				sndSize = dumpSize - rpos;
 		}
-		
-		dpos += dumpSize;	
+
+		dpos += dumpSize;
 		if ((len - dpos) < BUFSIZE)
-			dumpSize = len - dpos;				
+			dumpSize = len - dpos;
 	}
 
 	/* send end of reply message */
 	rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-	rpcNTPBSync(0, NULL, &r);										
-		
+	rpcNTPBSync(0, NULL, &r);
+
 	return len;
 }
 
@@ -351,12 +351,12 @@ static int execRemoteCmd(void)
 	u16 remote_cmd;
 	int size;
 	int ret;
-	u8 cmd_buf[64]; 
-	
+	u8 cmd_buf[64];
+
 	/* get the remote command by RPC */
 	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, g_debugger_opts.rpc_mode);
 	rpcNTPBSync(0, NULL, &ret);
-		
+
 	if (remote_cmd != REMOTE_CMD_NONE) {
 		/* handle Dump requests */
 		if (remote_cmd == REMOTE_CMD_DUMPEE) {
@@ -374,55 +374,55 @@ static int execRemoteCmd(void)
 		/* handle Halt request */
 		else if (remote_cmd == REMOTE_CMD_HALT) {
 			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);													
+			rpcNTPBSync(0, NULL, &ret);
 			if (!haltState) {
 				haltState = 1;
 				while (haltState)
 					execRemoteCmd();
-			}								
+			}
 		}
 		/* handle Resume request */
 		else if (remote_cmd == REMOTE_CMD_RESUME) {
 			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);	
-			if (haltState) {			
-				haltState = 0; 
-			}			
+			rpcNTPBSync(0, NULL, &ret);
+			if (haltState) {
+				haltState = 0;
+			}
 		}
-		/* handle raw mem patches adding */		
+		/* handle raw mem patches adding */
 		else if (remote_cmd == REMOTE_CMD_ADDMEMPATCHES) {
 			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);	
+			rpcNTPBSync(0, NULL, &ret);
 			/*
 			 * TODO ...
-			 */ 
+			 */
 		}
 		/* handle raw mem patches clearing */
 		else if (remote_cmd == REMOTE_CMD_CLEARMEMPATCHES) {
 			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);	
+			rpcNTPBSync(0, NULL, &ret);
 			/*
 			 * TODO ...
-			 */ 
+			 */
 		}
 		/* handle codes adding */
 		else if (remote_cmd == REMOTE_CMD_ADDRAWCODES) {
 			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);	
+			rpcNTPBSync(0, NULL, &ret);
 			/*
 			 * TODO ...
-			 */ 
+			 */
 		}
 		/* handle codes clearing */
 		else if (remote_cmd == REMOTE_CMD_CLEARRAWCODES) {
 			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);	
+			rpcNTPBSync(0, NULL, &ret);
 			/*
 			 * TODO ...
-			 */ 			
+			 */
 		}
 	}
-	
+
 	return 1;
 }
 
@@ -433,8 +433,8 @@ int _init(void)
 {
 	/* Set default debugger options */
 	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
-	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;	
-	
+	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
+
 	/* Hook syscalls */
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
@@ -463,6 +463,6 @@ int debugger_loop(void)
 	/* check/execute remote command */
 	if (debugger_ready)
 		execRemoteCmd();
-	
+
 	return 0;
 }

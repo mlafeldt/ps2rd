@@ -1,6 +1,6 @@
 /*
  * mystring.c - Small library of string functions
- * 
+ *
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
  *
  * This file is part of Artemis, the PS2 game debugger.

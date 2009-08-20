@@ -561,7 +561,7 @@ BootCodeHandler:
  * void *SetupThread(void *gp,	$a0
  *	void *stack,		$a1
  *	s32 stack_size,		$a2
- *	void *args,		$a3 
+ *	void *args,		$a3
  *	void *root_func)	$t0
  *
  ******************************************************************************/
