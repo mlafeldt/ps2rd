@@ -186,12 +186,12 @@ extern LIBCONFIG_API config_setting_t *config_setting_set_string_elem(
   /* const config_setting_t * */ S)                                     \
   (((S)->type == CONFIG_TYPE_GROUP) || ((S)->type == CONFIG_TYPE_LIST)  \
    || ((S)->type == CONFIG_TYPE_ARRAY))
-  
+
 #define /* int */ config_setting_is_number(/* const config_setting_t * */ S) \
   (((S)->type == CONFIG_TYPE_INT)                                       \
    || ((S)->type == CONFIG_TYPE_INT64)                                  \
    || ((S)->type == CONFIG_TYPE_FLOAT))
-  
+
 #define /* int */ config_setting_is_scalar(/* const config_setting_t * */ S) \
   (((S)->type == CONFIG_TYPE_BOOL) || ((S)->type == CONFIG_TYPE_STRING) \
    || config_setting_is_number(S))

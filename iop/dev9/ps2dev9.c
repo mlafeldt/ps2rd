@@ -130,7 +130,7 @@ int _start(int argc, char **argv)
 
 	if (res)
 		return res;
-	
+
 	if (RegisterLibraryEntries(&_exp_dev9) != 0) {
 		return 1;
 	}
@@ -181,7 +181,7 @@ static int dev9_intr_dispatch(int flag)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -737,9 +737,9 @@ static int pcmcia_intr(void *unused)
 	if (cstc1 & 0x03 || cstc2 & 0x03) {	/* Card removed or added? */
 		if (p_dev9_intr_cb)
 			p_dev9_intr_cb(1);
-		
+
 		/* Shutdown the card.  */
-		DEV9_REG(DEV9_R_POWER) = 0;	
+		DEV9_REG(DEV9_R_POWER) = 0;
 		DEV9_REG(DEV9_R_1474) = 0;
 
 		pcmcia_device_probe();

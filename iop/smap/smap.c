@@ -1,4 +1,4 @@
-/* 
+/*
    smap.c
 
    Copyright (c)2001 Sony Computer Entertainment Inc.
@@ -187,7 +187,7 @@ typedef struct SMap
 
 #define	SMAP_TXFIFO_CTRL			0x1000
 #define	TXFIFO_RESET				(1<<0)
-#define	TXFIFO_DMAEN				(1<<1) 
+#define	TXFIFO_DMAEN				(1<<1)
 #define	SMAP_TXFIFO_WR_PTR		0x1004
 #define	SMAP_TXFIFO_SIZE			0x1008
 #define	SMAP_TXFIFO_FRAME_CNT	0x100C
@@ -196,7 +196,7 @@ typedef struct SMap
 
 #define	SMAP_RXFIFO_CTRL			0x1030
 #define	RXFIFO_RESET				(1<<0)
-#define	RXFIFO_DMAEN				(1<<1) 
+#define	RXFIFO_DMAEN				(1<<1)
 #define	SMAP_RXFIFO_RD_PTR		0x1034
 #define	SMAP_RXFIFO_SIZE			0x1038
 #define	SMAP_RXFIFO_FRAME_CNT	0x103C
@@ -435,7 +435,7 @@ extern void		SMapLowLevelInput(struct pbuf* pBuf);
 
 static SMap		SMap0;
 
-static u32	au32TXBuf[(SMAP_TXMAXSIZE+SMAP_TXMAXTAILPAD+3)/4]; 
+static u32	au32TXBuf[(SMAP_TXMAXSIZE+SMAP_TXMAXTAILPAD+3)/4];
 
 /*--------------------------------------------------------------------------*/
 
@@ -1115,10 +1115,10 @@ ConfirmAutoNegotiation(SMap* pSMap)
 																																	 DsPHYTER_BMSR));
 		return	-1;
 	}
-	
+
 	// **ARGH: UGLY HACK! FIXME! **
 	spdrev = SMAP_REG16(pSMap, SPD_R_REV_1);
-	
+
 	if (spdrev >= 0x13)
 	{
 		dbgprintf("Disabling autonegotiation sync on v12 - seems to work anyway - beware, hack inside.\n");

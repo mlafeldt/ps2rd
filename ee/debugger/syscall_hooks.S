@@ -8,7 +8,7 @@
 
 #* SifSetReg syscall replacement number
 .globl __NR_OrigSifSetReg
-__NR_OrigSifSetReg: .word 251 
+__NR_OrigSifSetReg: .word 251
 
 
 #**************************************************************************

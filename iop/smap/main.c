@@ -206,7 +206,7 @@ QueueHandler(void)
 }
 
 
-static int 
+static int
 SMapInterrupt(int iFlag)
 {
 	int	iFlags=SMap_GetIRQ();
@@ -239,7 +239,7 @@ SMapInterrupt(int iFlag)
 }
 
 
-static unsigned int 
+static unsigned int
 Timer(void* pvArg)
 {
 
@@ -437,7 +437,7 @@ SMapLowLevelInput(PBuf* pBuf)
 	//When we receive data, the interrupt-handler will invoke this function, which means we are in an interrupt-context. Pass on
 	//the received data to ps2ip.
 
-	ps2ip_input(pBuf,&NIF);	
+	ps2ip_input(pBuf,&NIF);
 }
 
 

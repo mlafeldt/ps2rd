@@ -132,7 +132,7 @@
 #ifndef _STDLIB_H
 #define _STDLIB_H
 #endif
-  
+
 #include <malloc.h>
 #endif
 #include "private.h"
@@ -140,7 +140,7 @@
 /* these delcarations are provided to suppress compiler warnings */
 extern int libconfig_yylex();
 extern int libconfig_yyget_lineno();
-  
+
 static const char *err_array_elem_type = "mismatched element type in array";
 static const char *err_duplicate_setting = "duplicate setting name";
 
@@ -1448,7 +1448,7 @@ yyreduce:
     {
     ctx->setting = config_setting_add(ctx->parent, (yyvsp[(1) - (1)].sval), CONFIG_TYPE_NONE);
     free((yyvsp[(1) - (1)].sval));
-  
+
     if(ctx->setting == NULL)
     {
       libconfig_yyerror(scanner, ctx, err_duplicate_setting);
@@ -1482,7 +1482,7 @@ yyreduce:
 #line 140 "grammar.y"
     {
     if(ctx->parent)
-      ctx->parent = ctx->parent->parent;    
+      ctx->parent = ctx->parent->parent;
   }
     break;
 
@@ -1507,7 +1507,7 @@ yyreduce:
 #line 163 "grammar.y"
     {
     if(ctx->parent)
-      ctx->parent = ctx->parent->parent;    
+      ctx->parent = ctx->parent->parent;
   }
     break;
 
@@ -1518,7 +1518,7 @@ yyreduce:
     {
       config_setting_t *e = config_setting_set_bool_elem(ctx->parent, -1,
                                                          (int)(yyvsp[(1) - (1)].ival));
-      
+
       if(! e)
       {
         libconfig_yyerror(scanner, ctx, err_array_elem_type);
@@ -1663,7 +1663,7 @@ yyreduce:
       config_setting_t *e = config_setting_set_string_elem(ctx->parent, -1,
                                                            (yyvsp[(1) - (1)].sval));
       free((yyvsp[(1) - (1)].sval));
-      
+
       if(! e)
       {
         libconfig_yyerror(scanner, ctx, err_array_elem_type);
