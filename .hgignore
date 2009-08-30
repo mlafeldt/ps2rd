@@ -1,0 +1,8 @@
+syntax: glob
+
+*.o
+*.elf
+*.erl
+*.irx
+
+release/
