@@ -2,36 +2,10 @@ Artemis Commit Policy
 written by misfire <misfire@xploderfreax.de>
 
 
-Stable trunk strategy
----------------------
+All development of Artemis takes place at http://bitbucket.org/misfire/artemis/.
 
-As we follow the stable trunk strategy, direct changes MUST NOT be made to the
-SVN trunk of this project, that is, trunk/artemis/.
-
-Development may only take place in the development branch(es). If new features,
-bug fixes, etc. turn out to be stable, they'll be merged to the trunk later on.
-
-
-artemis-next
-------------
-
-branch/artemis-next is the main development branch. It is supposed to contain
-the latest cutting-edge code of the project.
-
-I'm the maintainer of artemis-next and take responsibility for it. If you have
-anything to contribute, don't hesitate to send me patches via email.
-
-
-More branches
--------------
-
-Of course, we can add more branches if need be. For example, I can think of an
-artemis-gui branch where the GUI people to their work without affecting the rest
-of the team.
-
-
-Licensing
----------
+I'm the maintainer of Artemis and take responsibility for it. If you have
+anything to contribute, don't hesitate to send me patches.
 
 Artemis is written and distributed under the GNU General Public License which
 means that its source code is freely-distributed and available to the general
