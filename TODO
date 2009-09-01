@@ -1,15 +1,1 @@
-ee/loader/
-- add loader.boot2 setting to boot/hack demos
-- calculate better game ID for auto-detection
-- add automatic search for hook codes (scePadRead patterns...)
-- add compatibility layer for code types (convert E type to D etc.)
-
-ee/engine/
-- do syscall hooking internally when ERL is loaded
-- implement code type suggestions from http://gshi.org/vb/showthread.php?t=3680
-
-ee/debugger/
-- manage code and hook list from engine
-- pass IP settings to SMAP module
-- add support for DNAS games
-- improve overall game compatibility
+Visit http://bitbucket.org/misfire/artemis/issues/ for a list of open issues.
