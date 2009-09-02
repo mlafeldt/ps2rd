@@ -337,6 +337,10 @@ static int start_game(const char *boot2)
 {
 	char elfname[FIO_PATH_MAX];
 	enum dev dev = DEV_CD;
+	char argbuf[256];
+	char *argv[16];
+	int argc = 0;
+	char *tok = NULL;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
 		_cdStandby(CDVD_BLOCK);
@@ -350,29 +354,39 @@ static int start_game(const char *boot2)
 		boot2 = elfname;
 	}
 
-	if (!file_exists(boot2)) {
-		A_PRINTF("Error: ELF %s not found\n", boot2);
+	/* build args for LoadExecPS2() */
+	memset(argv, 0, sizeof(argv));
+	memset(argbuf, 0, sizeof(argbuf));
+	strncpy(argbuf, boot2, sizeof(argbuf)-1);
+
+	tok = strtok(argbuf, "\t ");
+	while (tok != NULL) {
+		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, argc, tok);
+		argv[argc++] = tok;
+		tok = strtok(NULL, "\t ");
+	}
+
+	if (!file_exists(argv[0])) {
+		A_PRINTF("Error: ELF %s not found\n", argv[0]);
 		if (dev == DEV_CD)
 			_cdStop(CDVD_NOBLOCK);
 		return -1;
 	}
 
 	A_PRINTF("Starting game...\n");
-	D_PRINTF("Running ELF %s ...\n", boot2);
+	D_PRINTF("%s: running ELF %s ...\n", __FUNCTION__, argv[0]);
 
 	padPortClose(PAD_PORT, PAD_SLOT);
 	padReset();
-	//_ps2sdk_libc_deinit();
 
-	/* TODO pass args to ELF */
-	LoadExecPS2(boot2, 0, NULL);
+	LoadExecPS2(argv[0], argc-1, &argv[1]);
 
 	if (dev == DEV_CD)
 		_cdStop(CDVD_NOBLOCK);
 	padInit(0);
 	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
 
-	A_PRINTF("Error: could not load ELF %s\n", boot2);
+	A_PRINTF("Error: could not load ELF %s\n", argv[0]);
 
 	return -1;
 }
@@ -468,9 +482,9 @@ int main(int argc, char *argv[])
 		} else if (new_pad & PAD_SELECT) {
 			boot2 = _config_get_string_elem(&config, SET_BOOT2, select++);
 			if (boot2 != NULL) {
-				A_PRINTF("boot ELF is %s\n", boot2);
+				A_PRINTF("Boot ELF is %s\n", boot2);
 			} else {
-				A_PRINTF("boot ELF is read from SYSTEM.CNF\n");
+				A_PRINTF("Boot ELF is read from SYSTEM.CNF\n");
 				select = 0;
 			}
 		} else if (new_pad & PAD_CIRCLE) {
