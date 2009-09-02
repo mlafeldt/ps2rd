@@ -1,5 +1,3 @@
-$Id$
-
 Artemis uses libconfig to read and store its configuration:
 http://www.hyperrealm.com/libconfig/libconfig_manual.html
 

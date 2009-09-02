@@ -1,5 +1,3 @@
-$Id$
-
 Code Types supported by Artemis
 written by misfire <misfire@xploderfreax.de>
 
