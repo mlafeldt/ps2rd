@@ -150,8 +150,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install SDK libraries
 	 */
-	if (config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-		addr = config_get_u32(config, SET_SDKLIBS_ADDR);
+	if (_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+		addr = _config_get_u32(config, SET_SDKLIBS_ADDR);
 		file = &_erl_files[ERL_FILE_LIBKERNEL];
 		if (__install_erl(file, addr) < 0)
 			return -1;
@@ -176,8 +176,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install elfldr
 	 */
-	if (config_get_bool(config, SET_ELFLDR_INSTALL)) {
-		addr = config_get_u32(config, SET_ELFLDR_ADDR);
+	if (_config_get_bool(config, SET_ELFLDR_INSTALL)) {
+		addr = _config_get_u32(config, SET_ELFLDR_ADDR);
 		file = &_erl_files[ERL_FILE_ELFLDR];
 
 		if (__install_erl(file, addr) < 0)
@@ -187,8 +187,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install debugger
 	 */
-	if (config_get_bool(config, SET_DEBUGGER_INSTALL)) {
-		addr = config_get_u32(config, SET_DEBUGGER_ADDR);
+	if (_config_get_bool(config, SET_DEBUGGER_INSTALL)) {
+		addr = _config_get_u32(config, SET_DEBUGGER_ADDR);
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
 		if (__install_erl(file, addr) < 0)
@@ -203,8 +203,8 @@ int install_erls(const config_t *config, engine_t *engine)
 		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
 		debugger_opts_t opts;
 		GET_SYMBOL(set_debugger_opts, "set_debugger_opts", file);
-		opts.auto_hook = config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
-		opts.rpc_mode = config_get_int(config, SET_DEBUGGER_RPC_MODE);
+		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
+		opts.rpc_mode = _config_get_int(config, SET_DEBUGGER_RPC_MODE);
 		set_debugger_opts(&opts);
 	}
 

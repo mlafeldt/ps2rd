@@ -223,12 +223,12 @@ static int install_engine(const config_t *config, engine_t *engine)
 	const char *p = NULL;
 	u32 addr;
 
-	if (!config_get_bool(config, SET_ENGINE_INSTALL))
+	if (!_config_get_bool(config, SET_ENGINE_INSTALL))
 		return 0;
 
-	addr = config_get_u32(config, SET_ENGINE_ADDR);
+	addr = _config_get_u32(config, SET_ENGINE_ADDR);
 
-	if ((p = config_get_string(config, SET_ENGINE_FILE)) != NULL)
+	if ((p = _config_get_string(config, SET_ENGINE_FILE)) != NULL)
 		return engine_install_from_file(__pathname(p), addr, engine);
 	else
 		return engine_install_from_mem(_engine_erl_start, addr, engine);
@@ -239,7 +239,7 @@ static int install_engine(const config_t *config, engine_t *engine)
  */
 static int load_cheats(const config_t *config, cheats_t *cheats)
 {
-	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
+	const char *cheatfile = _config_get_string(config, SET_CHEATS_FILE);
 	char *buf = NULL;
 	int ret;
 
@@ -382,6 +382,7 @@ int main(int argc, char *argv[])
 	cheats_t cheats;
 	engine_t engine;
 	const char *boot2 = NULL;
+	int select = 0;
 
 	SifInitRpc(0);
 	init_scr();
@@ -397,15 +398,15 @@ int main(int argc, char *argv[])
 	A_PRINTF("Initializing...\n");
 
 	D_PRINTF("* Reading config...\n");
-	config_build(&config);
+	_config_build(&config);
 	if (config_read_file(&config, __pathname(CONFIG_FILE)) != CONFIG_TRUE)
 		D_PRINTF("config: %s\n", config_error_text(&config));
-	config_print(&config);
+	_config_print(&config);
 
-	if (g_bootdev != DEV_HOST && config_get_bool(&config, SET_IOP_RESET))
+	if (g_bootdev != DEV_HOST && _config_get_bool(&config, SET_IOP_RESET))
 		reset_iop("rom0:UDNL rom0:EELOADCNF");
 
-	if (config_get_bool(&config, SET_SBV_PATCHES)) {
+	if (_config_get_bool(&config, SET_SBV_PATCHES)) {
 		D_PRINTF("* Applying SBV patches...\n");
 		sbv_patch_enable_lmb();
 		sbv_patch_disable_prefix_check();
@@ -464,9 +465,15 @@ int main(int argc, char *argv[])
 		if ((new_pad & PAD_START) || (new_pad & PAD_CROSS)) {
 			start_game(boot2);
 		} else if (new_pad & PAD_SELECT) {
-			/* Do nothing */
+			boot2 = _config_get_string_elem(&config, SET_BOOT2, select++);
+			if (boot2 != NULL) {
+				A_PRINTF("boot ELF is %s\n", boot2);
+			} else {
+				A_PRINTF("boot ELF is read from SYSTEM.CNF\n");
+				select = 0;
+			}
 		} else if (new_pad & PAD_CIRCLE) {
-			if (!config_get_bool(&config, SET_ENGINE_INSTALL))
+			if (!_config_get_bool(&config, SET_ENGINE_INSTALL))
 				A_PRINTF("Error: could not activate cheats - "
 					"engine not installed\n");
 			else
@@ -476,17 +483,13 @@ int main(int argc, char *argv[])
 		} else if (new_pad & PAD_SQUARE) {
 			/* Do nothing */
 		} else if (new_pad & PAD_L1) {
-			boot2 = config_get_string(&config, SET_BOOT2_L1);
-			D_PRINTF("boot2 set to %s\n", boot2);
+			/* Do nothing */
 		} else if (new_pad & PAD_L2) {
-			boot2 = config_get_string(&config, SET_BOOT2_L2);
-			D_PRINTF("boot2 set to %s\n", boot2);
+			/* Do nothing */
 		} else if (new_pad & PAD_R1) {
-			boot2 = config_get_string(&config, SET_BOOT2_R1);
-			D_PRINTF("boot2 set to %s\n", boot2);
+			/* Do nothing */
 		} else if (new_pad & PAD_R2) {
-			boot2 = config_get_string(&config, SET_BOOT2_R2);
-			D_PRINTF("boot2 set to %s\n", boot2);
+			/* Do nothing */
 		}
 	}
 end:

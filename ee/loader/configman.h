@@ -55,10 +55,7 @@ enum setting_key {
 	/* loader */
 	SET_IOP_RESET = 0,
 	SET_SBV_PATCHES,
-	SET_BOOT2_L1,
-	SET_BOOT2_L2,
-	SET_BOOT2_R1,
-	SET_BOOT2_R2,
+	SET_BOOT2,
 	/* engine */
 	SET_ENGINE_INSTALL,
 	SET_ENGINE_ADDR,
@@ -78,20 +75,22 @@ enum setting_key {
 	SET_CHEATS_FILE
 };
 
-/* libconfig wrapper functions */
 int _config_lookup_int(const config_t *config, enum setting_key key, long *value);
 int _config_lookup_u32(const config_t *config, enum setting_key key, u32 *value);
 int _config_lookup_float(const config_t *config, enum setting_key key, double *value);
 int _config_lookup_bool(const config_t *config, enum setting_key key, int *value);
 int _config_lookup_string(const config_t *config, enum setting_key key, const char **value);
 
-long config_get_int(const config_t *config, enum setting_key key);
-u32 config_get_u32(const config_t *config, enum setting_key key);
-double config_get_float(const config_t *config, enum setting_key key);
-int config_get_bool(const config_t *config, enum setting_key key);
-const char *config_get_string(const config_t *config, enum setting_key key);
+long _config_get_int(const config_t *config, enum setting_key key);
+u32 _config_get_u32(const config_t *config, enum setting_key key);
+double _config_get_float(const config_t *config, enum setting_key key);
+int _config_get_bool(const config_t *config, enum setting_key key);
+const char *_config_get_string(const config_t *config, enum setting_key key);
+const char *_config_get_string_elem(const config_t *config, enum setting_key key, int index);
 
-void config_build(config_t *config);
-void config_print(const config_t *config);
+int _config_setting_length(const config_t *config, enum setting_key key);
+
+void _config_build(config_t *config);
+void _config_print(const config_t *config);
 
 #endif /* _CONFIGMAN_H_ */

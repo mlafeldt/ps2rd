@@ -29,10 +29,7 @@
 static const char *setting_paths[] = {
 	"loader.iop_reset",
 	"loader.sbv_patches",
-	"loader.boot2_L1",
-	"loader.boot2_L2",
-	"loader.boot2_R1",
-	"loader.boot2_R2",
+	"loader.boot2",
 	"engine.install",
 	"engine.addr",
 	"engine.file",
@@ -83,9 +80,7 @@ CONFIG_LOOKUP(config, key, value, bool)
 int _config_lookup_string(const config_t *config, enum setting_key key, const char **value)
 CONFIG_LOOKUP(config, key, value, string)
 
-
-/* XXX create another macro for functions below? */
-long config_get_int(const config_t *config, enum setting_key key)
+long _config_get_int(const config_t *config, enum setting_key key)
 {
 	long value;
 
@@ -94,7 +89,7 @@ long config_get_int(const config_t *config, enum setting_key key)
 	return value;
 }
 
-u32 config_get_u32(const config_t *config, enum setting_key key)
+u32 _config_get_u32(const config_t *config, enum setting_key key)
 {
 	u32 value;
 
@@ -103,7 +98,7 @@ u32 config_get_u32(const config_t *config, enum setting_key key)
 	return value;
 }
 
-double config_get_float(const config_t *config, enum setting_key key)
+double _config_get_float(const config_t *config, enum setting_key key)
 {
 	double value;
 
@@ -112,7 +107,7 @@ double config_get_float(const config_t *config, enum setting_key key)
 	return value;
 }
 
-int config_get_bool(const config_t *config, enum setting_key key)
+int _config_get_bool(const config_t *config, enum setting_key key)
 {
 	int value;
 
@@ -121,22 +116,40 @@ int config_get_bool(const config_t *config, enum setting_key key)
 	return value;
 }
 
-const char *config_get_string(const config_t *config, enum setting_key key)
+const char *_config_get_string(const config_t *config, enum setting_key key)
 {
 	const char *s = NULL;
 
 	_config_lookup_string(config, key, &s);
 
-	/* The returned string must not be freed by the caller! */
 	return s;
 }
 
+const char *_config_get_string_elem(const config_t *config, enum setting_key key, int index)
+{
+	config_setting_t *set = config_lookup(config, setting_paths[key]);
+
+	if (set == NULL)
+		return NULL;
+
+	return config_setting_get_string_elem(set, index);
+}
+
+int _config_setting_length(const config_t *config, enum setting_key key)
+{
+	config_setting_t *set = config_lookup(config, setting_paths[key]);
+
+	if (set == NULL)
+		return -1;
+
+	return config_setting_length(set);
+}
 
 /**
- * config_build - Build configuration with all required settings.
+ * _config_build - Build configuration with all required settings.
  * @config: ptr to config
  */
-void config_build(config_t *config)
+void _config_build(config_t *config)
 {
 	config_setting_t *root, *group, *set;
 
@@ -156,10 +169,7 @@ void config_build(config_t *config)
 #ifndef _NO_SBV
 	config_setting_set_bool(set, 1);
 #endif
-	set = config_setting_add(group, "boot2_L1", CONFIG_TYPE_STRING);
-	set = config_setting_add(group, "boot2_L2", CONFIG_TYPE_STRING);
-	set = config_setting_add(group, "boot2_R1", CONFIG_TYPE_STRING);
-	set = config_setting_add(group, "boot2_R2", CONFIG_TYPE_STRING);
+	set = config_setting_add(group, "boot2", CONFIG_TYPE_ARRAY);
 
 	/*
 	 * engine section
@@ -237,13 +247,14 @@ void config_build(config_t *config)
 }
 
 /**
- * config_print - Print out all config settings.
+ * _config_print - Print out all config settings.
  * @config: ptr to config
  */
-void config_print(const config_t *config)
+void _config_print(const config_t *config)
 {
 	u32 value;
 	const char *s = NULL;
+	int i;
 
 	printf("config settings:\n");
 
@@ -259,14 +270,18 @@ void config_print(const config_t *config)
 #define PRINT_STRING(key) \
 	_config_lookup_string(config, key, &s); \
 	printf("%s = %s\n", setting_paths[key], s)
+#define PRINT_STRING_ARRAY(key) \
+	i = 0; \
+	do { \
+		s = _config_get_string_elem(config, key, i); \
+		printf("%s[%i] = %s\n", setting_paths[key], i, s); \
+		i++; \
+	} while (s != NULL)
 
 	/* loader */
 	PRINT_BOOL(SET_IOP_RESET);
 	PRINT_BOOL(SET_SBV_PATCHES);
-	PRINT_STRING(SET_BOOT2_L1);
-	PRINT_STRING(SET_BOOT2_L2);
-	PRINT_STRING(SET_BOOT2_R1);
-	PRINT_STRING(SET_BOOT2_R2);
+	PRINT_STRING_ARRAY(SET_BOOT2);
 
 	/* engine */
 	PRINT_BOOL(SET_ENGINE_INSTALL);
