@@ -20,6 +20,20 @@ Section "loader"
    - sbv_patch_disable_prefix_check
    - sbv_patch_user_mem_clear
 
+* boot2 [string array, not set by default]
+
+  'boot2' holds a list of ELF pathnames (including arguments). You can later
+  select one of those ELFs in order to boot it instead of the disc's default
+  ELF. This is handy if you want to directly boot/hack demos, for instance.
+
+  Example:
+
+  boot2 = [
+    "cdrom0:\\MGS2\\MGS2.ELF;1 foo bar",
+    "cdrom0:\\KESSEN2\\KESSEN2.ELF;1",
+    "cdrom0:\\REZ.ELF;1"
+  ];
+
 
 Section "engine"
 ----------------
