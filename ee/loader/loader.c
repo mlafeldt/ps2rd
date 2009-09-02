@@ -46,6 +46,7 @@
 #define OPTIONS \
 	"Options:\n" \
 	"START | X - Start Game\n" \
+	"SELECT    - Select Boot ELF\n" \
 	"CIRCLE    - Activate Cheats\n"
 
 #define PAD_PORT	0
