@@ -105,7 +105,7 @@ extern int _eesync_irx_size;
 /* TODO: make it configurable */
 #define IRX_ADDR	0x80030000
 
-#define IRX_NUM		5
+#define IRX_NUM		7
 
 /* RAM file table entry */
 typedef struct {
