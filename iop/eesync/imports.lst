@@ -1,0 +1,10 @@
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+I_QueryBootMode
+I_SetPostResetcb
+loadcore_IMPORTS_end
+
+sifman_IMPORTS_start
+I_sceSifSetSMFlag
+sifman_IMPORTS_end
