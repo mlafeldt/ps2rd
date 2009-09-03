@@ -95,6 +95,12 @@ extern int _debugger_irx_size;
 extern u8  _netlog_irx_start[];
 extern u8  _netlog_irx_end[];
 extern int _netlog_irx_size;
+extern u8  _memdisk_irx_start[];
+extern u8  _memdisk_irx_end[];
+extern int _memdisk_irx_size;
+extern u8  _eesync_irx_start[];
+extern u8  _eesync_irx_end[];
+extern int _eesync_irx_size;
 
 /* TODO: make it configurable */
 #define IRX_ADDR	0x80030000
@@ -161,6 +167,8 @@ static void copy_modules_to_kernel(u32 addr)
 	ramfile_set(file_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
 	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
 	ramfile_set(file_ptr++, "netlog", _netlog_irx_start, _netlog_irx_size);
+	ramfile_set(file_ptr++, "memdisk", _memdisk_irx_start, _memdisk_irx_size);
+	ramfile_set(file_ptr++, "eesync", _eesync_irx_start, _eesync_irx_size);
 	ramfile_set(file_ptr, NULL, 0, 0); /* terminator */
 
 	/*

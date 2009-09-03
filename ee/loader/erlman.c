@@ -45,8 +45,8 @@ enum {
 #ifdef _DEBUG
 	ERL_FILE_LIBC,
 	ERL_FILE_LIBDEBUG,
-	ERL_FILE_LIBPATCHES,
 #endif
+	ERL_FILE_LIBPATCHES,
 	ERL_FILE_DEBUGGER,
 	ERL_FILE_ELFLDR,
 
@@ -58,8 +58,8 @@ extern u8  _libkernel_erl_start[];
 #ifdef _DEBUG
 extern u8  _libc_erl_start[];
 extern u8  _libdebug_erl_start[];
-extern u8  _libpatches_erl_start[];
 #endif
+extern u8  _libpatches_erl_start[];
 extern u8  _debugger_erl_start[];
 extern u8  _elfldr_erl_start[];
 
@@ -83,11 +83,11 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 		.name = "libdebug.erl",
 		.start = _libdebug_erl_start,
 	},
+#endif
 	{
 		.name = "libpatches.erl",
 		.start = _libpatches_erl_start,
 	},
-#endif
 	{
 		.name = "debugger.erl",
 		.start = _debugger_erl_start,
