@@ -28,6 +28,10 @@
 #include <sifrpc.h>
 #include <string.h>
 #include <syscallnr.h>
+#include <io_common.h>
+#include <fileio.h>
+#include <sbv_patches.h>
+#include <debug.h>
 
 /*
  * TODO: Eventually, this is where all the hacking magic happens:
@@ -40,11 +44,15 @@ char *erl_id = "debugger";
 #if 0
 char *erl_dependancies[] = {
 	"libkernel",
+	"libpatches",
 	NULL
 };
 #endif
 
-/* padread_hooks.c function */
+/* loadfile.c function */
+extern int SifLoadModuleAsync(const char *path, int arg_len, const char *args);
+
+/* padread_hooks.c functions */
 extern int patch_padRead(void);
 
 /* debugger_rpc.c functions */
@@ -55,22 +63,46 @@ extern int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode);
 extern int rpcNTPBEndReply(int rpc_mode);
 extern int rpcNTPBSync(int mode, int *cmd, int *result);
 
+/* do not link to strcpy() from libc! */
+#define __strcpy(dest, src) \
+	strncpy(dest, src, strlen(src))
+
+/* GS macro */
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
+/* reset packet structs */
+typedef struct {
+	u32 psize:8;
+	u32 dsize:24;
+	u32 daddr;
+	u32 fcode;
+} _sceSifCmdHdr;
+
+typedef struct {
+	_sceSifCmdHdr chdr;
+	int size;
+	int flag;
+	char arg[0x50];
+} _sceSifCmdResetData __attribute__((aligned(16)));
+
+/* for syscall hooks */
 extern void OrigSifSetReg(u32 register_num, int register_value);
 extern void HookSifSetReg(u32 register_num, int register_value);
 extern int __NR_OrigSifSetReg;
+extern u32 HookSifSetDma(SifDmaTransfer_t *sdd, s32 len);
+extern u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len);
+extern int (*OldSifSetReg)(u32 register_num, int register_value);
 
-static int (*OldSifSetReg)(u32 register_num, int register_value) = NULL;
+/* SifSetReg syscall hook counter */
 static int set_reg_hook = 0;
+
+/* debugger ready state, allow it to know when to start RPC transfers */
 static int debugger_ready = 0;
 
 /* libkernel reboot counter */
 extern int _iop_reboot_count;
 
-/* internal reboot counter */
-static int iop_reboot_count = 0;
-
+/* buffer for modules load and memory reads */
 #define BUFSIZE 	80*1024
 static u8 g_buf[BUFSIZE] __attribute__((aligned(64)));
 
@@ -89,6 +121,8 @@ typedef struct {
 #define HASH_PS2SMAP	0x0769a3f0
 #define HASH_DEBUGGER	0x0b9bdb62
 #define HASH_NETLOG	0x074cb357
+#define HASH_MEMDISK	0x03c3b0eb
+#define HASH_EESYNC	0x06bcb043
 
 /* defines for communication with debugger module */
 #define NTPBCMD_PRINT_EEDUMP 		0x301
@@ -132,6 +166,13 @@ typedef struct {
 } debugger_opts_t;
 
 static debugger_opts_t g_debugger_opts;
+
+/* struct for romdir fs */
+typedef struct {
+	char 	fileName[10];
+	u16 	extinfo_size;
+	int 	fileSize;
+} romdir_t;
 
 /*
  * set_debugger_opts - Set debugger options from loader.
@@ -178,21 +219,292 @@ static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
 }
 
 /*
- * post_reboot_hook - Will be executed after IOP reboot to load our modules.
+ * get_module_from_kernel - get IOP module from kernel RAM to buffer on user mem.
  */
-static int post_reboot_hook(void)
+static int get_module_from_kernel(u32 hash, void *buf)
 {
-	int ret;
+	const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
+	int irxsize = 0;
 
-	/* init services */
+	DI();
+	ee_kmode_enter();
+
+	/*
+	 * find module by hash and copy it to user memory
+	 */
+	while (irx_ptr->hash) {
+		if (irx_ptr->hash == hash) {
+			irxsize = irx_ptr->size;
+			memcpy(buf, irx_ptr->addr, irxsize);
+			break;
+		}
+		irx_ptr++;
+	}
+
+	ee_kmode_exit();
+	EI();
+
+	/* not found */
+	if (!irxsize)
+		return -1;
+
+	return irxsize;
+}
+
+/*
+ * MySifResetIop - sceSifResetIop replacement function
+ */
+int MySifResetIop(const char *arg, int flag)
+{
+	_sceSifCmdResetData reset_pkt;
+	struct t_SifDmaTransfer dmat;
+
+	SifExitRpc();
+	SifStopDma();
+
+	memset(&reset_pkt, 0, sizeof(_sceSifCmdResetData));
+
+	reset_pkt.chdr.psize = sizeof(_sceSifCmdResetData);
+	reset_pkt.chdr.fcode = 0x80000003;
+
+	reset_pkt.flag = flag;
+
+	if (arg != NULL) {
+		strncpy(reset_pkt.arg, arg, 0x50);
+		reset_pkt.arg[0x50] = '\0';
+		reset_pkt.size = strlen(reset_pkt.arg) + 1;
+	}
+
+	dmat.src  = &reset_pkt;
+	dmat.dest = (void *)SifGetReg(0x80000000); /* SIF_REG_SUBADDR */
+	dmat.size = sizeof reset_pkt;
+	dmat.attr = 0x40 | SIF_DMA_INT_O;
+	SifWriteBackDCache(&reset_pkt, sizeof reset_pkt);
+
+	DI();
+	ee_kmode_enter();
+	if (!OldSifSetDma(&dmat, 1)) {
+		ee_kmode_exit();
+		EI();
+		return 0;
+	}
+	ee_kmode_exit();
+	EI();
+
+	OrigSifSetReg(SIF_REG_SMFLAG, 0x10000);
+	OrigSifSetReg(SIF_REG_SMFLAG, 0x20000);
+	OrigSifSetReg(0x80000002, 0);
+	OrigSifSetReg(0x80000000, 0);
+
+	return 1;
+}
+
+/*
+ * MySifSyncIop - sceSifSyncIop replacement function
+ */
+int MySifSyncIop(void)
+{
+	if (SifGetReg(SIF_REG_SMFLAG) & 0x40000)
+		return 1;
+
+	return 0;
+}
+
+/*
+ * Get_EESYNC_Offset - return eesync module offset in IOPRP img
+ */
+int Get_EESYNC_Offset(romdir_t *romdir_fs)
+{
+	int offset = 0;
+
+	/* scan romdir fs for EESYNC module */
+	while (strlen(romdir_fs->fileName) > 0) {
+
+		if ((romdir_fs->fileName[0] == 'E') &&
+			(romdir_fs->fileName[1] == 'E') &&
+			(romdir_fs->fileName[2] == 'S') &&
+			(romdir_fs->fileName[3] == 'Y') &&
+			(romdir_fs->fileName[4] == 'N') &&
+			(romdir_fs->fileName[5] == 'C')) {
+				return offset;
+		}
+		/* arrange irx size to next 16 bytes multiple to get offset of the module */
+		if ((romdir_fs->fileSize % 0x10)==0)
+			offset += romdir_fs->fileSize;
+		else
+			offset += (romdir_fs->fileSize + 0x10) & 0xfffffff0;
+
+		romdir_fs++;
+	}
+
+	return -1;
+}
+
+/*
+ * MySifRebootIop - IOP reset function
+ */
+int MySifRebootIop(char *ioprp_path)
+{
+ 	void   *ioprp_dest;
+	int     ret, fd, ioprp_size, rd_size, rpos, gbuf_offset, rp_size;
+	int 	ioprp_offset = 0, eesync_size = 0, eesync_offset = 0;
+	u8 	   *eesync_ptr = NULL;
+	u32  	qid;
+	SifDmaTransfer_t dmat;
+
 	GS_BGCOLOUR = 0xff0000;
+
+	/* Reset IOP */
+	SifInitRpc(0);
+	while (!MySifResetIop(NULL, 0)) {;}
+	while (!MySifSyncIop()){;}
+
+	/* Init services & apply SBV patches */
+	SifInitRpc(0);
+	SifLoadFileInit();
+	SifInitIopHeap();
+	sbv_patch_enable_lmb();
+	sbv_patch_disable_prefix_check();
+
+	/* read IOPRP img and send it on IOP mem */
+	GS_BGCOLOUR = 0xff00ff;
+	fioInit();
+	fd = fioOpen(ioprp_path, O_RDONLY);
+	if (fd < 0) {
+		GS_BGCOLOUR = 0x0000ff;
+		while (1){;}
+	}
+
+	/* get IOPRP img size */
+	ioprp_size = fioLseek(fd, 0, SEEK_END);
+	fioLseek(fd, 0, SEEK_SET);
+
+	/* alloc mem on IOP for the IOPRP img */
+	SifInitIopHeap();
+	ioprp_dest = SifAllocIopHeap(ioprp_size);
+	if (!ioprp_dest) {
+		GS_BGCOLOUR = 0x0000ff;
+		while (1){;}
+	}
+
+	/* send IOPRP to IOP mem using g_buf */
+	rpos = 0;
+	while (rpos < ioprp_size) {
+		if ((ioprp_size - rpos) > BUFSIZE)
+			rd_size = BUFSIZE;
+		else
+			rd_size = ioprp_size - rpos;
+		ret = fioRead(fd, g_buf, rd_size);
+		if (ret != rd_size) {
+			GS_BGCOLOUR = 0x0000ff;
+			while (1){;}
+		}
+
+		/* if it's the 1st read then locate EESYNC module
+		 * offset in IOPRP and its replacement in kernel RAM
+		 */
+		if (rpos == 0) {
+			ioprp_offset = Get_EESYNC_Offset((romdir_t *)g_buf);
+
+			const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
+
+			DI();
+			ee_kmode_enter();
+
+			/* find module by hash */
+			while (irx_ptr->hash) {
+				if (irx_ptr->hash == HASH_EESYNC) {
+					/* Get EESYNC replacement module address & size */
+					eesync_ptr = irx_ptr->addr;
+					eesync_size = irx_ptr->size;
+					break;
+				}
+				irx_ptr++;
+			}
+
+			ee_kmode_exit();
+			EI();
+		}
+
+		/* replace EESYNC module before to send on IOP mem,
+		 * taking care if it's splitted along g_buf
+		 */
+		if (((rpos + rd_size) >= ioprp_offset) && (eesync_size > 0)) {
+
+			gbuf_offset = ioprp_offset - rpos;
+
+			if (gbuf_offset < 0)
+				gbuf_offset = 0;
+
+			DI();
+			ee_kmode_enter();
+
+			if ((rd_size - gbuf_offset) < eesync_size)
+				rp_size = rd_size - gbuf_offset;
+			else
+				rp_size = eesync_size;
+
+			if (rp_size)
+				memcpy(&g_buf[gbuf_offset], &eesync_ptr[eesync_offset], rp_size);
+
+			eesync_offset += rd_size - gbuf_offset;
+			eesync_size -= 	rd_size - gbuf_offset;
+
+			ee_kmode_exit();
+			EI();
+
+			FlushCache(0);
+		}
+
+		dmat.src = (void *)g_buf;
+		dmat.dest = (void *)(ioprp_dest + rpos);
+		dmat.size = rd_size;
+		dmat.attr = 0;
+
+		qid = SifSetDma(&dmat, 1);
+		while (SifDmaStat(qid) >= 0);
+
+		rpos += rd_size;
+	}
+
+	fioClose(fd);
+	fioExit();
+
+	/* we also want to get memdisk in g_buf without loading it */
+	int size_memdisk_irx = get_module_from_kernel(HASH_MEMDISK, g_buf);
+
+	/* Patching memdisk irx */
+	u8 *memdisk_drv = (u8 *)g_buf;
+	*(u32*)(&memdisk_drv[0x19C]) = (u32)ioprp_dest;
+	*(u32*)(&memdisk_drv[0x1A8]) = ioprp_size;
+	FlushCache(0);
+
+	/* use MDISK device to reload modules asynchronously, using NOWAIT RPC mode */
+	SifExecModuleBuffer(memdisk_drv, size_memdisk_irx, 0, NULL, &ret);
+	SifLoadModuleAsync("rom0:UDNL", 7, "MDISK0:");
+
+	GS_BGCOLOUR = 0x008000;
+
+	SifExitIopHeap();
+	SifLoadFileExit();
+	SifExitRpc();
+
+	/* as sceSifIopReset does... */
+	OrigSifSetReg(SIF_REG_SMFLAG, 0x10000);
+	OrigSifSetReg(SIF_REG_SMFLAG, 0x20000);
+	OrigSifSetReg(0x80000002, 0);
+	OrigSifSetReg(0x80000000, 0);
+
+	/* sync IOP */
+	while (!MySifSyncIop()) {;}
+
+	GS_BGCOLOUR = 0xffff00;
+
 	SifInitRpc(0);
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-	GS_BGCOLOUR = 0xffff00;
-
-	/* load our modules from kernel */
+   /* load our modules from kernel */
 	ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
 	if (ret < 0)
 		while (1) ;
@@ -209,7 +521,7 @@ static int post_reboot_hook(void)
 #endif
 	ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
 	if (ret < 0)
-		while (1) ;
+	while (1) ;
 
 	GS_BGCOLOUR = 0xff00ff;
 
@@ -217,9 +529,8 @@ static int post_reboot_hook(void)
 	rpcNTPBreset();
 	rpcNTPBinit();
 
-	GS_BGCOLOUR = 0x0000ff;
+	GS_BGCOLOUR = 0x800080;
 
-	/* deinit services */
 	SifExitIopHeap();
 	SifLoadFileExit();
 	SifExitRpc();
@@ -230,9 +541,56 @@ static int post_reboot_hook(void)
 
 	GS_BGCOLOUR = 0x000000;
 
-#ifdef DISABLE_AFTER_IOPRESET
-	_fini();
-#endif
+	/* set number of SifSetReg hooks to skip */
+	set_reg_hook = 4;
+
+	return 1;
+}
+
+/*
+ * NewSifSetDma - Replacement function for SifSetDma().
+ */
+u32 NewSifSetDma(SifDmaTransfer_t *sdd, s32 len)
+{
+	int i, j;
+ 	char ioprp_path[0x50];
+ 	int ioprp_img = 0;
+	_sceSifCmdResetData *reset_pkt = (_sceSifCmdResetData*)sdd->src;
+
+	/* check for reboot with IOPRP from cdrom */
+	char *ioprp_pattern = "rom0:UDNL cdrom";
+	for (i=0; i<0x50; i++) {
+		for (j=0; j<15; j++) {
+			if (reset_pkt->arg[i+j] != ioprp_pattern[j])
+				break;
+		}
+		if (j == 15) {
+			/* get IOPRP img file path */
+			__strcpy(ioprp_path, &reset_pkt->arg[i+10]);
+			ioprp_img = 1;
+			break;
+		}
+	}
+
+	/* increment libkernel's IOP reboot counter, this allow
+	 * to detect RPC services unbinding
+	 */
+	_iop_reboot_count++;
+
+	if (ioprp_img) {
+		/* it's a reset with cdrom IOPRP so we perform it ourselves */
+		MySifRebootIop(ioprp_path);
+	}
+	else {
+		/* not a reset with cdrom IOPRP, so we must send reset packet
+		 * with SifSetDma and let the system do IOP reboot
+		 */
+		DI();
+		ee_kmode_enter();
+		OldSifSetDma(sdd, len);
+		ee_kmode_exit();
+		EI();
+	}
 
 	return 1;
 }
@@ -242,35 +600,21 @@ static int post_reboot_hook(void)
  */
 void NewSifSetReg(u32 regnum, int regval)
 {
-	/* call original SifSetReg() */
-	OrigSifSetReg(regnum, regval);
-
-	/* catch IOP reboot */
-	if (regnum == SIF_REG_SMFLAG && regval == 0x10000) {
-		debugger_ready = 0;
-		/* by setting set_reg_hook to 4 here, it will reach 0
-		 * at the last sceSifSetReg call in sceSifResetIop
-		 */
-		set_reg_hook = 4;
-	}
-
+	/* Skip all 4 SifSetReg made after SifSetDma in sceSifResetIop */
 	if (set_reg_hook) {
 		set_reg_hook--;
-		/* check if reboot is done */
-		if (!set_reg_hook && regnum == 0x80000000 && !regval) {
-			/* we filter the 1st IOP reboot done by LoadExecPS2 or its replacement function */
-			if (iop_reboot_count) {
-				/* IOP sync, needed since at this point it haven't yet been done by the game */
-				while (!(SifGetReg(SIF_REG_SMFLAG) & 0x40000))
-					;
-				/* load our modules */
-				post_reboot_hook();
-				debugger_ready = 1;
-			}
-			iop_reboot_count++;
-			_iop_reboot_count++;
+
+		if (set_reg_hook == 0) {
+			debugger_ready = 1;
+			/* we could unhook some syscalls if needed here
+			 * or call some post reset treatment
+			 */
 		}
+		return;
 	}
+
+	/* Call original SifSetReg */
+	OrigSifSetReg(regnum, regval);
 }
 
 /*
@@ -436,6 +780,9 @@ int _init(void)
 	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
 
 	/* Hook syscalls */
+	OldSifSetDma = GetSyscall(__NR_SifSetDma);
+	SetSyscall(__NR_SifSetDma, HookSifSetDma);
+
 	OldSifSetReg = GetSyscall(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
 	SetSyscall(__NR_OrigSifSetReg, OldSifSetReg);
@@ -449,6 +796,8 @@ int _init(void)
 int _fini(void)
 {
 	/* Unhook syscalls */
+	SetSyscall(__NR_SifSetDma, OldSifSetDma);
+
 	SetSyscall(__NR_SifSetReg, OldSifSetReg);
 	SetSyscall(__NR_OrigSifSetReg, 0);
 
