@@ -23,15 +23,14 @@ rebuild: clean all
 
 release: all
 	rm -rf release
-	mkdir release
+	mkdir -p release/bin
 	if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
-		ps2-packer -v ee/loader/artemis.elf release/artemis.elf; \
-		chmod +x release/artemis.elf; \
+		ps2-packer -v ee/loader/artemis.elf release/bin/artemis.elf; \
+		chmod +x release/bin/artemis.elf; \
 	else \
-		cp ee/loader/artemis.elf release/artemis.elf; \
+		cp ee/loader/artemis.elf release/bin/artemis.elf; \
 	fi
-	cp ee/loader/artemis.conf release/
-	cp ee/loader/cheats.txt release/
-	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
-	mkdir release/doc
-	cp doc/* release/doc/
+	cp ee/loader/artemis.conf release/bin/
+	cp ee/loader/cheats.txt release/bin/
+	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
+	cp -r doc/ release/
