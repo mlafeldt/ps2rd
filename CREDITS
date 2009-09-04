@@ -10,8 +10,8 @@ N: Mathias Lafeldt
 E: misfire@xploderfreax.de
 D: project maintainer and core developer
 D: common/libcheats/
-D: ee/elfldr/
 D: ee/debugger/
+D: ee/elfldr/
 D: ee/engine/
 D: ee/libconfig/ (port only)
 D: ee/loader/
@@ -19,9 +19,12 @@ D: iop/netlog/
 S: Germany
 
 A: jimmikaelkael
+N: Jimenez Michael
 E: jimmikaelkael@wanadoo.fr
 D: core developer
-D: ee/elfldr/
 D: ee/debugger/
+D: ee/elfldr/
 D: iop/debugger/
+D: iop/eesync/
+D: iop/memdisk/
 S: France
