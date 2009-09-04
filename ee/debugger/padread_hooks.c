@@ -25,10 +25,16 @@
 
 #include "padread_patterns.h"
 
+/* from debugger.c */
 extern int debugger_loop(void);
 
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
+/* for hook addresses */
+#define HOOK_ADDRESSES_BASE 	0x000fff00
+#define MAX_HOOK_ADDRESSES 		63
+
+/* pad buttons stats structs */
 struct padButtonStat {
     u8 ok;
     u8 mode;
@@ -41,6 +47,7 @@ struct pad2ButtonStat {
 
 int patch_padRead(void);
 
+/* scePadRead prototypes */
 static int (*scePadRead)(int port, int slot, struct padButtonStat *data);
 static int (*scePad2Read)(int socket, struct pad2ButtonStat *data);
 static int scePadRead_style = 1;
@@ -88,6 +95,43 @@ u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
 	}
 
 	return NULL;
+}
+
+/*
+ * clear_hook_addresses_tab - clears hook adresses table
+ */
+void clear_hook_addresses_tab(void)
+{
+	int i;
+	u32 *ptr = (u32 *)HOOK_ADDRESSES_BASE;
+
+	for (i=0; i<(MAX_HOOK_ADDRESSES+1); i++)
+		*ptr++ = 0;
+}
+
+/*
+ * set_hook_address - helper to build hook adresses table
+ */
+static int set_hook_address(u32 hook_addr)
+{
+	int i = 0;
+	u32 *ptr = (u32 *)HOOK_ADDRESSES_BASE;
+
+	/* search for existing hook address */
+	while (*ptr) {
+		if (*ptr++ == hook_addr)
+			return 0;
+		i++;
+	}
+
+	/* check that we get enough room space to store address */
+	if (i >= MAX_HOOK_ADDRESSES)
+		return 0;
+
+	/* store hook address */
+	*ptr = hook_addr;
+
+	return 1;
 }
 
 /*
@@ -169,11 +213,17 @@ int patch_padRead(void)
 	ptr = (u8 *)start;
 	while (ptr) {
 		memscope = 0x01f00000 - (u32)ptr;
+
 		ptr = find_pattern_with_mask(ptr, memscope, (u8 *)pattern, (u8 *)mask, sizeof(pattern));
 		if (ptr) {
+			/* store hook address */
+			set_hook_address((u32)ptr);
+
 			pattern_found = 1;
+
 			fncall = (u32)ptr;
 			_sw(inst, fncall); /* overwrite the original scePadRead function call with our function call */
+
 			ptr += 8;
 		}
 	}

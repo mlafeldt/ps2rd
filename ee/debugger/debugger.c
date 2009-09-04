@@ -53,6 +53,7 @@ char *erl_dependancies[] = {
 extern int SifLoadModuleAsync(const char *path, int arg_len, const char *args);
 
 /* padread_hooks.c functions */
+extern void clear_hook_addresses_tab(void);
 extern int patch_padRead(void);
 
 /* debugger_rpc.c functions */
@@ -160,9 +161,14 @@ static int haltState = 0;
 #define RPC_M_NORMAL	0
 #define RPC_M_NOWAIT	1
 
+/* to control debugger modules reloading */
+#define LOAD_MODULES_OFF	0
+#define LOAD_MODULES_ON		1
+
 typedef struct {
 	int auto_hook;
 	int rpc_mode;
+	int load_modules;
 } debugger_opts_t;
 
 static debugger_opts_t g_debugger_opts;
@@ -181,6 +187,7 @@ void set_debugger_opts(const debugger_opts_t *opts)
 {
 	g_debugger_opts.auto_hook = opts->auto_hook;
 	g_debugger_opts.rpc_mode = opts->rpc_mode;
+	g_debugger_opts.load_modules = opts->load_modules;
 }
 
 /*
@@ -367,7 +374,7 @@ int MySifRebootIop(char *ioprp_path)
 	sbv_patch_disable_prefix_check();
 
 	/* read IOPRP img and send it on IOP mem */
-	GS_BGCOLOUR = 0xff00ff;
+	GS_BGCOLOUR = 0x00ffff;
 	fioInit();
 	fd = fioOpen(ioprp_path, O_RDONLY);
 	if (fd < 0) {
@@ -387,7 +394,7 @@ int MySifRebootIop(char *ioprp_path)
 		while (1){;}
 	}
 
-	/* send IOPRP to IOP mem using g_buf */
+	/* read/send IOPRP to IOP mem using g_buf */
 	rpos = 0;
 	while (rpos < ioprp_size) {
 		if ((ioprp_size - rpos) > BUFSIZE)
@@ -456,6 +463,7 @@ int MySifRebootIop(char *ioprp_path)
 			FlushCache(0);
 		}
 
+		/* send g_buf on IOP mem */
 		dmat.src = (void *)g_buf;
 		dmat.dest = (void *)(ioprp_dest + rpos);
 		dmat.size = rd_size;
@@ -504,39 +512,39 @@ int MySifRebootIop(char *ioprp_path)
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-   /* load our modules from kernel */
-	ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
-	if (ret < 0)
-		while (1) ;
-	ret = load_module_from_kernel(HASH_PS2IP, 0, NULL);
-	if (ret < 0)
-		while (1) ;
-	ret = load_module_from_kernel(HASH_PS2SMAP, 0, NULL);
-	if (ret < 0)
-		while (1) ;
+	if (g_debugger_opts.load_modules == LOAD_MODULES_ON) {
+		/* load our modules from kernel */
+		ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
+		if (ret < 0)
+			while (1) ;
+		ret = load_module_from_kernel(HASH_PS2IP, 0, NULL);
+		if (ret < 0)
+			while (1) ;
+		ret = load_module_from_kernel(HASH_PS2SMAP, 0, NULL);
+		if (ret < 0)
+			while (1) ;
 #if 0
-	ret = load_module_from_kernel(HASH_NETLOG, 0, NULL);
-	if (ret < 0)
-		while (1) ;
+		ret = load_module_from_kernel(HASH_NETLOG, 0, NULL);
+		if (ret < 0)
+			while (1) ;
 #endif
-	ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
-	if (ret < 0)
-	while (1) ;
+		ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
+		if (ret < 0)
+		while (1) ;
 
-	GS_BGCOLOUR = 0xff00ff;
+		GS_BGCOLOUR = 0xff00ff;
 
-	/* Binding debugger module RPC server */
-	rpcNTPBreset();
-	rpcNTPBinit();
-
-	GS_BGCOLOUR = 0x800080;
+		/* Binding debugger module RPC server */
+		rpcNTPBreset();
+		rpcNTPBinit();
+	}
 
 	SifExitIopHeap();
 	SifLoadFileExit();
 	SifExitRpc();
 
 	/* automatic padRead hooking is done if needed */
-	if (g_debugger_opts.auto_hook)
+	if (g_debugger_opts.auto_hook == AUTO_HOOK_ON)
 		patch_padRead();
 
 	GS_BGCOLOUR = 0x000000;
@@ -778,6 +786,10 @@ int _init(void)
 	/* Set default debugger options */
 	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
 	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
+	g_debugger_opts.load_modules = LOAD_MODULES_ON;
+
+	/* clear auto-hook addresses table */
+	clear_hook_addresses_tab();
 
 	/* Hook syscalls */
 	OldSifSetDma = GetSyscall(__NR_SifSetDma);
