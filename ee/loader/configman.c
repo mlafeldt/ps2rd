@@ -37,6 +37,7 @@ static const char *setting_paths[] = {
 	"debugger.addr",
 	"debugger.auto_hook",
 	"debugger.rpc_mode",
+	"debugger.load_modules",
 	"sdklibs.install",
 	"sdklibs.addr",
 	"elfldr.install",
@@ -178,7 +179,7 @@ void _config_build(config_t *config)
 
 	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
 #ifdef ENGINE_INSTALL
-	config_setting_set_bool(set, 1);
+	config_setting_set_bool(set, ENGINE_INSTALL);
 #endif
 	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
 #ifdef ENGINE_ADDR
@@ -195,7 +196,7 @@ void _config_build(config_t *config)
 
 	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
 #ifdef DEBUGGER_INSTALL
-	config_setting_set_bool(set, 1);
+	config_setting_set_bool(set, DEBUGGER_INSTALL);
 #endif
 	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
 #ifdef DEBUGGER_ADDR
@@ -203,11 +204,15 @@ void _config_build(config_t *config)
 #endif
 	set = config_setting_add(group, "auto_hook", CONFIG_TYPE_BOOL);
 #ifdef DEBUGGER_AUTO_HOOK
-	config_setting_set_bool(set, 1);
+	config_setting_set_bool(set, DEBUGGER_AUTO_HOOK);
 #endif
 	set = config_setting_add(group, "rpc_mode", CONFIG_TYPE_INT);
 #ifdef DEBUGGER_RPC_MODE
 	config_setting_set_int(set, DEBUGGER_RPC_MODE);
+#endif
+	set = config_setting_add(group, "load_modules", CONFIG_TYPE_BOOL);
+#ifdef DEBUGGER_LOAD_MODULES
+	config_setting_set_bool(set, DEBUGGER_LOAD_MODULES);
 #endif
 	/*
 	 * sdklibs section
@@ -216,7 +221,7 @@ void _config_build(config_t *config)
 
 	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
 #ifdef SDKLIBS_INSTALL
-	config_setting_set_bool(set, 1);
+	config_setting_set_bool(set, SDKLIBS_INSTALL);
 #endif
 	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
 #ifdef SDKLIBS_ADDR
@@ -229,7 +234,7 @@ void _config_build(config_t *config)
 
 	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
 #ifdef ELFLDR_INSTALL
-	config_setting_set_bool(set, 1);
+	config_setting_set_bool(set, ELFLDR_INSTALL);
 #endif
 	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
 #ifdef ELFLDR_ADDR
@@ -293,6 +298,7 @@ void _config_print(const config_t *config)
 	PRINT_U32(SET_DEBUGGER_ADDR);
 	PRINT_BOOL(SET_DEBUGGER_AUTO_HOOK);
 	PRINT_INT(SET_DEBUGGER_RPC_MODE);
+	PRINT_BOOL(SET_DEBUGGER_LOAD_MODULES);
 
 	/* sdklibs */
 	PRINT_BOOL(SET_SDKLIBS_INSTALL);

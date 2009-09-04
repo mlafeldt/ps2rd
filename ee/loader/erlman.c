@@ -37,6 +37,7 @@ typedef struct {
 typedef struct {
 	int auto_hook;
 	int rpc_mode;
+	int load_modules;
 } debugger_opts_t;
 
 enum {
@@ -205,6 +206,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		GET_SYMBOL(set_debugger_opts, "set_debugger_opts", file);
 		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
 		opts.rpc_mode = _config_get_int(config, SET_DEBUGGER_RPC_MODE);
+		opts.load_modules = _config_get_int(config, SET_DEBUGGER_LOAD_MODULES);
 		set_debugger_opts(&opts);
 	}
 

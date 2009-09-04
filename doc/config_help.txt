@@ -72,6 +72,12 @@ Section "debugger"
 
   Set SIF RPC mode to blocking (0) or non-blocking (1).
 
+* load_modules [bool, true by default]
+
+  Set to true if you want the debugger to reload our IOP modules on every IOP
+  reboot. This is required to hack games, and should only be turned off for
+  compatibility tests.
+
 
 Section "sdklibs"
 -----------------

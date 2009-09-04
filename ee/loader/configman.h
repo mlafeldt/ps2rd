@@ -26,13 +26,15 @@
 #include <libconfig.h>
 
 /* Define some default settings */
-#define ENGINE_INSTALL
-#define DEBUGGER_INSTALL
-#define SDKLIBS_INSTALL
-#define ELFLDR_INSTALL
-
+#ifndef ENGINE_INSTALL
+#define ENGINE_INSTALL		1
+#endif
 #ifndef ENGINE_ADDR
 #define ENGINE_ADDR		0x00080000
+#endif
+
+#ifndef DEBUGGER_INSTALL
+#define DEBUGGER_INSTALL	1
 #endif
 #ifndef DEBUGGER_ADDR
 #define DEBUGGER_ADDR		0x00090000
@@ -40,12 +42,24 @@
 #ifndef DEBUGGER_RPC_MODE
 #define DEBUGGER_RPC_MODE	1
 #endif
+#ifndef DEBUGGER_LOAD_MODULES
+#define DEBUGGER_LOAD_MODULES	1
+#endif
+
+#ifndef SDKLIBS_INSTALL
+#define SDKLIBS_INSTALL		1
+#endif
 #ifndef SDKLIBS_ADDR
 #define SDKLIBS_ADDR		0x000c0000
+#endif
+
+#ifndef ELFLDR_INSTALL
+#define ELFLDR_INSTALL		1
 #endif
 #ifndef ELFLDR_ADDR
 #define ELFLDR_ADDR		0x000ff000
 #endif
+
 #ifndef CHEATS_FILE
 #define CHEATS_FILE		"cheats.txt"
 #endif
@@ -65,6 +79,7 @@ enum setting_key {
 	SET_DEBUGGER_ADDR,
 	SET_DEBUGGER_AUTO_HOOK,
 	SET_DEBUGGER_RPC_MODE,
+	SET_DEBUGGER_LOAD_MODULES,
 	/* sdklibs */
 	SET_SDKLIBS_INSTALL,
 	SET_SDKLIBS_ADDR,
