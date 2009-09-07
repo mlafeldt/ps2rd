@@ -244,9 +244,11 @@ int install_erls(const config_t *config, engine_t *engine)
 			return -1;
 
 		/* add debugger_loop() callback to engine */
-		int (*debugger_loop)(void) = NULL;
-		GET_SYMBOL(debugger_loop, "debugger_loop");
-		engine->callbacks[0] = (u32)debugger_loop;
+		if (_config_get_bool(config, SET_ENGINE_INSTALL)) {
+			int (*debugger_loop)(void) = NULL;
+			GET_SYMBOL(debugger_loop, "debugger_loop");
+			engine->callbacks[0] = (u32)debugger_loop;
+		}
 
 		/* set debugger options */
 		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
