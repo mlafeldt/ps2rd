@@ -47,11 +47,6 @@ Section "engine"
   Specifies the load address of the cheat engine. This address must belong
   to user space memory (0x00080000-0x01ffffff).
 
-* file [path, not set by default]
-
-  If you don't want to use the built-in cheat engine, you can specify the
-  filename of an external engine instead.
-
 
 Section "debugger"
 ------------------

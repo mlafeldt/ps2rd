@@ -32,7 +32,6 @@ static const char *setting_paths[] = {
 	"loader.boot2",
 	"engine.install",
 	"engine.addr",
-	"engine.file",
 	"debugger.install",
 	"debugger.addr",
 	"debugger.auto_hook",
@@ -185,10 +184,7 @@ void _config_build(config_t *config)
 #ifdef ENGINE_ADDR
 	config_setting_set_int(set, ENGINE_ADDR);
 #endif
-	set = config_setting_add(group, "file", CONFIG_TYPE_STRING);
-#ifdef ENGINE_FILE
-	config_setting_set_string(set, ENGINE_FILE);
-#endif
+
 	/*
 	 * debugger section
 	 */
@@ -291,7 +287,6 @@ void _config_print(const config_t *config)
 	/* engine */
 	PRINT_BOOL(SET_ENGINE_INSTALL);
 	PRINT_U32(SET_ENGINE_ADDR);
-	PRINT_STRING(SET_ENGINE_FILE);
 
 	/* debugger */
 	PRINT_BOOL(SET_DEBUGGER_INSTALL);

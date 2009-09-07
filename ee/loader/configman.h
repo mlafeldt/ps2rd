@@ -73,7 +73,6 @@ enum setting_key {
 	/* engine */
 	SET_ENGINE_INSTALL,
 	SET_ENGINE_ADDR,
-	SET_ENGINE_FILE,
 	/* debugger */
 	SET_DEBUGGER_INSTALL,
 	SET_DEBUGGER_ADDR,
