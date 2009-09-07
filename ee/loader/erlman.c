@@ -163,11 +163,20 @@ static int __uninstall_erl(erl_file_t *file)
 	return 0;
 }
 
+static struct erl_record_t *__init_load_erl_dummy(char *erl_id)
+{
+	/* Do nothing */
+	return NULL;
+}
+
 int install_erls(const config_t *config, engine_t *engine)
 {
 	erl_file_t *file = NULL;
 	struct symbol_t *sym = NULL;
 	u32 addr;
+
+	/* replace original load function - we resolve dependencies manually */
+	_init_load_erl = __init_load_erl_dummy;
 
 #define GET_SYMBOL(var, name) \
 	sym = erl_find_local_symbol(name, file->erl); \
