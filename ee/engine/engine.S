@@ -630,8 +630,6 @@ j_SetupThread:
  */
 engine_info:
 	.word	0x00000001 /* version 0.1 */
-engine_id:
-	.word	0 /* set by loader */
 
 /*
  * List of external functions to call from cheat engine. Set by loader.
