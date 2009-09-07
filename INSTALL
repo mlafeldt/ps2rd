@@ -3,9 +3,9 @@ up-to-date version of the PS2SDK.
 
 [PATCHES]
 
-Currently, it is required to patch the PS2SDK sources with the file
-patches/ps2sdk-erl-fix.patch and rebuild it from scratch. That will hopefully
-change soon when the patch is directly included in the SDK.
+Currently, it is required to apply all patches inside the patches/ directory to
+the PS2SDK sources and rebuild it from scratch. That will hopefully change soon
+when the patches are directly included in the SDK.
 
 Patches can be easily applied with the "patch" program. Go to the folder where
 your PS2SDK sources live in and run
