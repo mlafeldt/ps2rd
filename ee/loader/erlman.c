@@ -128,8 +128,8 @@ static int __install_erl(erl_file_t *file, u32 addr)
 		while (h->syscall) {
 			h->oldvector = GetSyscall(h->syscall);
 			SetSyscall(h->syscall, h->vector);
-			D_PRINTF("Hooked syscall 0x%02x (old vector %08x, new %08x)\n",
-				h->syscall, (u32)h->oldvector, (u32)h->vector);
+			D_PRINTF("%s: hooked syscall 0x%02x (old vector %08x, new %08x)\n",
+				__FUNCTION__, h->syscall, (u32)h->oldvector, (u32)h->vector);
 			h++;
 		}
 	}
@@ -216,7 +216,7 @@ int install_erls(const config_t *config, engine_t *engine)
 	 */
 	if (_config_get_bool(config, SET_ENGINE_INSTALL)) {
 		addr = _config_get_u32(config, SET_ENGINE_ADDR);
-		file = &_erl_files[ERL_FILE_LIBKERNEL];
+		file = &_erl_files[ERL_FILE_ENGINE];
 
 		if (__install_erl(file, addr) < 0)
 			return -1;
