@@ -29,7 +29,6 @@
 #include <libconfig.h>
 #include "configman.h"
 #include "dbgprintf.h"
-#include "engineman.h"
 #include "erlman.h"
 #include "mycdvd.h"
 #include "mypad.h"
@@ -73,11 +72,6 @@ static const char *g_modules[] = {
 	"rom0:PADMAN",
 	NULL
 };
-
-/* Statically linked ERL files */
-extern u8  _engine_erl_start[];
-extern u8  _engine_erl_end[];
-extern int _engine_erl_size;
 
 /* Statically linked IRX files */
 extern u8  _ps2dev9_irx_start[];
@@ -222,25 +216,6 @@ static char *__pathname(const char *name)
 	}
 
 	return filename;
-}
-
-/*
- * Install external or built-in engine.
- */
-static int install_engine(const config_t *config, engine_t *engine)
-{
-	const char *p = NULL;
-	u32 addr;
-
-	if (!_config_get_bool(config, SET_ENGINE_INSTALL))
-		return 0;
-
-	addr = _config_get_u32(config, SET_ENGINE_ADDR);
-
-	if ((p = _config_get_string(config, SET_ENGINE_FILE)) != NULL)
-		return engine_install_from_file(__pathname(p), addr, engine);
-	else
-		return engine_install_from_mem(_engine_erl_start, addr, engine);
 }
 
 /*
@@ -458,10 +433,6 @@ int main(int argc, char *argv[])
 	copy_modules_to_kernel(IRX_ADDR);
 
 	/* Install ERL files */
-	if (install_engine(&config, &engine) < 0) {
-		A_PRINTF("Error: failed to install cheat engine\n");
-		goto end;
-	}
 	if (install_erls(&config, &engine) < 0) {
 		A_PRINTF("Error: failed to install ERLs\n");
 		goto end;

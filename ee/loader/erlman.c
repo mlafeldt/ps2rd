@@ -22,9 +22,11 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <erl.h>
+#include <string.h>
 #include "configman.h"
 #include "erlman.h"
 #include "dbgprintf.h"
+#include "myutil.h"
 
 #define ALIGN(x, a)	(((x) + (a) - 1) & ~((a) - 1))
 
@@ -41,7 +43,7 @@ typedef struct {
 } debugger_opts_t;
 
 enum {
-//	ERL_FILE_ENGINE = 0,
+	ERL_FILE_ENGINE = 0,
 	ERL_FILE_LIBKERNEL,
 #ifdef _DEBUG
 	ERL_FILE_LIBC,
@@ -55,6 +57,7 @@ enum {
 };
 
 /* Statically linked ERL files */
+extern u8  _engine_erl_start[];
 extern u8  _libkernel_erl_start[];
 #ifdef _DEBUG
 extern u8  _libc_erl_start[];
@@ -65,12 +68,10 @@ extern u8  _debugger_erl_start[];
 extern u8  _elfldr_erl_start[];
 
 static erl_file_t _erl_files[ERL_FILE_NUM] = {
-#if 0
 	{
 		.name = "engine.erl",
 		.start = _engine_erl_start,
 	},
-#endif
 	{
 		.name = "libkernel.erl",
 		.start = _libkernel_erl_start,
@@ -136,11 +137,11 @@ static int __uninstall_erl(erl_file_t *file)
 
 int install_erls(const config_t *config, engine_t *engine)
 {
-	erl_file_t *file;
-	struct symbol_t *sym;
+	erl_file_t *file = NULL;
+	struct symbol_t *sym = NULL;
 	u32 addr;
 
-#define GET_SYMBOL(var, name, file) \
+#define GET_SYMBOL(var, name) \
 	sym = erl_find_local_symbol(name, file->erl); \
 	if (sym == NULL) { \
 		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, name); \
@@ -166,23 +167,50 @@ int install_erls(const config_t *config, engine_t *engine)
 		file = &_erl_files[ERL_FILE_LIBDEBUG];
 		if (__install_erl(file, addr) < 0)
 			return -1;
-
+#endif
 		addr += ALIGN(file->erl->fullsize, 64);
 		file = &_erl_files[ERL_FILE_LIBPATCHES];
 		if (__install_erl(file, addr) < 0)
 			return -1;
-#endif
 	}
 
 	/*
-	 * install elfldr
+	 * install cheat engine
 	 */
-	if (_config_get_bool(config, SET_ELFLDR_INSTALL)) {
-		addr = _config_get_u32(config, SET_ELFLDR_ADDR);
-		file = &_erl_files[ERL_FILE_ELFLDR];
+	if (_config_get_bool(config, SET_ENGINE_INSTALL)) {
+		addr = _config_get_u32(config, SET_ENGINE_ADDR);
+		file = &_erl_files[ERL_FILE_LIBKERNEL];
 
 		if (__install_erl(file, addr) < 0)
 			return -1;
+
+		/* populate engine context */
+		GET_SYMBOL(engine->info, "engine_info");
+		GET_SYMBOL(engine->syscall_hooks, "syscall_hooks");
+		GET_SYMBOL(engine->maxhooks, "maxhooks");
+		GET_SYMBOL(engine->numhooks, "numhooks");
+		GET_SYMBOL(engine->hooklist, "hooklist");
+		GET_SYMBOL(engine->maxcodes, "maxcodes");
+		GET_SYMBOL(engine->numcodes, "numcodes");
+		GET_SYMBOL(engine->codelist, "codelist");
+		GET_SYMBOL(engine->maxcallbacks, "maxcallbacks");
+		GET_SYMBOL(engine->callbacks, "callbacks");
+#ifndef _NO_HOOK
+		/* TODO hook syscalls inside ERL */
+		D_PRINTF("%s: hooking syscalls...\n", __FUNCTION__);
+		syscall_hook_t *h = engine->syscall_hooks;
+		while (h->syscall) {
+			void *v = hook_syscall(h->syscall, h->vector);
+			if (v == NULL) {
+				D_PRINTF("%s: syscall hook error\n", __FUNCTION__);
+				return -1;
+			}
+			h->oldvector = v;
+			h++;
+		}
+#else
+		D_PRINTF("%s: no syscalls hooked.\n", __FUNCTION__);
+#endif
 	}
 
 	/*
@@ -197,17 +225,28 @@ int install_erls(const config_t *config, engine_t *engine)
 
 		/* add debugger_loop() callback to engine */
 		int (*debugger_loop)(void) = NULL;
-		GET_SYMBOL(debugger_loop, "debugger_loop", file);
+		GET_SYMBOL(debugger_loop, "debugger_loop");
 		engine->callbacks[0] = (u32)debugger_loop;
 
 		/* set debugger options */
 		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
 		debugger_opts_t opts;
-		GET_SYMBOL(set_debugger_opts, "set_debugger_opts", file);
+		GET_SYMBOL(set_debugger_opts, "set_debugger_opts");
 		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
 		opts.rpc_mode = _config_get_int(config, SET_DEBUGGER_RPC_MODE);
 		opts.load_modules = _config_get_int(config, SET_DEBUGGER_LOAD_MODULES);
 		set_debugger_opts(&opts);
+	}
+
+	/*
+	 * install ELF loader
+	 */
+	if (_config_get_bool(config, SET_ELFLDR_INSTALL)) {
+		addr = _config_get_u32(config, SET_ELFLDR_ADDR);
+		file = &_erl_files[ERL_FILE_ELFLDR];
+
+		if (__install_erl(file, addr) < 0)
+			return -1;
 	}
 
 	return 0;
@@ -223,4 +262,63 @@ void uninstall_erls(void)
 		if (file->erl != NULL)
 			__uninstall_erl(file);
 	}
+}
+
+
+/**
+ * engine_add_hook - Add a hook to an engine's hook list.
+ * @engine: engine context
+ * @addr: hook address
+ * @val: hook value
+ * @return: 0: success, -1: max hooks reached
+ */
+int engine_add_hook(engine_t *engine, u32 addr, u32 val)
+{
+	if (*engine->numhooks >= *engine->maxhooks)
+		return -1;
+
+	engine->hooklist[*engine->numhooks * 2] = addr & 0x01FFFFFC;
+	engine->hooklist[*engine->numhooks * 2 + 1] = val;
+	(*engine->numhooks)++;
+
+	return 0;
+}
+
+/**
+ * engine_add_code - Add a code to an engine's code list.
+ * @engine: engine context
+ * @addr: code address
+ * @val: code value
+ * @return: 0: success, -1: max codes reached
+ */
+int engine_add_code(engine_t *engine, u32 addr, u32 val)
+{
+	if (*engine->numcodes >= *engine->maxcodes)
+		return -1;
+
+	engine->codelist[*engine->numcodes * 2] = addr;
+	engine->codelist[*engine->numcodes * 2 + 1] = val;
+	(*engine->numcodes)++;
+
+	return 0;
+}
+
+/**
+ * engine_clear_hooks - Clear all hooks in an engine's hook list.
+ * @engine: engine context
+ */
+void engine_clear_hooks(engine_t *engine)
+{
+	memset(engine->hooklist, 0, *engine->numhooks * 8);
+	*engine->numhooks = 0;
+}
+
+/**
+ * engine_clear_codes - Clear all codes in an engine's code list.
+ * @engine: engine context
+ */
+void engine_clear_codes(engine_t *engine)
+{
+	memset(engine->codelist, 0, *engine->numcodes * 8);
+	*engine->numcodes = 0;
 }

@@ -22,10 +22,57 @@
 #ifndef _ERLMAN_H_
 #define _ERLMAN_H_
 
+#include <tamtypes.h>
 #include "configman.h"
-#include "engineman.h"
+
+/**
+ * syscall_hook_t - syscall hook
+ * @syscall: syscall number
+ * @vector: syscall vector
+ * @oldvector: original vector
+ */
+typedef struct {
+	s32	syscall;
+	void	*vector;
+	void	*oldvector;
+} syscall_hook_t;
+
+/**
+ * engine_t - cheat engine context
+ * @erl: ERL record
+ * @info: engine info
+ * @id: engine ID
+ * @syscall_hooks: syscall hooks
+ * @maxhooks: max number of allowed hooks
+ * @numhooks: number of hooks in hook list
+ * @hooklist: hook list
+ * @maxcodes: max number of allowed codes
+ * @numcodes: number of codes in code list
+ * @codelist: code list
+ * @maxcallbacks: max number of callbacks
+ * @callbacks: callback list
+ */
+typedef struct {
+	struct erl_record_t	*erl;
+	u32			*info;
+	u32			*id;
+	syscall_hook_t		*syscall_hooks;
+	u32			*maxhooks;
+	u32			*numhooks;
+	u32			*hooklist;
+	u32			*maxcodes;
+	u32			*numcodes;
+	u32			*codelist;
+	u32			*maxcallbacks;
+	u32			*callbacks;
+} engine_t;
 
 int install_erls(const config_t *config, engine_t *engine);
 void uninstall_erls(void);
+
+int engine_add_hook(engine_t *engine, u32 addr, u32 val);
+int engine_add_code(engine_t *engine, u32 addr, u32 val);
+void engine_clear_hooks(engine_t *engine);
+void engine_clear_codes(engine_t *engine);
 
 #endif /* _ERLMAN_H_ */

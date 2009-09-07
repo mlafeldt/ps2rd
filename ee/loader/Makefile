@@ -25,7 +25,7 @@ endif
 
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o debugger_irx.o \
 	netlog_irx.o memdisk_irx.o eesync_irx.o
-LDR_FILES = loader.o configman.o erlman.o engineman.o mycdvd.o mypad.o \
+LDR_FILES = loader.o configman.o erlman.o mycdvd.o mypad.o \
 	mystring.o myutil.o netlog_rpc.o
 
 EE_OBJS = $(LDR_FILES) $(ERL_FILES) $(IRX_FILES)
