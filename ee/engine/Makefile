@@ -10,10 +10,10 @@ EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = engine.S
+EE_OBJS = engine_asm.S engine.o
 TEST_OBJS = $(EE_OBJS) test.o $(PS2SDK)/ee/startup/crt0.o
 
-all: engine.erl test.elf
+all: engine.erl #test.elf
 
 clean:
 	rm -f *.o *.elf *.erl

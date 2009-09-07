@@ -61,7 +61,6 @@
 
 #ifdef _HOOK_9
 	.globl	HookSetupThread
-	.globl	j_SetupThread
 	.globl	maxhooks
 	.globl	numhooks
 	.globl	hooklist
@@ -71,7 +70,6 @@
 	.globl	codelist
 
 	.globl	engine_info
-	.globl	engine_id
 	.globl	syscall_hooks
 
 _start:
