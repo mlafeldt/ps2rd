@@ -311,8 +311,6 @@ static int activate_cheats(const cheats_t *cheats, engine_t *engine)
 	return 0;
 }
 
-extern void *_ps2sdk_libc_deinit();
-
 /*
  * Start ELF specified by @boot2, or parse SYSTEM.CNF if @boot2 is NULL.
  */
