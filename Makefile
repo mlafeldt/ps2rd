@@ -1,8 +1,9 @@
-DEBUG=1
+DEBUG = 1
+USB = 0
 
-VARS=DEBUG=$(DEBUG)
+VARS=DEBUG=$(DEBUG) USB=$(USB)
 
-all:
+all: check
 	make -C iop
 	bin2o iop/dev9/ps2dev9.irx ee/loader/ps2dev9_irx.o _ps2dev9_irx
 	bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx
@@ -11,6 +12,10 @@ all:
 	bin2o iop/memdisk/memdisk.irx ee/loader/memdisk_irx.o _memdisk_irx
 	bin2o iop/eesync/eesync.irx ee/loader/eesync_irx.o _eesync_irx
 	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx
+	if [ $(USB) = "1" ]; then \
+		bin2o $(PS2SDK)/iop/irx/usbd.irx ee/loader/usbd_irx.o _usbd_irx; \
+		bin2o $(USB_MASS) ee/loader/usb_mass_irx.o _usb_mass_irx; \
+	fi
 	$(VARS) make -C ee
 
 clean:
@@ -34,3 +39,13 @@ release: all
 	cp ee/loader/cheats.txt release/bin/
 	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
 	cp -r doc/ release/
+
+check:
+	@if [ -z $(PS2SDK) ]; then \
+		echo "PS2SDK env var not set."; \
+		exit 1; \
+	fi
+	@if [ $(USB) = "1" ] && [ -z $(USB_MASS) ]; then \
+		echo "USB_MASS env var not set."; \
+		exit 1; \
+	fi

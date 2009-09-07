@@ -96,6 +96,15 @@ extern u8  _eesync_irx_start[];
 extern u8  _eesync_irx_end[];
 extern int _eesync_irx_size;
 
+#ifdef _USB
+extern u8  _usbd_irx_start[];
+extern u8  _usbd_irx_end[];
+extern int _usbd_irx_size;
+extern u8  _usb_mass_irx_start[];
+extern u8  _usb_mass_irx_end[];
+extern int _usb_mass_irx_size;
+#endif
+
 /* TODO: make it configurable */
 #define IRX_ADDR	0x80030000
 
@@ -415,6 +424,16 @@ int main(int argc, char *argv[])
 		goto end;
 	}
 
+#ifdef _USB
+	int ret;
+	SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
+	SifExecModuleBuffer(_usb_mass_irx_start, _usb_mass_irx_size, 0, NULL, &ret);
+#endif
+#if 0
+	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
+	netlog_init(NETLOG_IP, NETLOG_PORT);
+#endif
+
 	/* Init CDVD (non-blocking) */
 	cdInit(CDVD_INIT_NOCHECK);
 	_cdStop(CDVD_NOBLOCK);
@@ -424,10 +443,7 @@ int main(int argc, char *argv[])
 	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
 	padWaitReady(PAD_PORT, PAD_SLOT);
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
-#if 0
-	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
-	netlog_init(NETLOG_IP, NETLOG_PORT);
-#endif
+
 	copy_modules_to_kernel(IRX_ADDR);
 
 	/* Install ERL files */
