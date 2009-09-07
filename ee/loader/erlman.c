@@ -103,8 +103,6 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 
 static int __install_erl(erl_file_t *file, u32 addr)
 {
-	struct symbol_t *sym = NULL;
-
 	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, file->name, addr);
 
 	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
@@ -119,9 +117,9 @@ static int __install_erl(erl_file_t *file, u32 addr)
 
 	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, file->erl->fullsize,
 		addr + file->erl->fullsize);
-
+#if 0
 	/* process syscall hooks */
-	sym = erl_find_local_symbol("syscall_hooks", file->erl);
+	struct symbol_t *sym = erl_find_local_symbol("syscall_hooks", file->erl);
 	if (sym != NULL) {
 		file->hooks = (syscall_hook_t*)sym->address;
 		syscall_hook_t *h = file->hooks;
@@ -133,7 +131,7 @@ static int __install_erl(erl_file_t *file, u32 addr)
 			h++;
 		}
 	}
-
+#endif
 	return 0;
 }
 
@@ -141,7 +139,7 @@ static int __uninstall_erl(erl_file_t *file)
 {
 	D_PRINTF("%s: uninstall %s from %08x\n", __FUNCTION__, file->name,
 		(u32)file->erl->bytes);
-
+#if 0
 	/* unhook syscalls */
 	if (file->hooks) {
 		syscall_hook_t *h = file->hooks;
@@ -152,7 +150,7 @@ static int __uninstall_erl(erl_file_t *file)
 			h++;
 		}
 	}
-
+#endif
 	if (!unload_erl(file->erl)) {
 		D_PRINTF("%s: %s unload error\n", __FUNCTION__, file->name);
 		return -1;
