@@ -34,6 +34,7 @@ typedef struct {
 	char name[20];
 	u8 *start;
 	struct erl_record_t *erl;
+	syscall_hook_t *hooks;
 } erl_file_t;
 
 typedef struct {
@@ -102,6 +103,8 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 
 static int __install_erl(erl_file_t *file, u32 addr)
 {
+	struct symbol_t *sym = NULL;
+
 	D_PRINTF("%s: relocate %s at %08x\n", __FUNCTION__, file->name, addr);
 
 	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
@@ -117,6 +120,20 @@ static int __install_erl(erl_file_t *file, u32 addr)
 	D_PRINTF("%s: size=%u end=%08x\n", __FUNCTION__, file->erl->fullsize,
 		addr + file->erl->fullsize);
 
+	/* process syscall hooks */
+	sym = erl_find_local_symbol("syscall_hooks", file->erl);
+	if (sym != NULL) {
+		file->hooks = (syscall_hook_t*)sym->address;
+		syscall_hook_t *h = file->hooks;
+		while (h->syscall) {
+			h->oldvector = GetSyscall(h->syscall);
+			SetSyscall(h->syscall, h->vector);
+			D_PRINTF("Hooked syscall 0x%02x (old vector %08x, new %08x)\n",
+				h->syscall, (u32)h->oldvector, (u32)h->vector);
+			h++;
+		}
+	}
+
 	return 0;
 }
 
@@ -124,6 +141,17 @@ static int __uninstall_erl(erl_file_t *file)
 {
 	D_PRINTF("%s: uninstall %s from %08x\n", __FUNCTION__, file->name,
 		(u32)file->erl->bytes);
+
+	/* unhook syscalls */
+	if (file->hooks) {
+		syscall_hook_t *h = file->hooks;
+		while (h->syscall) {
+			SetSyscall(h->syscall, h->oldvector);
+			D_PRINTF("Unhooked syscall 0x%02x (restored vector %08x)\n",
+				h->syscall, (u32)h->oldvector);
+			h++;
+		}
+	}
 
 	if (!unload_erl(file->erl)) {
 		D_PRINTF("%s: %s unload error\n", __FUNCTION__, file->name);
@@ -186,7 +214,6 @@ int install_erls(const config_t *config, engine_t *engine)
 
 		/* populate engine context */
 		GET_SYMBOL(engine->info, "engine_info");
-		GET_SYMBOL(engine->syscall_hooks, "syscall_hooks");
 		GET_SYMBOL(engine->maxhooks, "maxhooks");
 		GET_SYMBOL(engine->numhooks, "numhooks");
 		GET_SYMBOL(engine->hooklist, "hooklist");
@@ -195,22 +222,6 @@ int install_erls(const config_t *config, engine_t *engine)
 		GET_SYMBOL(engine->codelist, "codelist");
 		GET_SYMBOL(engine->maxcallbacks, "maxcallbacks");
 		GET_SYMBOL(engine->callbacks, "callbacks");
-#ifndef _NO_HOOK
-		/* TODO hook syscalls inside ERL */
-		D_PRINTF("%s: hooking syscalls...\n", __FUNCTION__);
-		syscall_hook_t *h = engine->syscall_hooks;
-		while (h->syscall) {
-			void *v = hook_syscall(h->syscall, h->vector);
-			if (v == NULL) {
-				D_PRINTF("%s: syscall hook error\n", __FUNCTION__);
-				return -1;
-			}
-			h->oldvector = v;
-			h++;
-		}
-#else
-		D_PRINTF("%s: no syscalls hooked.\n", __FUNCTION__);
-#endif
 	}
 
 	/*

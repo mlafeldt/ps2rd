@@ -26,6 +26,7 @@
 #define F_BootCodeHandler
 
 #ifdef _HOOK_9
+#define F_MySetupThread
 #define F_HookSetupThread
 #endif
 
@@ -547,12 +548,11 @@ BootCodeHandler:
 
 /*******************************************************************************
  *
- * HookSetupThread - Pre-call hook function for syscall SetupThread().
+ * MySetupThread - Post-call hook function for syscall SetupThread().
  *
  * It runs through all hooks in the hook list and hard-codes a jal to
  * EngineHandler() if a hook's value is equal to the opcode at the hook address;
- * replaced opcodes are backed up. After processing the boot codes, it jumps to
- * the original SetupThread() function.
+ * replaced opcodes are backed up.
  *
  * NOTE: Only the _first_ matching hook will be activated.
  *
@@ -565,9 +565,9 @@ BootCodeHandler:
  *	void *root_func)	$t0
  *
  ******************************************************************************/
-#ifdef F_HookSetupThread
-	.ent	HookSetupThread
-HookSetupThread:
+#ifdef F_MySetupThread
+	.ent	MySetupThread
+MySetupThread:
 	addiu	$sp, -0x10
 	sd	$ra, 0($sp)
 
@@ -610,11 +610,23 @@ HookSetupThread:
 	jal	BootCodeHandler
 	nop
 	ld	$ra, 0($sp)
+	jr	$ra
 	addiu	$sp, 0x10
+	.end	MySetupThread
+#endif
 
-	/* jump to original SetupThread() */
-j_SetupThread:
-	j	0
+/*******************************************************************************
+ *
+ * HookSetupThread - Patch EPC to run MySetupThread() in userspace after the
+ * original SetupThread() handler has been called.
+ *
+ ******************************************************************************/
+#ifdef F_HookSetupThread
+	.ent	HookSetupThread
+HookSetupThread:
+	la	$v1, MySetupThread
+	sw	$v1, 8($sp)
+	jr	$ra
 	nop
 	.end	HookSetupThread
 #endif

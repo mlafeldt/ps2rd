@@ -39,10 +39,7 @@ typedef struct {
 
 /**
  * engine_t - cheat engine context
- * @erl: ERL record
  * @info: engine info
- * @id: engine ID
- * @syscall_hooks: syscall hooks
  * @maxhooks: max number of allowed hooks
  * @numhooks: number of hooks in hook list
  * @hooklist: hook list
@@ -53,18 +50,15 @@ typedef struct {
  * @callbacks: callback list
  */
 typedef struct {
-	struct erl_record_t	*erl;
-	u32			*info;
-	u32			*id;
-	syscall_hook_t		*syscall_hooks;
-	u32			*maxhooks;
-	u32			*numhooks;
-	u32			*hooklist;
-	u32			*maxcodes;
-	u32			*numcodes;
-	u32			*codelist;
-	u32			*maxcallbacks;
-	u32			*callbacks;
+	u32	*info;
+	u32	*maxhooks;
+	u32	*numhooks;
+	u32	*hooklist;
+	u32	*maxcodes;
+	u32	*numcodes;
+	u32	*codelist;
+	u32	*maxcallbacks;
+	u32	*callbacks;
 } engine_t;
 
 int install_erls(const config_t *config, engine_t *engine);

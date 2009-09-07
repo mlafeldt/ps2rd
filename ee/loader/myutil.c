@@ -67,46 +67,6 @@ u32 kmem_write(void *addr, const void *buf, u32 size)
 }
 
 /**
- * hook_syscall - Hooks a system call.
- * @syscall: number of syscall to hook
- * @myhandler: ptr to syscall handler (vector)
- * @return: original vector, or NULL on error
- *
- * This function patches the syscall vector table to call @myhandler first, each
- * time the syscall @syscall is executed.  Also, it inserts a jump opcode at the
- * address of "j 0" inside @myhandler that branches to the default syscall
- * handler.
- */
-void *hook_syscall(s32 syscall, const void *myhandler)
-{
-	void *vector;
-	u32 *j_defhandler;
-
-	if (myhandler == NULL)
-		return NULL;
-
-	/* Get vector from syscall vector table */
-	if ((vector = GetSyscall(syscall)) == NULL)
-		return NULL;
-
-	/* Search for opcode "j 0" inside myhandler */
-	j_defhandler = (u32*)myhandler;
-	while (*j_defhandler != MAKE_J(0))
-		j_defhandler++;
-
-	/* Insert jump opcode to syscall's default handler */
-	*j_defhandler = MAKE_J(vector);
-
-	/* Patch default vector to call my handler first */
-	SetSyscall(syscall, KSEG0(myhandler));
-
-	D_PRINTF("Hooked syscall 0x%02x (old vector %08x, new %08x, j_defhandler @%08x)\n",
-		syscall, (u32)vector, (u32)KSEG0(myhandler), (u32)j_defhandler);
-
-	return vector;
-}
-
-/**
  * flush_caches - Flushes data and instruction caches.
  */
 void flush_caches(void)

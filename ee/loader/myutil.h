@@ -46,7 +46,6 @@ enum dev {
 
 u32 kmem_read(void *addr, void *buf, u32 size);
 u32 kmem_write(void *addr, const void *buf, u32 size);
-void *hook_syscall(s32 syscall, const void *myhandler);
 void flush_caches(void);
 void reset_iop(const char *img);
 int load_modules(const char **modv);
