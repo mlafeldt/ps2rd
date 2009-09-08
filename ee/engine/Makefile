@@ -11,9 +11,9 @@ EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
 EE_OBJS = engine_asm.S engine.o
-TEST_OBJS = $(EE_OBJS) test.o $(PS2SDK)/ee/startup/crt0.o
+TEST_OBJS = engine_asm.S test.o $(PS2SDK)/ee/startup/crt0.o
 
-all: engine.erl #test.elf
+all: engine.erl
 
 clean:
 	rm -f *.o *.elf *.erl
@@ -29,7 +29,7 @@ test.elf: $(TEST_OBJS)
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) $(EE_INCS) \
 	-o $@ $(TEST_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
-run:
+run: test.elf
 	ps2client reset; sleep 3
 	ps2client execee host:test.elf
 
