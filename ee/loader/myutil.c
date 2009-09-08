@@ -199,7 +199,7 @@ enum dev get_dev(const char *path)
 	const char *prefix[] = {
 		"cdrom0:",
 		"host:",
-		"mass:"
+		"mass:",
 		"mc0:",
 		"mc1:",
 		NULL
