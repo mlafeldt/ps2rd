@@ -26,18 +26,6 @@
 #include "configman.h"
 
 /**
- * syscall_hook_t - syscall hook
- * @syscall: syscall number
- * @vector: syscall vector
- * @oldvector: original vector
- */
-typedef struct {
-	s32	syscall;
-	void	*vector;
-	void	*oldvector;
-} syscall_hook_t;
-
-/**
  * engine_t - cheat engine context
  * @info: engine info
  * @maxhooks: max number of allowed hooks
