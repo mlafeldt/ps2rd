@@ -168,14 +168,14 @@ static int haltState = 0;
 struct _ip_config {
 	char ip[16];
 	char netmask[16];
-	char gateway[16];	
+	char gateway[16];
 };
 
 typedef struct {
 	int auto_hook;
 	int rpc_mode;
 	int load_modules;
-	struct _ip_config ipconfig;	
+	struct _ip_config ipconfig;
 } debugger_opts_t;
 
 static debugger_opts_t g_debugger_opts;
@@ -199,11 +199,11 @@ void set_debugger_opts(const debugger_opts_t *opts)
 {
 	g_debugger_opts.auto_hook = opts->auto_hook;
 	g_debugger_opts.rpc_mode = opts->rpc_mode;
-	g_debugger_opts.load_modules = opts->load_modules;	
-	
+	g_debugger_opts.load_modules = opts->load_modules;
+
 	__strcpy(g_debugger_opts.ipconfig.ip, opts->ipconfig.ip);
 	__strcpy(g_debugger_opts.ipconfig.netmask, opts->ipconfig.netmask);
-	__strcpy(g_debugger_opts.ipconfig.gateway, opts->ipconfig.gateway);	
+	__strcpy(g_debugger_opts.ipconfig.gateway, opts->ipconfig.gateway);
 }
 
 /*
@@ -213,7 +213,7 @@ void get_ipconfig(void)
 {
 	memset(g_ipconfig, 0, IPCONFIG_MAX_LEN);
 	g_ipconfig_len = 0;
-	
+
 	/* add ip to g_ipconfig buf */
 	strncpy(&g_ipconfig[g_ipconfig_len], g_debugger_opts.ipconfig.ip, 15);
 	g_ipconfig_len += strlen(g_debugger_opts.ipconfig.ip) + 1;
@@ -402,11 +402,11 @@ int MySifRebootIop(char *ioprp_path)
 	SifInitRpc(0);
 	while (!MySifResetIop(NULL, 0)) {;}
 	while (!MySifSyncIop()){;}
-	
+
 	/* Init services & apply SBV patches */
 	SifInitRpc(0);
 	SifLoadFileInit();
-	SifInitIopHeap();	
+	SifInitIopHeap();
 	sbv_patch_enable_lmb();
 	sbv_patch_disable_prefix_check();
 
@@ -549,15 +549,15 @@ int MySifRebootIop(char *ioprp_path)
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-	if (g_debugger_opts.load_modules == LOAD_MODULES_ON) {	
+	if (g_debugger_opts.load_modules == LOAD_MODULES_ON) {
 		/* load our modules from kernel */
 		ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
 		if (ret < 0)
 			while (1) ;
 		ret = load_module_from_kernel(HASH_PS2IP, 0, NULL);
 		if (ret < 0)
-			while (1) ;	
-		get_ipconfig();	
+			while (1) ;
+		get_ipconfig();
 		ret = load_module_from_kernel(HASH_PS2SMAP, g_ipconfig_len, g_ipconfig);
 		if (ret < 0)
 			while (1) ;
@@ -576,7 +576,7 @@ int MySifRebootIop(char *ioprp_path)
 		rpcNTPBreset();
 		rpcNTPBinit();
 	}
-		
+
 	SifExitIopHeap();
 	SifLoadFileExit();
 	SifExitRpc();
@@ -824,16 +824,16 @@ int _init(void)
 	/* Set default debugger options */
 	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
 	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
-	g_debugger_opts.load_modules = LOAD_MODULES_ON;	
-	
+	g_debugger_opts.load_modules = LOAD_MODULES_ON;
+
 	/* set default IP settings */
 	__strcpy(g_debugger_opts.ipconfig.ip, "192.168.0.10");
 	__strcpy(g_debugger_opts.ipconfig.netmask, "255.255.255.0");
 	__strcpy(g_debugger_opts.ipconfig.gateway, "192.168.0.1");
 
 	/* clear auto-hook addresses table */
-	clear_hook_addresses_tab();	
-	
+	clear_hook_addresses_tab();
+
 	/* Hook syscalls */
 	OldSifSetDma = GetSyscall(__NR_SifSetDma);
 	SetSyscall(__NR_SifSetDma, HookSifSetDma);
