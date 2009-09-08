@@ -190,6 +190,12 @@ int install_erls(const config_t *config, engine_t *engine)
 		addr = _config_get_u32(config, SET_ENGINE_ADDR);
 		file = &_erl_files[ERL_FILE_ENGINE];
 
+		/* export functions for engine if libkernel isn't installed */
+		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+			erl_add_global_symbol("GetSyscall", (u32)GetSyscall);
+			erl_add_global_symbol("SetSyscall", (u32)SetSyscall);
+		}
+
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
