@@ -622,6 +622,7 @@ j_SetupThread:
  * Data section
  *
  ******************************************************************************/
+	.data
 
 /*
  * Some information about the engine used by the loader.
