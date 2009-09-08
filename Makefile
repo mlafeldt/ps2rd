@@ -1,4 +1,24 @@
+# This is the main Makefile of Artemis.
+#
+# The build targets are:
+#  check   - check for environment variables (invoked by all)
+#  all     - compile project (default)
+#  clean   - clean project
+#  rebuild - rebuild project (clean + all)
+#  release - create "release package"
+#
+# The following variables can influence the build process:
+
+# Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
+# messages will be printed to host: when using ps2link. There're also some other
+# consequences mainly important for the developers.
 DEBUG = 1
+
+# When USB is 1, USB support will be activated by loading the IOP modules
+# usbd.irx and usb_mass.irx. Unfortunately, the latter is _not_ open source, and
+# we're not allowed to include it directly. As a workaround, get yourself a copy
+# of usb_mass.irx, and set the environment variable USB_MASS to its file path,
+# e.g. export USB_MASS=/usr/local/ps2dev/irx/usb_mass.irx
 USB = 0
 
 VARS=DEBUG=$(DEBUG) USB=$(USB)
