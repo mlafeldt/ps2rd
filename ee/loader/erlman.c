@@ -40,6 +40,11 @@ typedef struct {
 	int auto_hook;
 	int rpc_mode;
 	int load_modules;
+	struct {
+		char ipaddr[16];
+		char netmask[16];
+		char gateway[16];
+	} ip_config;
 } debugger_opts_t;
 
 enum {
@@ -238,9 +243,13 @@ int install_erls(const config_t *config, engine_t *engine)
 		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
 		debugger_opts_t opts;
 		GET_SYMBOL(set_debugger_opts, "set_debugger_opts");
+		memset(&opts, 0, sizeof(opts));
 		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
 		opts.rpc_mode = _config_get_int(config, SET_DEBUGGER_RPC_MODE);
-		opts.load_modules = _config_get_int(config, SET_DEBUGGER_LOAD_MODULES);
+		opts.load_modules = _config_get_bool(config, SET_DEBUGGER_LOAD_MODULES);
+		strncpy(opts.ip_config.ipaddr, _config_get_string(config, SET_DEBUGGER_IPADDR), 15);
+		strncpy(opts.ip_config.netmask, _config_get_string(config, SET_DEBUGGER_NETMASK), 15);
+		strncpy(opts.ip_config.gateway, _config_get_string(config, SET_DEBUGGER_GATEWAY), 15);
 		set_debugger_opts(&opts);
 	}
 

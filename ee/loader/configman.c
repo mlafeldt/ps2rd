@@ -37,6 +37,9 @@ static const char *setting_paths[] = {
 	"debugger.auto_hook",
 	"debugger.rpc_mode",
 	"debugger.load_modules",
+	"debugger.ipaddr",
+	"debugger.netmask",
+	"debugger.gateway",
 	"sdklibs.install",
 	"sdklibs.addr",
 	"elfldr.install",
@@ -210,6 +213,18 @@ void _config_build(config_t *config)
 #ifdef DEBUGGER_LOAD_MODULES
 	config_setting_set_bool(set, DEBUGGER_LOAD_MODULES);
 #endif
+	set = config_setting_add(group, "ipaddr", CONFIG_TYPE_STRING);
+#ifdef DEBUGGER_IPADDR
+	config_setting_set_string(set, DEBUGGER_IPADDR);
+#endif
+	set = config_setting_add(group, "netmask", CONFIG_TYPE_STRING);
+#ifdef DEBUGGER_NETMASK
+	config_setting_set_string(set, DEBUGGER_NETMASK);
+#endif
+	set = config_setting_add(group, "gateway", CONFIG_TYPE_STRING);
+#ifdef DEBUGGER_GATEWAY
+	config_setting_set_string(set, DEBUGGER_GATEWAY);
+#endif
 	/*
 	 * sdklibs section
 	 */
@@ -294,6 +309,9 @@ void _config_print(const config_t *config)
 	PRINT_BOOL(SET_DEBUGGER_AUTO_HOOK);
 	PRINT_INT(SET_DEBUGGER_RPC_MODE);
 	PRINT_BOOL(SET_DEBUGGER_LOAD_MODULES);
+	PRINT_STRING(SET_DEBUGGER_IPADDR);
+	PRINT_STRING(SET_DEBUGGER_NETMASK);
+	PRINT_STRING(SET_DEBUGGER_GATEWAY);
 
 	/* sdklibs */
 	PRINT_BOOL(SET_SDKLIBS_INSTALL);
