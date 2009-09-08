@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: ps2dev9.c 1454 2007-11-04 23:19:57Z roman_ps2dev $
+# $Id$
 # DEV9 Device Driver.
 */
 

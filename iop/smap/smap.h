@@ -8,7 +8,7 @@
    Copyright (c)2003 T Lindstrom
    License: GPL
 
-   $Id: smap.h 360 2004-05-16 13:57:25Z oobles $
+   $Id$
 */
 
 /*
