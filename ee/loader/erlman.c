@@ -218,6 +218,12 @@ int install_erls(const config_t *config, engine_t *engine)
 		addr = _config_get_u32(config, SET_DEBUGGER_ADDR);
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
+		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
+				__FUNCTION__, file->name);
+			return -1;
+		}
+
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
@@ -244,6 +250,12 @@ int install_erls(const config_t *config, engine_t *engine)
 	if (_config_get_bool(config, SET_ELFLDR_INSTALL)) {
 		addr = _config_get_u32(config, SET_ELFLDR_ADDR);
 		file = &_erl_files[ERL_FILE_ELFLDR];
+
+		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
+				__FUNCTION__, file->name);
+			return -1;
+		}
 
 		if (__install_erl(file, addr) < 0)
 			return -1;
