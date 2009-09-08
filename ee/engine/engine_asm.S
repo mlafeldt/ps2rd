@@ -1,5 +1,5 @@
 /*
- * engine.S - Low-level cheat engine
+ * engine_asm.S - Low-level cheat engine
  *
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
  *
@@ -26,7 +26,6 @@
 #define F_BootCodeHandler
 
 #ifdef _HOOK_9
-#define F_MySetupThread
 #define F_HookSetupThread
 #endif
 
@@ -61,6 +60,7 @@
 
 #ifdef _HOOK_9
 	.globl	HookSetupThread
+	.globl	j_SetupThread
 	.globl	maxhooks
 	.globl	numhooks
 	.globl	hooklist
@@ -70,7 +70,6 @@
 	.globl	codelist
 
 	.globl	engine_info
-	.globl	syscall_hooks
 
 _start:
 
@@ -546,11 +545,12 @@ BootCodeHandler:
 
 /*******************************************************************************
  *
- * MySetupThread - Post-call hook function for syscall SetupThread().
+ * HookSetupThread - Pre-call hook function for syscall SetupThread().
  *
  * It runs through all hooks in the hook list and hard-codes a jal to
  * EngineHandler() if a hook's value is equal to the opcode at the hook address;
- * replaced opcodes are backed up.
+ * replaced opcodes are backed up. After processing the boot codes, it jumps to
+ * the original SetupThread() function.
  *
  * NOTE: Only the _first_ matching hook will be activated.
  *
@@ -563,9 +563,9 @@ BootCodeHandler:
  *	void *root_func)	$t0
  *
  ******************************************************************************/
-#ifdef F_MySetupThread
-	.ent	MySetupThread
-MySetupThread:
+#ifdef F_HookSetupThread
+	.ent	HookSetupThread
+HookSetupThread:
 	addiu	$sp, -0x10
 	sd	$ra, 0($sp)
 
@@ -608,23 +608,11 @@ MySetupThread:
 	jal	BootCodeHandler
 	nop
 	ld	$ra, 0($sp)
-	jr	$ra
 	addiu	$sp, 0x10
-	.end	MySetupThread
-#endif
 
-/*******************************************************************************
- *
- * HookSetupThread - Patch EPC to run MySetupThread() in userspace after the
- * original SetupThread() handler has been called.
- *
- ******************************************************************************/
-#ifdef F_HookSetupThread
-	.ent	HookSetupThread
-HookSetupThread:
-	la	$v1, MySetupThread
-	sw	$v1, 8($sp)
-	jr	$ra
+	/* jump to original SetupThread() */
+j_SetupThread:
+	j	0
 	nop
 	.end	HookSetupThread
 #endif
@@ -649,17 +637,6 @@ maxcallbacks:
 callbacks:
 	.space	(MAX_CALLBACKS*4)
 	.word	0 /* terminator */
-
-/*
- * List of syscalls to be hooked by the loader.
- */
-syscall_hooks:
-#ifdef _HOOK_9
-	.word	__NR_SetupThread	/* syscall number */
-	.word	HookSetupThread		/* new vector */
-	.word	0			/* original vector, set by loader */
-#endif
-	.word	0			/* terminator */
 
 /*
  * The engine exports how many hooks it can handle, the hook list is then

@@ -24,6 +24,10 @@
 #include <syscallnr.h>
 
 char *erl_id = "engine";
+/*
+ * Import GetSyscall() and SetSyscall() from libkernel.erl. If libkernel is not
+ * installed, the boot loader will provide those functions instead.
+ */
 #if 0
 char *erl_dependancies[] = {
 	"libkernel",
@@ -32,17 +36,27 @@ char *erl_dependancies[] = {
 #endif
 
 #ifdef _HOOK_9
-extern void *HookSetupThread(void *gp, void *stack, s32 stack_size, void *args,
-	void *root_func);
+static void *(*OldSetupThread)(void *gp, void *stack, s32 stack_size,
+	void *args, void *root_func) = NULL;
+extern void *HookSetupThread(void *gp, void *stack, s32 stack_size,
+	void *args, void *root_func);
+extern u32 j_SetupThread;
 #endif
+
+#define KSEG0(x)	((void*)(((u32)(x)) | 0x80000000))
+#define MAKE_J(addr)	(u32)(0x08000000 | (0x03FFFFFF & ((u32)addr >> 2)))
 
 /*
  * _init - Automatically invoked on ERL load.
  */
 int _init(void)
 {
-	/* TODO Hook syscall */
-
+	/* Hook syscall */
+#ifdef _HOOK_9
+	OldSetupThread = GetSyscall(__NR_SetupThread);
+	j_SetupThread = MAKE_J(OldSetupThread);
+	SetSyscall(__NR_SetupThread, KSEG0(HookSetupThread));
+#endif
 	return 0;
 }
 
@@ -51,7 +65,9 @@ int _init(void)
  */
 int _fini(void)
 {
-	/* TODO Unhook syscall */
-
+	/* Unhook syscall */
+#ifdef _HOOK_9
+	SetSyscall(__NR_SetupThread, OldSetupThread);
+#endif
 	return 0;
 }
