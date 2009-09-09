@@ -1,3 +1,10 @@
+0.3 (Sep xx 2009)
+- Added support for DNAS games; Metal Gear Solid 3 is now hackable.
+- Added ELF selector to directly boot/hack demos, for instance.
+- All ERLs hook/unhook syscalls internally when they're loaded/unloaded.
+- IP settings for PS2-side debugger are now configurable.
+- Load IOP modules for USB access (Artemis must be compiled with USB=1).
+
 0.2 (Aug 19 2009)
 - Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
 - Added ELF loader to replace evil LoadExecPS2() syscall.
