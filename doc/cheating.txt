@@ -1,6 +1,19 @@
 $Id$
 
-- see cheats_format.txt for details on the cheats file format
-- see code_types.txt for a complete list of available code types
+Artemis includes a cheat system which has many features people are used to from
+commercial products like CB and AR.
 
-tbc.
+The current version allows you to load cheat codes from a text file and to
+automatically activate them for the inserted game.
+
+The configuration file holds a setting named "cheats.file" which specifies the
+(absolute or relative) path to the cheats file to use, e.g. "mass:cheats.txt".
+The cheats file must follow the format described in doc/cheats_format.txt. This
+document also explains the concept of game IDs, and how to use them to auto-
+matically activate cheats for a certain game.
+
+Last but not least, take a look at doc/code_types.txt for a complete list of
+available code types. Note that Artemis only supports raw codes.
+
+
+EOF
