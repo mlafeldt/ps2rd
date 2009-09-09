@@ -62,10 +62,10 @@ release: all
 
 check:
 	@if [ -z $(PS2SDK) ]; then \
-		echo "PS2SDK env var not set."; \
+		echo "PS2SDK env var not set." >&2; \
 		exit 1; \
 	fi
 	@if [ $(USB) = "1" ] && [ -z $(USB_MASS) ]; then \
-		echo "USB_MASS env var not set."; \
+		echo "USB_MASS env var not set." >&2; \
 		exit 1; \
 	fi
