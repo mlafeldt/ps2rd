@@ -619,10 +619,10 @@ j_SetupThread:
 
 /*******************************************************************************
  *
- * Data section
+ * .rodata section
  *
  ******************************************************************************/
-	.data
+	.section .rodata
 
 /*
  * Some information about the engine used by the loader.
@@ -630,22 +630,35 @@ j_SetupThread:
 engine_info:
 	.word	0x00000001 /* version 0.1 */
 
+maxcallbacks:
+	.word	MAX_CALLBACKS
+
+#ifdef _HOOK_9
+maxhooks:
+	.word	MAX_HOOKS
+#endif
+
+maxcodes:
+	.word	MAX_CODES
+
+/*******************************************************************************
+ *
+ * .bss section
+ *
+ ******************************************************************************/
+	.section .bss
+
 /*
  * List of external functions to call from cheat engine. Set by loader.
  */
-maxcallbacks:
-	.word	MAX_CALLBACKS
 callbacks:
 	.space	(MAX_CALLBACKS*4)
 	.word	0 /* terminator */
 
 /*
- * The engine exports how many hooks it can handle, the hook list is then
- * filled by the loader.
+ * Hook list to be filled by loader.
  */
 #ifdef _HOOK_9
-maxhooks:
-	.word	MAX_HOOKS
 numhooks:
 	.word	0
 hooklist:
@@ -653,11 +666,8 @@ hooklist:
 #endif
 
 /*
- * The engine exports how many codes it can handle, the code list is then
- * filled by the loader.
+ * Code list to be filled by loader.
  */
-maxcodes:
-	.word	MAX_CODES
 numcodes:
 	.word	0
 codelist:
