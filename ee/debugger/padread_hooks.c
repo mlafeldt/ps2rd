@@ -22,6 +22,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <string.h>
 
 #include "padread_patterns.h"
 
@@ -31,8 +32,13 @@ extern int debugger_loop(void);
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
 /* for hook addresses */
-#define HOOK_ADDRESSES_BASE 	0x000fff00
-#define MAX_HOOK_ADDRESSES 		63
+#define HOOKS_BASE	 	0x000fff00
+#define MAX_HOOKS 		30
+
+typedef struct {
+	u32 address;
+	u32 opcode;
+} auto_hook_t;
 
 /* pad buttons stats structs */
 struct padButtonStat {
@@ -98,38 +104,38 @@ u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
 }
 
 /*
- * clear_hook_addresses_tab - clears hook adresses table
+ * clear_autohook_tab - clears hook adresses/opcode table
  */
-void clear_hook_addresses_tab(void)
+void clear_autohook_tab(void)
 {
-	int i;
-	u32 *ptr = (u32 *)HOOK_ADDRESSES_BASE;
-
-	for (i=0; i<(MAX_HOOK_ADDRESSES+1); i++)
-		*ptr++ = 0;
+	memset((void *)HOOKS_BASE, 0, sizeof(auto_hook_t) * (MAX_HOOKS+1));
 }
 
 /*
- * set_hook_address - helper to build hook adresses table
+ * add_autohook - helper to build hook adresses/opcode table
  */
-static int set_hook_address(u32 hook_addr)
+static int add_autohook(u32 hook_addr, u32 orig_opcode)
 {
 	int i = 0;
-	u32 *ptr = (u32 *)HOOK_ADDRESSES_BASE;
+	auto_hook_t *auto_hook = (auto_hook_t *)HOOKS_BASE;
 
 	/* search for existing hook address */
-	while (*ptr) {
-		if (*ptr++ == hook_addr)
+	while (auto_hook->address) {
+		if (auto_hook->address == hook_addr)
 			return 0;
+		auto_hook++;
 		i++;
 	}
 
 	/* check that we get enough room space to store address */
-	if (i >= MAX_HOOK_ADDRESSES)
+	if (i >= MAX_HOOKS)
 		return 0;
 
 	/* store hook address */
-	*ptr = hook_addr;
+	auto_hook->address = hook_addr;
+
+	/* save original opcode */
+	auto_hook->opcode = orig_opcode;
 
 	return 1;
 }
@@ -145,32 +151,32 @@ int patch_padRead(void)
 	u32 start = 0x00100000;
 	int pattern_found = 0;
 
-	GS_BGCOLOUR = 0x800080; /* Purple while padRead pattern search	*/
+	GS_BGCOLOUR = 0x800080; /* Purple while padRead pattern search */
 
 	memscope = 0x01f00000 - start;
 
 	/* First try to locate the orginal libpad's scePadRead function */
-    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern0, (u8 *)padReadpattern0_mask, sizeof(padReadpattern0));
-    if (!ptr) {
-	    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern1, (u8 *)padReadpattern1_mask, sizeof(padReadpattern1));
-	    if (!ptr) {
-		    ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern2, (u8 *)padReadpattern2_mask, sizeof(padReadpattern2));
-	    	if (!ptr) {
-		    	ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern3, (u8 *)padReadpattern3_mask, sizeof(padReadpattern3));
-		    	if (!ptr) {
-		    		ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)pad2Readpattern0, (u8 *)pad2Readpattern0_mask, sizeof(pad2Readpattern0));
-		    		if (!ptr) {
-		    			ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern4, (u8 *)padReadpattern4_mask, sizeof(padReadpattern4));
-		    			if (!ptr) {
-		    				ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern5, (u8 *)padReadpattern5_mask, sizeof(padReadpattern5));
-		    				if (!ptr) {
-		    					ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern6, (u8 *)padReadpattern6_mask, sizeof(padReadpattern6));
-		    					if (!ptr) {
-		    						ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern7, (u8 *)padReadpattern7_mask, sizeof(padReadpattern7));
-		    						if (!ptr) {
-    									//while(1) {;}
-    									GS_BGCOLOUR = 0xffffff; /* White, pattern not found	*/
-    									return 0;
+    	ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern0, (u8 *)padReadpattern0_mask, sizeof(padReadpattern0));
+    	if (!ptr) {
+		ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern1, (u8 *)padReadpattern1_mask, sizeof(padReadpattern1));
+		if (!ptr) {
+			ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern2, (u8 *)padReadpattern2_mask, sizeof(padReadpattern2));
+			if (!ptr) {
+				ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern3, (u8 *)padReadpattern3_mask, sizeof(padReadpattern3));
+				if (!ptr) {
+					ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)pad2Readpattern0, (u8 *)pad2Readpattern0_mask, sizeof(pad2Readpattern0));
+					if (!ptr) {
+						ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern4, (u8 *)padReadpattern4_mask, sizeof(padReadpattern4));
+						if (!ptr) {
+							ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern5, (u8 *)padReadpattern5_mask, sizeof(padReadpattern5));
+							if (!ptr) {
+								ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern6, (u8 *)padReadpattern6_mask, sizeof(padReadpattern6));
+								if (!ptr) {
+									ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern7, (u8 *)padReadpattern7_mask, sizeof(padReadpattern7));
+									if (!ptr) {
+										//while(1) {;}
+										GS_BGCOLOUR = 0xffffff; /* White, pattern not found */
+										return 0;
 									}
 								}
 							}
@@ -179,9 +185,9 @@ int patch_padRead(void)
 					else /* If found scePad2Read pattern */
 						scePadRead_style = 2;
 				}
-	    	}
-    	}
-    }
+			}
+		}
+	}
 
  	GS_BGCOLOUR = 0x00ff00; /* Lime while padRead patches */
 
@@ -217,7 +223,7 @@ int patch_padRead(void)
 		ptr = find_pattern_with_mask(ptr, memscope, (u8 *)pattern, (u8 *)mask, sizeof(pattern));
 		if (ptr) {
 			/* store hook address */
-			set_hook_address((u32)ptr);
+			add_autohook((u32)ptr, _lw((u32)ptr));
 
 			pattern_found = 1;
 

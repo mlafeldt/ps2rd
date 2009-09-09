@@ -40,6 +40,7 @@ struct lf_module_load_arg {
 
 #define LF_F_MOD_LOAD 0
 
+/* from libkernel */
 extern SifRpcClientData_t _lf_cd;
 extern int _lf_init;
 

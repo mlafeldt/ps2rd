@@ -29,8 +29,8 @@
 #define CMD_SENDDATA	  	0x0e
 #define CMD_ENDREPLY	  	0x0f
 
-static SifRpcClientData_t rpcclient __attribute__((aligned(64)));
-static int Rpc_Buffer[16] 			__attribute__((aligned(64)));
+static SifRpcClientData_t rpcclient 	__attribute__((aligned(64)));
+static int Rpc_Buffer[16] 		__attribute__((aligned(64)));
 
 static struct { 	// size = 16384
 	u16 cmd;	// 0

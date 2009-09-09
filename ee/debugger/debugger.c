@@ -53,7 +53,7 @@ char *erl_dependancies[] = {
 extern int SifLoadModuleAsync(const char *path, int arg_len, const char *args);
 
 /* padread_hooks.c functions */
-extern void clear_hook_addresses_tab(void);
+extern void clear_autohook_tab(void);
 extern int patch_padRead(void);
 
 /* debugger_rpc.c functions */
@@ -832,7 +832,7 @@ int _init(void)
 	__strcpy(g_debugger_opts.ipconfig.gateway, "192.168.0.1");
 
 	/* clear auto-hook addresses table */
-	clear_hook_addresses_tab();
+	clear_autohook_tab();
 
 	/* Hook syscalls */
 	OldSifSetDma = GetSyscall(__NR_SifSetDma);

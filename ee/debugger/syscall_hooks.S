@@ -29,9 +29,9 @@ OldSifSetDma: 			.word 0
 .globl	HookSifSetReg
 .ent	HookSifSetReg
 HookSifSetReg:
-	la $v1, NewSifSetReg
-	jr $ra
-	sw $v1, 8($sp)
+	la 	$v1, NewSifSetReg
+	jr 	$ra
+	sw 	$v1, 8($sp)
 .end	HookSifSetReg
 
 #**************************************************************************
@@ -58,26 +58,26 @@ OrigSifSetReg:
 .globl	HookSifSetDma
 .ent	HookSifSetDma
 HookSifSetDma:
-	lw		$v1, 0x0c($a0)
+	lw	$v1, 0x0c($a0)
 	addiu	$v0, $zero, 0x44
-	bne		$v0, $v1, lbl_oldsifsetdma
-	lw		$v1, 0x08($a0)
+	bne	$v0, $v1, lbl_oldsifsetdma
+	lw	$v1, 0x08($a0)
 	addiu	$v0, $zero, 0x68
-	bne		$v0, $v1, lbl_oldsifsetdma
-	lw		$a2, 0x00($a0)
+	bne	$v0, $v1, lbl_oldsifsetdma
+	lw	$a2, 0x00($a0)
 	lbu 	$v0, 0x00($a2)
-	bne		$v0, $v1, lbl_oldsifsetdma
+	bne	$v0, $v1, lbl_oldsifsetdma
 	lui 	$a3, 0x8000
 	ori 	$a3, $a3, 0x0003
-	lw 		$v0, 0x08($a2)
-	bne		$v0, $a3, lbl_oldsifsetdma
+	lw 	$v0, 0x08($a2)
+	bne	$v0, $a3, lbl_oldsifsetdma
 	nop
-	la		$v1, NewSifSetDma
-	jr 		$ra
-	sw 		$v1, 0x08($sp)
+	la	$v1, NewSifSetDma
+	jr 	$ra
+	sw 	$v1, 0x08($sp)
 lbl_oldsifsetdma:
-	lw		$v0, OldSifSetDma
-	jr 		$v0
+	lw	$v0, OldSifSetDma
+	jr 	$v0
 	nop
 .end	HookSifSetDma
 
