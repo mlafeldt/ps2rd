@@ -1,0 +1,6 @@
+$Id$
+
+- see cheats_format.txt for details on the cheats file format
+- see code_types.txt for a complete list of available code types
+
+tbc.
