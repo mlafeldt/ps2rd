@@ -5,3 +5,6 @@ hard on improving compatibility.
 
 A list of working games can be found here:
 http://gshi.org/wiki/Comprehensive_Artemis_Working_Game_List
+
+
+EOF

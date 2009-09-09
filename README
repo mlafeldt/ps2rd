@@ -5,10 +5,10 @@
 Artemis is a collection of tools to debug commercial PS2 games remotely over
 Ethernet.
 
-The debugging capabilities include:
+The debugging capabilities will include:
 - dump contents of PS2 memory
 - write data to PS2 memory
-- set breakpoints/watchpoints (not implemented yet)
+- set breakpoints/watchpoints
 
 Read doc/debugging.txt to find out more about debugging with Artemis.
 
@@ -19,7 +19,7 @@ automatically activate them for the inserted game.
 
 Read doc/cheating.txt for more information.
 
-The directory doc/ is generally the first place to look for any documention.
+The directory doc/ is generally the first place to look for any documentation.
 
 
 ---=======---

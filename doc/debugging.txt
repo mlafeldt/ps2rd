@@ -1,3 +1,22 @@
 $Id$
 
-TODO
+The main goal of Artemis is to provide means to debug commercial PS2 games
+remotely over Ethernet.
+
+The debugging capabilities include:
+- dump contents of PS2 memory
+- write data to PS2 memory (*)
+- set breakpoints/watchpoints (*)
+
+There's a dedicated "debugger" section in the configuration file - see
+doc/config_help.txt for a list of all settings.
+
+In order to debug games, you need to "hook" them first. This can be done by
+either activating appropriate hook codes or by enabling automatic hooking in
+the configuration file.
+
+
+(*) not implemented yet
+
+
+EOF
