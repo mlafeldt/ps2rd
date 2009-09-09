@@ -75,6 +75,20 @@ Section "debugger"
   reboot. This is required to hack games, and should only be turned off for
   compatibility tests.
 
+* ipaddr [IPv4 address in dotted decimal format, "192.168.0.10" by default]
+
+  Configure the IP address for the PS2-side debugger. The PC client will connect
+  to this address for remote debugging. You can figure out if network is "up" by
+  pinging the IP address.
+
+* netmask [IPv4 address in dotted decimal format, "255.255.255.0" by default]
+
+  Configure the subnet mask for the PS2-side debugger.
+
+* gateway [IPv4 address in dotted decimal format, "192.168.0.1" by default]
+
+  Configure the gateway address for the PS2-side debugger.
+
 
 Section "sdklibs"
 -----------------
