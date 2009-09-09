@@ -21,7 +21,6 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
-#include <loadfile.h>
 #include <sbv_patches.h>
 #include <sifrpc.h>
 #include <string.h>
@@ -30,6 +29,7 @@
 #include "configman.h"
 #include "dbgprintf.h"
 #include "erlman.h"
+#include "irxman.h"
 #include "mycdvd.h"
 #include "mypad.h"
 #include "mystring.h"
@@ -55,152 +55,11 @@
 #define CONFIG_FILE	"artemis.conf"
 #endif
 
-#define NETLOG_IP	"192.168.0.2"
-#define NETLOG_PORT	7411
-
 /* Boot information */
 static char g_bootpath[FIO_PATH_MAX];
 static enum dev g_bootdev = DEV_UNKN;
 
 static u8 g_padbuf[256] __attribute__((aligned(64)));
-
-/* IOP modules to load */
-static const char *g_modules[] = {
-	"rom0:SIO2MAN",
-	"rom0:MCMAN",
-	"rom0:MCSERV",
-	"rom0:PADMAN",
-	NULL
-};
-
-/* Statically linked IRX files */
-extern u8  _ps2dev9_irx_start[];
-extern u8  _ps2dev9_irx_end[];
-extern int _ps2dev9_irx_size;
-extern u8  _ps2ip_irx_start[];
-extern u8  _ps2ip_irx_end[];
-extern int _ps2ip_irx_size;
-extern u8  _ps2smap_irx_start[];
-extern u8  _ps2smap_irx_end[];
-extern int _ps2smap_irx_size;
-extern u8  _debugger_irx_start[];
-extern u8  _debugger_irx_end[];
-extern int _debugger_irx_size;
-extern u8  _netlog_irx_start[];
-extern u8  _netlog_irx_end[];
-extern int _netlog_irx_size;
-extern u8  _memdisk_irx_start[];
-extern u8  _memdisk_irx_end[];
-extern int _memdisk_irx_size;
-extern u8  _eesync_irx_start[];
-extern u8  _eesync_irx_end[];
-extern int _eesync_irx_size;
-
-#ifdef _USB
-extern u8  _usbd_irx_start[];
-extern u8  _usbd_irx_end[];
-extern int _usbd_irx_size;
-extern u8  _usb_mass_irx_start[];
-extern u8  _usb_mass_irx_end[];
-extern int _usb_mass_irx_size;
-#endif
-
-/* TODO: make it configurable */
-#define IRX_ADDR	0x80030000
-
-#define IRX_NUM		7
-
-/* RAM file table entry */
-typedef struct {
-	u32	hash;
-	u8	*addr;
-	u32	size;
-} ramfile_t;
-
-/**
- * strhash - String hashing function as specified by the ELF ABI.
- * @name: string to calculate hash from
- * @return: 32-bit hash value
- */
-static u32 strhash(const char *name)
-{
-	const u8 *p = (u8*)name;
-	u32 h = 0, g;
-
-	while (*p) {
-		h = (h << 4) + *p++;
-		if ((g = (h & 0xf0000000)) != 0)
-			h ^= (g >> 24);
-		h &= ~g;
-	}
-
-	return h;
-}
-
-/*
- * Helper to populate an RAM file table entry.
- */
-static void ramfile_set(ramfile_t *file, const char *name, u8 *addr, u32 size)
-{
-	file->hash = name ? strhash(name) : 0;
-	file->addr = addr;
-	file->size = size;
-
-	D_PRINTF("%s: name=%s hash=%08x addr=%08x size=%i\n", __FUNCTION__,
-		name, file->hash, (u32)file->addr, file->size);
-}
-
-/*
- * Copy statically linked IRX files to kernel RAM.
- * They will be loaded by the debugger later...
- */
-static void copy_modules_to_kernel(u32 addr)
-{
-	ramfile_t file_tab[IRX_NUM + 1];
-	ramfile_t *file_ptr = file_tab;
-	ramfile_t *ktab = NULL;
-
-	D_PRINTF("%s: addr=%08x\n", __FUNCTION__, addr);
-
-	/*
-	 * build RAM file table
-	 */
-	ramfile_set(file_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
-	ramfile_set(file_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
-	ramfile_set(file_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
-	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
-	ramfile_set(file_ptr++, "netlog", _netlog_irx_start, _netlog_irx_size);
-	ramfile_set(file_ptr++, "memdisk", _memdisk_irx_start, _memdisk_irx_size);
-	ramfile_set(file_ptr++, "eesync", _eesync_irx_start, _eesync_irx_size);
-	ramfile_set(file_ptr, NULL, 0, 0); /* terminator */
-
-	/*
-	 * copy modules to kernel RAM
-	 *
-	 * memory structure at @addr:
-	 * |RAM file table|IRX module #1|IRX module #2|etc.
-	 */
-	DI();
-	ee_kmode_enter();
-
-	ktab = (ramfile_t*)addr;
-	addr += sizeof(file_tab);
-	file_ptr = file_tab;
-
-	while (file_ptr->hash) {
-		memcpy((u8*)addr, file_ptr->addr, file_ptr->size);
-		file_ptr->addr = (u8*)addr;
-		addr += file_ptr->size;
-		file_ptr++;
-	}
-
-	memcpy(ktab, file_tab, sizeof(file_tab));
-
-	ee_kmode_exit();
-	EI();
-
-	FlushCache(0);
-}
 
 /*
  * Build pathname based on boot device and filename.
@@ -418,41 +277,24 @@ int main(int argc, char *argv[])
 		sbv_patch_user_mem_clear(0x00100000);
 	}
 
-	D_PRINTF("* Loading modules...\n");
-	if (load_modules(g_modules) < 0) {
-		A_PRINTF("Error: failed to load IOP modules\n");
+	if (init_irx_modules(&config) < 0) {
+		A_PRINTF("Error: failed to init IRX modules\n");
 		goto end;
 	}
 
-#ifdef _USB
-	int ret;
-	SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
-	SifExecModuleBuffer(_usb_mass_irx_start, _usb_mass_irx_size, 0, NULL, &ret);
-#endif
-#if 0
-	SifExecModuleBuffer(_netlog_irx_start, _netlog_irx_size, 0, NULL, &ret);
-	netlog_init(NETLOG_IP, NETLOG_PORT);
-#endif
-
-	/* Init CDVD (non-blocking) */
 	cdInit(CDVD_INIT_NOCHECK);
 	_cdStop(CDVD_NOBLOCK);
 
-	/* Init pad */
 	padInit(0);
 	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
 	padWaitReady(PAD_PORT, PAD_SLOT);
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
-	copy_modules_to_kernel(IRX_ADDR);
-
-	/* Install ERL files */
 	if (install_erls(&config, &engine) < 0) {
 		A_PRINTF("Error: failed to install ERLs\n");
 		goto end;
 	}
 
-	/* Load cheats */
 	cheats_init(&cheats);
 	load_cheats(&config, &cheats);
 

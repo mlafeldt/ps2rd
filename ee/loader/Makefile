@@ -30,7 +30,7 @@ EE_CFLAGS += -D_USB
 IRX_FILES += usbd_irx.o usb_mass_irx.o
 endif
 
-LDR_FILES = loader.o configman.o erlman.o mycdvd.o mypad.o \
+LDR_FILES = loader.o configman.o erlman.o irxman.o mycdvd.o mypad.o \
 	mystring.o myutil.o netlog_rpc.o
 
 EE_OBJS = $(LDR_FILES) $(ERL_FILES) $(IRX_FILES)
