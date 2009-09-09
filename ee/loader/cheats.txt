@@ -25,6 +25,12 @@ Extra Ammo
 
 //--------
 
+"Metal Gear Solid 3-Snake Eater PAL /ID SLES_820.32"
+Mastercode
+90177600 0C0620DA
+
+//--------
+
 "Resident Evil 4 PAL /ID SLES_537.02"
 Mastercode
 902A6EDC 0C0A74B2
