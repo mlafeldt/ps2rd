@@ -19,27 +19,26 @@
  * along with Artemis.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libcheats.h>
 #include "dbgprintf.h"
 #include "gameid.h"
 #include "mystring.h"
 
 /**
- * set_game_id - Sets up the members of a game id.
+ * gameid_set - Set up the members of a game id.
  * @id: ptr to game id
  * @name: filename
  * @size: file size (greater than 0)
  * @return: GID_F_* flags showing which of the members were set
  */
-int set_game_id(game_id_t *id, const char *name, size_t size)
+int gameid_set(gameid_t *id, const char *name, size_t size)
 {
 	if (id != NULL) {
-		memset(id, 0, sizeof(game_id_t));
+		memset(id, 0, sizeof(gameid_t));
 		if (name != NULL) {
 			strncpy(id->name, name, GID_NAME_MAX);
 			id->set |= GID_F_NAME;
 		}
-		if (size != 0) {
+		if (size > 0) {
 			id->size = size;
 			id->set |= GID_F_SIZE;
 		}
@@ -50,12 +49,41 @@ int set_game_id(game_id_t *id, const char *name, size_t size)
 }
 
 /**
- * cmp_game_id - Compares two game ids.
+ * gameid_generate - Generate the game id from a file.
+ * @filename: full path to the file
+ * @id: ptr to where the game id will be written to
+ * @return: 0: success, <0: error
+ */
+int gameid_generate(const char *filename, gameid_t *id)
+{
+	int fd;
+	size_t size;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		return -1;
+
+	/* get file size */
+	size = lseek(fd, 0, SEEK_END);
+	if (size < 0)
+		return -1;
+
+	/* XXX get checksum? */
+
+	close(fd);
+
+	gameid_set(id, filename, size);
+
+	return 0;
+}
+
+/**
+ * gameid_compare - Compare two game ids.
  * @id1: ptr to 1st game id
  * @id2: ptr to 2nd game id
  * @return: GID_F_* flags showing which of the members are equal
  */
-int cmp_game_id(const game_id_t *id1, const game_id_t *id2)
+int gameid_compare(const gameid_t *id1, const gameid_t *id2)
 {
 	int ret = GID_F_NONE;
 
@@ -76,45 +104,19 @@ int cmp_game_id(const game_id_t *id1, const game_id_t *id2)
 }
 
 /**
- * gen_game_id - Generates the game id from a file.
- * @filename: full path to the file
- * @id: ptr to where the game id will be written to
+ * gameid_parse - Parse a string for a game ID.
+ * @s: string to be parsed
+ * @id: ptr to game id
  * @return: 0: success, <0: error
  */
-int gen_game_id(const char *filename, game_id_t *id)
-{
-	int fd;
-	size_t size;
-
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return -1;
-
-	/* get file size */
-	size = lseek(fd, 0, SEEK_END);
-	if (size < 0)
-		return -1;
-
-	/* XXX get checksum? */
-
-	close(fd);
-
-	set_game_id(id, filename, size);
-
-	return 0;
-}
-
-/*
- * Parses a game title for the game ID.
- */
-int get_game_id(const char *s, game_id_t *id)
+int gameid_parse(const char *s, gameid_t *id)
 {
 	const char *sep = " \t";
-	char buf[GAME_TITLE_MAX + 1];
+	char buf[256];
 	char *p = NULL;
 	int i = 0;
 
-	memset(id, 0, sizeof(game_id_t));
+	memset(id, 0, sizeof(gameid_t));
 	strncpy(buf, s + strlen(ID_START), sizeof(buf));
 	p = strtok(buf, sep);
 

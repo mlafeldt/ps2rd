@@ -29,7 +29,6 @@
 #define ID_START	"/ID"
 
 #define GID_NAME_MAX	255
-#define GID_HASH_SIZE	20
 
 #define GID_F_NONE	0
 #define GID_F_NAME	1
@@ -37,7 +36,7 @@
 #define GID_F_ALL	(GID_F_NAME | GID_F_SIZE)
 
 /**
- * game_id_t - structure to hold game id information
+ * gameid_t - structure to hold game id information
  * @name: name of file
  * @size: size of file in bytes
  * @set: GID_F_* flags showing which of the members are set
@@ -46,11 +45,11 @@ typedef struct _game_id {
 	char	name[GID_NAME_MAX + 1];
 	size_t	size;
 	int	set;
-} game_id_t;
+} gameid_t;
 
-int set_game_id(game_id_t *id, const char *name, size_t size);
-int cmp_game_id(const game_id_t *id1, const game_id_t *id2);
-int gen_game_id(const char *filename, game_id_t *id);
-int get_game_id(const char *s, game_id_t *id);
+int gameid_set(gameid_t *id, const char *name, size_t size);
+int gameid_generate(const char *filename, gameid_t *id);
+int gameid_compare(const gameid_t *id1, const gameid_t *id2);
+int gameid_parse(const char *s, gameid_t *id);
 
 #endif /* _GAMEID_H_ */
