@@ -3,7 +3,10 @@
 - Added ELF selector to directly boot/hack demos, for instance.
 - All ERLs hook/unhook syscalls internally when they're loaded/unloaded.
 - IP settings for PS2-side debugger are now configurable.
+- In auto-hook mode, the debugger logs all hook addresses and original opcodes
+  to a list at 0x000fff00. You can easily create Mastercodes from it.
 - Load IOP modules for USB access (Artemis must be compiled with USB=1).
+- Included jimmikaelkael's ntpbclient from Core Launcher v2.
 
 0.2 (Aug 19 2009)
 - Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
