@@ -13,7 +13,9 @@ document also explains the concept of game IDs, and how to use them to auto-
 matically activate cheats for a certain game.
 
 Last but not least, take a look at doc/code_types.txt for a complete list of
-available code types. Note that Artemis only supports raw codes.
+available code types. Note that Artemis only supports _raw_ codes.
+
+Happy cheating!
 
 
 EOF
