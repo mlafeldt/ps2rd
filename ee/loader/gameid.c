@@ -117,7 +117,12 @@ int gameid_parse(const char *s, gameid_t *id)
 	int i = 0;
 
 	memset(id, 0, sizeof(gameid_t));
-	strncpy(buf, s + strlen(ID_START), sizeof(buf));
+
+	p = strstr(s, ID_START);
+	if (p == NULL)
+		return -1;
+
+	strncpy(buf, p + strlen(ID_START), sizeof(buf) - 1);
 	p = strtok(buf, sep);
 
 	while (p != NULL && i < 3) {
