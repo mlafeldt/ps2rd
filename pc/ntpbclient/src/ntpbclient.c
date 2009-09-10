@@ -26,7 +26,7 @@ WSADATA *WsaData;
 
 #define SERVER_TCP_PORT  		4234
 #define SERVER_UDP_PORT  		4244
-#define SERVER_IP			"192.168.0.80"
+#define SERVER_IP			"192.168.0.10"
 
 unsigned char pktbuffer[65536];
 char netlogbuffer[1024];
