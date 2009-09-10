@@ -37,11 +37,13 @@ all: check
 		bin2o $(USB_MASS) ee/loader/usb_mass_irx.o _usb_mass_irx; \
 	fi
 	$(VARS) make -C ee
+	make -C pc
 
 clean:
 	$(VARS) make -C ee clean
 	rm -f ee/loader/*_irx.o
 	make -C iop clean
+	make -C pc clean
 	rm -rf release/
 
 rebuild: clean all
@@ -57,6 +59,7 @@ release: all
 	fi
 	cp ee/loader/artemis.conf release/bin/
 	cp ee/loader/cheats.txt release/bin/
+	cp pc/ntpbclient/bin/ntpbclient release/bin/
 	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
 	cp -r doc/ release/
 
