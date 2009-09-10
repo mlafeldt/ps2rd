@@ -6,3 +6,4 @@ syntax: glob
 *.irx
 
 release/
+pc/ntpbclient/bin/ntpbclient
