@@ -1,15 +1,22 @@
 $Id$
 
+Overview
+--------
+
 The main goal of Artemis is to provide means to debug commercial PS2 games
-remotely over Ethernet.
+remotely over Ethernet. The system deploys a client-server architecture, where
+the PS2 serves requests from a debugger client run on a PC.
 
-Artemis has a client-server architecture, where the PS2 serves requests from a
-debugger client run on a PC.
-
-The debugging capabilities include:
+Remote debugging capabilities include:
 - dump contents of PS2 memory
 - write data to PS2 memory (not implemented yet)
 - set breakpoints/watchpoints (not implemented yet)
+
+More features will be added as development continues.
+
+
+PS2 server
+----------
 
 For the PS2 side, there's a dedicated "debugger" section in the configuration
 file - see doc/config_help.txt for a list of all settings.
@@ -17,6 +24,10 @@ file - see doc/config_help.txt for a list of all settings.
 In order to debug games, you need to "hook" them first. This can be done by
 either activating appropriate hook codes or by enabling automatic hooking in
 the configuration file.
+
+
+PC client
+---------
 
 On the PC side, you can use ntpbclient to issue commands to the server.
 
