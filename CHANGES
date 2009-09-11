@@ -6,7 +6,7 @@
 - In auto-hook mode, the debugger logs all hook addresses and original opcodes
   to a list at 0x000fff00. You can easily create Mastercodes from it.
 - Load IOP modules for USB access (Artemis must be compiled with USB=1).
-- Included jimmikaelkael's ntpbclient from Core Launcher v2.
+- Added updated version of ntpbclient.
 
 0.2 (Aug 19 2009)
 - Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
