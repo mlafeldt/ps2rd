@@ -50,16 +50,16 @@ rebuild: clean all
 
 release: all
 	rm -rf release
-	mkdir -p release/bin
+	mkdir -p release/ps2 release/pc
 	if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
-		ps2-packer -v ee/loader/artemis.elf release/bin/artemis.elf; \
-		chmod +x release/bin/artemis.elf; \
+		ps2-packer -v ee/loader/artemis.elf release/ps2/artemis.elf; \
+		chmod +x release/ps2/artemis.elf; \
 	else \
-		cp ee/loader/artemis.elf release/bin/artemis.elf; \
+		cp ee/loader/artemis.elf release/ps2/artemis.elf; \
 	fi
-	cp ee/loader/artemis.conf release/bin/
-	cp ee/loader/cheats.txt release/bin/
-	cp pc/ntpbclient/bin/ntpbclient release/bin/
+	cp ee/loader/artemis.conf release/ps2/
+	cp ee/loader/cheats.txt release/ps2/
+	cp pc/ntpbclient/bin/ntpbclient release/pc/
 	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
 	cp -r doc/ release/
 
