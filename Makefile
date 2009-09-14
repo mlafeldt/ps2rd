@@ -59,7 +59,7 @@ release: all
 	fi
 	cp ee/loader/artemis.conf release/ps2/
 	cp ee/loader/cheats.txt release/ps2/
-	cp pc/ntpbclient/bin/ntpbclient release/pc/
+	cp pc/ntpbclient/bin/* release/pc/
 	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
 	cp -r doc/ release/
 
