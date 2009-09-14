@@ -25,7 +25,7 @@ Extra Ammo
 
 //--------
 
-"Metal Gear Solid 3-Snake Eater PAL /ID SLES_820.32"
+"Metal Gear Solid 3-Snake Eater PAL /ID cdrom0:\SLES_820.32;1 353476"
 Mastercode
 90177600 0C0620DA
 

@@ -29,6 +29,7 @@
 #include "configman.h"
 #include "dbgprintf.h"
 #include "erlman.h"
+#include "gameid.h"
 #include "irxman.h"
 #include "mycdvd.h"
 #include "mypad.h"
@@ -119,41 +120,61 @@ static int load_cheats(const config_t *config, cheats_t *cheats)
 /*
  * Add cheats for inserted game to cheat engine.
  */
-static int activate_cheats(const cheats_t *cheats, engine_t *engine)
+static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
 {
 	char elfname[FIO_PATH_MAX];
+	enum dev dev = DEV_CD;
 	game_t *game = NULL;
 	cheat_t *cheat = NULL;
 	code_t *code = NULL;
-	int found, ret;
+	gameid_t id1, id2;
+	int found;
 
-	/*
-	 * Get ELF filename of inserted game.
-	 */
-	_cdStandby(CDVD_BLOCK);
-	ret = cdGetElf(elfname);
-	_cdStop(CDVD_NOBLOCK);
-	if (ret < 0) {
-		A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
+	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
+		_cdStandby(CDVD_BLOCK);
+
+	if (boot2 == NULL) {
+		if (cdGetElf(elfname) < 0) {
+			A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
+			_cdStop(CDVD_NOBLOCK);
+			return -1;
+		}
+		boot2 = elfname;
+	}
+
+	if (!file_exists(boot2)) {
+		A_PRINTF("Error: ELF %s not found\n", boot2);
+		if (dev == DEV_CD)
+			_cdStop(CDVD_NOBLOCK);
 		return -1;
 	}
 
 	/*
-	 * Search game list for title that includes the ELF name.
-	 * TODO: use a real game ID instead of this crap.
+	 * Generate game ID.
 	 */
-	get_base_name(elfname, elfname);
+	if (gameid_generate(boot2, &id1) < 0) {
+		A_PRINTF("Error: could not generate game ID from ELF %s\n", boot2);
+		return -1;
+	}
+
+	if (dev == DEV_CD)
+		_cdStop(CDVD_NOBLOCK);
+
+	/*
+	 * Search cheats for game ID.
+	 */
 	found = 0;
 	GAMES_FOREACH(game, &cheats->games) {
-		if (strstr(game->title, elfname) != NULL) {
-			found = 1;
-			break;
+		if (!gameid_parse(game->title, &id2)) {
+			if (gameid_compare(&id1, &id2) != GID_F_NONE) {
+				found = 1;
+				break;
+			}
 		}
 	}
 
 	if (!found) {
-		A_PRINTF("Error: no cheats found for inserted game (%s)\n",
-			elfname);
+		A_PRINTF("Error: no cheats found for ELF %s\n", boot2);
 		return -1;
 	}
 
@@ -327,7 +348,7 @@ int main(int argc, char *argv[])
 				A_PRINTF("Error: could not activate cheats - "
 					"engine not installed\n");
 			else
-				activate_cheats(&cheats, &engine);
+				activate_cheats(boot2, &cheats, &engine);
 		} else if (new_pad & PAD_TRIANGLE) {
 			/* Do nothing */
 		} else if (new_pad & PAD_SQUARE) {
