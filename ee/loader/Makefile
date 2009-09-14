@@ -12,13 +12,14 @@ EE_LDFLAGS += -s
 endif
 
 EE_INCS += -I$(PS2SDK)/ports/include
-EE_CFLAGS += #-D_NO_HOOK -D_NO_SBV -D_NO_IOPRESET
+EE_CFLAGS += #-D_NO_SBV -D_NO_IOPRESET
 EE_LDFLAGS += -L$(PS2SDK)/ports/lib
 EE_ASFLAGS +=
 
 EE_BIN = artemis.elf
 
-ERL_FILES = engine_erl.o libkernel_erl.o libpatches_erl.o debugger_erl.o elfldr_erl.o
+ERL_FILES = engine_erl.o libkernel_erl.o libpatches_erl.o \
+	debugger_erl.o elfldr_erl.o
 ifeq ($(DEBUG),1)
 ERL_FILES += libc_erl.o libdebug_erl.o
 endif
