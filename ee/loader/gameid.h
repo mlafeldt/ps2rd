@@ -26,7 +26,7 @@
 #include <stddef.h> /* for size_t */
 
 /* Start of game id string */
-#define ID_START	"/ID"
+#define GID_START	"/ID"
 
 #define GID_NAME_MAX	255
 
