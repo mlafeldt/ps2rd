@@ -127,8 +127,7 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 	game_t *game = NULL;
 	cheat_t *cheat = NULL;
 	code_t *code = NULL;
-	gameid_t id1, id2;
-	int found;
+	gameid_t id;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
 		_cdStandby(CDVD_BLOCK);
@@ -149,10 +148,7 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 		return -1;
 	}
 
-	/*
-	 * Generate game ID.
-	 */
-	if (gameid_generate(boot2, &id1) < 0) {
+	if (gameid_generate(boot2, &id) < 0) {
 		A_PRINTF("Error: could not generate game ID from ELF %s\n", boot2);
 		return -1;
 	}
@@ -160,20 +156,7 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 	if (dev == DEV_CD)
 		_cdStop(CDVD_NOBLOCK);
 
-	/*
-	 * Search cheats for game ID.
-	 */
-	found = 0;
-	GAMES_FOREACH(game, &cheats->games) {
-		if (!gameid_parse(game->title, &id2)) {
-			if (gameid_compare(&id1, &id2) != GID_F_NONE) {
-				found = 1;
-				break;
-			}
-		}
-	}
-
-	if (!found) {
+	if ((game = gameid_find(&id, &cheats->games)) == NULL) {
 		A_PRINTF("Error: no cheats found for ELF %s\n", boot2);
 		return -1;
 	}

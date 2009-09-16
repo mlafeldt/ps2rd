@@ -19,6 +19,8 @@
  * along with Artemis.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <tamtypes.h>
+#include <libcheats.h>
 #include "dbgprintf.h"
 #include "gameid.h"
 #include "mystring.h"
@@ -65,12 +67,11 @@ int gameid_generate(const char *filename, gameid_t *id)
 
 	/* get file size */
 	size = lseek(fd, 0, SEEK_END);
+	close(fd);
 	if (size < 0)
 		return -1;
 
 	/* XXX get checksum? */
-
-	close(fd);
 
 	gameid_set(id, filename, size);
 
@@ -170,4 +171,25 @@ int gameid_parse(const char *s, gameid_t *id)
 	}
 
 	return 0;
+}
+
+/**
+ * gameid_find - Find cheats for a game by its game ID.
+ * @id: ptr to game id
+ * @list: game list to be searched
+ * @return: ptr to game, or NULL if it could not be found
+ */
+game_t *gameid_find(const gameid_t *id, const gamelist_t *list)
+{
+	game_t *game;
+	gameid_t id2;
+
+	GAMES_FOREACH(game, list) {
+		if (!gameid_parse(game->title, &id2)) {
+			if (gameid_compare(id, &id2) != GID_F_NONE)
+				return game;
+		}
+	}
+
+	return NULL;
 }

@@ -24,6 +24,7 @@
 
 #include <tamtypes.h>
 #include <stddef.h> /* for size_t */
+#include <libcheats.h>
 
 /* Start of game id string */
 #define GID_START	"/ID"
@@ -51,5 +52,6 @@ int gameid_set(gameid_t *id, const char *name, size_t size);
 int gameid_generate(const char *filename, gameid_t *id);
 int gameid_compare(const gameid_t *id1, const gameid_t *id2);
 int gameid_parse(const char *s, gameid_t *id);
+game_t *gameid_find(const gameid_t *id, const gamelist_t *list);
 
 #endif /* _GAMEID_H_ */
