@@ -91,7 +91,7 @@ int gameid_compare(const gameid_t *id1, const gameid_t *id2)
 	if (id1 != NULL && id2 != NULL) {
 		/* compare name */
 		if ((id1->set & GID_F_NAME) && (id2->set & GID_F_NAME)) {
-			if (!strstr_wc(id1->name, id2->name, GID_WILDCARD))
+			if (strstr_wc(id1->name, id2->name, GID_WILDCARD))
 				match |= GID_F_NAME;
 			else
 				return -1;

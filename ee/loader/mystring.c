@@ -220,14 +220,18 @@ int trim_str(char *s)
  */
 int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
 {
-	while (--n >= 0 && (*s1 == *s2 || *s1 == wc || *s2 == wc)) {
-		if (*s1 == '\0')
+	unsigned char a, b;
+
+	while (n-- > 0) {
+		a = (unsigned char)*s1++;
+		b = (unsigned char)*s2++;
+		if (a != b && a != wc && b != wc)
+			return a - b;
+		if (!a)
 			return 0;
-		s1++;
-		s2++;
 	}
 
-	return (n < 0 ? 0 : *(u8*)s1 - *(u8*)s2);
+	return 0;
 }
 
 /*
