@@ -38,7 +38,7 @@
 #include "netlog_rpc.h"
 
 #define APP_NAME	"Artemis"
-#define APP_VERSION	"0.3"
+#define APP_VERSION	"0.4 WIP"
 #define APP_BUILD_DATE	__DATE__" "__TIME__
 
 #define WELCOME_STRING	"Welcome to "APP_NAME" "APP_VERSION"\n"
