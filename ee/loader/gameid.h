@@ -31,7 +31,7 @@
 
 #define GID_WILDCARD	'?'
 
-#define GID_NAME_MAX	255
+#define GID_NAME_MAX	GAME_TITLE_MAX
 
 #define GID_F_NONE	0
 #define GID_F_NAME	1

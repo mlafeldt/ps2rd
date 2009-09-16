@@ -82,7 +82,7 @@ int gameid_generate(const char *filename, gameid_t *id)
  * gameid_compare - Compare two game ids.
  * @id1: ptr to 1st game id
  * @id2: ptr to 2nd game id
- * @return: 0: equal, <0: unequal
+ * @return: 0: equal, -1: unequal
  */
 int gameid_compare(const gameid_t *id1, const gameid_t *id2)
 {
@@ -112,12 +112,12 @@ int gameid_compare(const gameid_t *id1, const gameid_t *id2)
  * gameid_parse - Parse a string for a game ID.
  * @s: string to be parsed
  * @id: ptr to game id
- * @return: 0: success, <0: error
+ * @return: 0: success, -1: error
  */
 int gameid_parse(const char *s, gameid_t *id)
 {
 	const char *sep = " \t";
-	char buf[256];
+	char buf[GID_NAME_MAX + 1];
 	char *p = NULL;
 	int i = 0;
 
@@ -127,7 +127,7 @@ int gameid_parse(const char *s, gameid_t *id)
 	if (p == NULL)
 		return -1;
 
-	strncpy(buf, p + strlen(GID_START), sizeof(buf) - 1);
+	strncpy(buf, p + strlen(GID_START), GID_NAME_MAX);
 	p = strtok(buf, sep);
 
 	while (p != NULL && i < 3) {
