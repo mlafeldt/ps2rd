@@ -4,7 +4,7 @@ Artemis makes use of the libcheats library to read cheat codes in text format.
 
 The format of the text file is quite simple:
 
-"Game title 1 /ID NAME"
+"Game title 1 /ID NAME SIZE"
 Cheat description 1
 Cheat code 1
 Cheat code 2
@@ -12,13 +12,24 @@ Cheat description 2
 Cheat code 1
 Cheat code 2
 
-"Game title 2 /ID NAME"
+"Game title 2 /ID NAME SIZE"
 etc.
 
 The ID is used by the cheat system to auto-detect the inserted game and activate
-codes accordingly. NAME must be the pathname of the game's start ELF (as
-specified in SYSTEM.CNF, but you can leave out the cdrom0:\ prefix).
-Note that the game ID handling will be improved in the future.
+codes accordingly. NAME must match (a substring of) the pathname of the ELF you
+want to boot. This is most likely the ELF specified in SYSTEM.CNF. Further, you
+can use the wildcard character '?' in NAME to match more than one ELF.
+
+Examples for NAME:
+- cdrom0:\SLES_820.32;1 matches cdrom0:\SLES_820.32;1
+- SLES_820.32 matches cdrom0:\SLES_820.32;1
+- SLES_820.1? matches cdrom0:\SLES_820.11;1 and cdrom0:\SLES_820.12;1
+
+SIZE is the size of the ELF file in bytes. It is optional. If you want to omit
+NAME and only use size as an identifier, insert the '-' character, e.g.:
+
+"Metal Gear Solid 3-Snake Eater PAL /ID - 353476"
+
 
 Also, two types of comments are allowed in the cheats file:
 - Script-style comments. All text beginning with a ‘#’ character to the end of
