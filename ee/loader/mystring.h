@@ -45,6 +45,9 @@ int set_strlen(char *s, size_t max);
 char *term_str(char *s, int(*callback)(const char *));
 int trim_str(char *s);
 
+int strncmp_wc(const char *s1, const char *s2, size_t n, int wc);
+char *strstr_wc(const char *haystack, const char *needle, int wc);
+
 int _isascii(int c);
 int is_empty_str(const char *s);
 int is_empty_substr(const char *s, size_t count);

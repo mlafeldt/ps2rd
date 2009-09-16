@@ -216,6 +216,42 @@ int trim_str(char *s)
 }
 
 /*
+ * strncmp_wc - Compare two strings. Wildcard character @wc is ignored.
+ */
+int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
+{
+	while (--n >= 0 && (*s1 == *s2 || *s1 == wc || *s2 == wc)) {
+		if (*s1 == '\0')
+			return 0;
+		s1++;
+		s2++;
+	}
+
+	return (n < 0 ? 0 : *(u8*)s1 - *(u8*)s2);
+}
+
+/*
+ * strstr_wc - Locate a substring. Wildcard character @wc is ignored.
+ */
+char *strstr_wc(const char *haystack, const char *needle, int wc)
+{
+	char *pos;
+
+	if (!strlen(needle))
+		return (char*)haystack;
+
+	pos = (char*)haystack;
+
+	while (*pos) {
+		if (!strncmp_wc(pos, needle, strlen(needle), wc))
+			return pos;
+		pos++;
+	}
+
+	return NULL;
+}
+
+/*
  * _isascii - Returns 1 if @c is an ASCII character (in the range 0x00 - 0x7F).
  */
 int _isascii(int c)
