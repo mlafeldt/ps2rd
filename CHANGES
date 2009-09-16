@@ -8,7 +8,6 @@
 - IP settings for PS2-side debugger are now configurable.
 - Added setting debugger.load_modules and removed engine.file.
 - Fixed handling of absolute paths for devices mass and mc0.
-- Fixed ps2sdk-erl-fix.patch to ignore white space.
 - Load IOP modules for USB access (Artemis must be compiled with USB=1).
 - Added updated version of ntpbclient.
 
