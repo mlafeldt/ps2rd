@@ -1,4 +1,4 @@
-0.3 (Sep xx 2009)
+0.3 (Sep 16 2009)
 - Added support for DNAS games; Metal Gear Solid 3 is now hackable.
 - Added ELF selector to directly boot/hack demos, for instance.
 - All ERLs hook/unhook syscalls internally when they're loaded/unloaded.
