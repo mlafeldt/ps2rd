@@ -118,12 +118,38 @@ static int load_cheats(const config_t *config, cheats_t *cheats)
 }
 
 /*
+ * Build argument vector from string @s.
+ */
+static void get_argv(const char *s, int *argc, char *argv[])
+{
+	static char argbuf[256];
+	int max;
+	char *tok;
+
+	max = *argc;
+	*argc = 0;
+
+	memset(argv, 0, max * sizeof(argv[0]));
+	memset(argbuf, 0, sizeof(argbuf));
+	strncpy(argbuf, s, sizeof(argbuf)-1);
+
+	tok = strtok(argbuf, "\t ");
+	while (tok != NULL && *argc < max) {
+		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, *argc, tok);
+		argv[(*argc)++] = tok;
+		tok = strtok(NULL, "\t ");
+	}
+}
+
+/*
  * Add cheats for inserted game to cheat engine.
  */
 static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
 {
 	char elfname[FIO_PATH_MAX];
 	enum dev dev = DEV_CD;
+	char *argv[1];
+	int argc = 1;
 	game_t *game = NULL;
 	cheat_t *cheat = NULL;
 	code_t *code = NULL;
@@ -141,15 +167,12 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 		boot2 = elfname;
 	}
 
-	if (!file_exists(boot2)) {
-		A_PRINTF("Error: ELF %s not found\n", boot2);
+	get_argv(boot2, &argc, argv);
+
+	if (gameid_generate(argv[0], &id) < 0) {
+		A_PRINTF("Error: could not generate game ID from ELF %s\n", argv[0]);
 		if (dev == DEV_CD)
 			_cdStop(CDVD_NOBLOCK);
-		return -1;
-	}
-
-	if (gameid_generate(boot2, &id) < 0) {
-		A_PRINTF("Error: could not generate game ID from ELF %s\n", boot2);
 		return -1;
 	}
 
@@ -157,7 +180,7 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 		_cdStop(CDVD_NOBLOCK);
 
 	if ((game = gameid_find(&id, &cheats->games)) == NULL) {
-		A_PRINTF("Error: no cheats found for ELF %s\n", boot2);
+		A_PRINTF("Error: no cheats found for ELF %s\n", argv[0]);
 		return -1;
 	}
 
@@ -190,10 +213,8 @@ static int start_game(const char *boot2)
 {
 	char elfname[FIO_PATH_MAX];
 	enum dev dev = DEV_CD;
-	char argbuf[256];
 	char *argv[16];
-	int argc = 0;
-	char *tok = NULL;
+	int argc = 16;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
 		_cdStandby(CDVD_BLOCK);
@@ -208,16 +229,7 @@ static int start_game(const char *boot2)
 	}
 
 	/* build args for LoadExecPS2() */
-	memset(argv, 0, sizeof(argv));
-	memset(argbuf, 0, sizeof(argbuf));
-	strncpy(argbuf, boot2, sizeof(argbuf)-1);
-
-	tok = strtok(argbuf, "\t ");
-	while (tok != NULL) {
-		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, argc, tok);
-		argv[argc++] = tok;
-		tok = strtok(NULL, "\t ");
-	}
+	get_argv(boot2, &argc, argv);
 
 	if (!file_exists(argv[0])) {
 		A_PRINTF("Error: ELF %s not found\n", argv[0]);
