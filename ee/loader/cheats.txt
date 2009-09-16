@@ -25,6 +25,12 @@ Extra Ammo
 
 //--------
 
+"Metal Gear Solid 2-Sons Of Liberty Demo PAL /ID MGS2\MGS2.ELF"
+Mastercode
+9016519C 0C05B4AA
+
+//--------
+
 "Metal Gear Solid 3-Snake Eater PAL /ID cdrom0:\SLES_820.32;1 353476"
 Mastercode
 90177600 0C0620DA
