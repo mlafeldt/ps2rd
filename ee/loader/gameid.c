@@ -78,47 +78,34 @@ int gameid_generate(const char *filename, gameid_t *id)
 	return 0;
 }
 
-/*
- * String compare with wildcard.
- */
-static int strcmp_wc(const char *s1, const char *s2)
-{
-	while (*s1 && *s2) {
-		if (*s1 == *s2 || *s1 == '?' || *s2 == '?') {
-			s1++;
-			s2++;
-		} else {
-			break;
-		}
-	}
-
-	return (*(u8*)s1 - *(u8*)s2);
-}
-
 /**
  * gameid_compare - Compare two game ids.
  * @id1: ptr to 1st game id
  * @id2: ptr to 2nd game id
- * @return: GID_F_* flags showing which of the members are equal
+ * @return: 0: equal, <0: unequal
  */
 int gameid_compare(const gameid_t *id1, const gameid_t *id2)
 {
-	int ret = GID_F_NONE;
+	int match = GID_F_NONE;
 
 	if (id1 != NULL && id2 != NULL) {
 		/* compare name */
 		if ((id1->set & GID_F_NAME) && (id2->set & GID_F_NAME)) {
-			if (!strcmp_wc(id1->name, id2->name))
-				ret |= GID_F_NAME;
+			if (!strstr_wc(id1->name, id2->name, GID_WILDCARD))
+				match |= GID_F_NAME;
+			else
+				return -1;
 		}
 		/* compare size */
 		if ((id1->set & GID_F_SIZE) && (id2->set & GID_F_SIZE)) {
 			if (id1->size == id2->size)
-				ret |= GID_F_SIZE;
+				match |= GID_F_SIZE;
+			else
+				return -1;
 		}
 	}
 
-	return ret;
+	return (match != GID_F_NONE) ? 0 : -1;
 }
 
 /**
@@ -149,7 +136,6 @@ int gameid_parse(const char *s, gameid_t *id)
 			case 0: /* name */
 				strncpy(id->name, p, GID_NAME_MAX);
 				id->set |= GID_F_NAME;
-				D_PRINTF("id.name %s\n", id->name);
 				break;
 
 			case 1: /* size */
@@ -158,7 +144,6 @@ int gameid_parse(const char *s, gameid_t *id)
 				if (!sscanf(p, "%i", &id->size))
 					return -1;
 				id->set |= GID_F_SIZE;
-				D_PRINTF("id.size %i\n", id->size);
 				break;
 
 			case 2: /* XXX checksum? */
@@ -186,7 +171,7 @@ game_t *gameid_find(const gameid_t *id, const gamelist_t *list)
 
 	GAMES_FOREACH(game, list) {
 		if (!gameid_parse(game->title, &id2)) {
-			if (gameid_compare(id, &id2) != GID_F_NONE)
+			if (!gameid_compare(id, &id2))
 				return game;
 		}
 	}

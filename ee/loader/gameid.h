@@ -29,6 +29,8 @@
 /* Start of game id string */
 #define GID_START	"/ID"
 
+#define GID_WILDCARD	'?'
+
 #define GID_NAME_MAX	255
 
 #define GID_F_NONE	0
