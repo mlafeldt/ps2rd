@@ -69,6 +69,16 @@
 #define ELFLDR_ADDR		0x000ff000
 #endif
 
+#ifndef VIDEOMOD_INSTALL
+#define VIDEOMOD_INSTALL	0
+#endif
+#ifndef VIDEOMOD_ADDR
+#define VIDEOMOD_ADDR		0x000f0000
+#endif
+#ifndef VIDEOMOD_VMODE
+#define VIDEOMOD_VMODE		0
+#endif
+
 #ifndef CHEATS_FILE
 #define CHEATS_FILE		"cheats.txt"
 #endif
@@ -97,6 +107,10 @@ enum setting_key {
 	/* elfldr */
 	SET_ELFLDR_INSTALL,
 	SET_ELFLDR_ADDR,
+	/* videomod */
+	SET_VIDEOMOD_INSTALL,
+	SET_VIDEOMOD_ADDR,
+	SET_VIDEOMOD_VMODE,
 	/* cheats */
 	SET_CHEATS_FILE
 };

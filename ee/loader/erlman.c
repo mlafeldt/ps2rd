@@ -225,8 +225,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install videomod
 	 */
-	if (0) {
-		addr = 0x000f0000;
+	if (_config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
+		addr = _config_get_u32(config, SET_VIDEOMOD_ADDR);
 		file = &_erl_files[ERL_FILE_VIDEOMOD];
 
 		if (__install_erl(file, addr) < 0)

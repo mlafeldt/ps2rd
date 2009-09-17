@@ -44,6 +44,9 @@ static const char *setting_paths[] = {
 	"sdklibs.addr",
 	"elfldr.install",
 	"elfldr.addr",
+	"videomod.install",
+	"videomod.addr",
+	"videomod.vmode",
 	"cheats.file",
 	NULL
 };
@@ -252,6 +255,23 @@ void _config_build(config_t *config)
 	config_setting_set_int(set, ELFLDR_ADDR);
 #endif
 	/*
+	 * videomod section
+	 */
+	group = config_setting_add(root, "videomod", CONFIG_TYPE_GROUP);
+
+	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
+#ifdef VIDEOMOD_INSTALL
+	config_setting_set_bool(set, VIDEOMOD_INSTALL);
+#endif
+	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
+#ifdef VIDEOMOD_ADDR
+	config_setting_set_int(set, VIDEOMOD_ADDR);
+#endif
+	set = config_setting_add(group, "vmode", CONFIG_TYPE_INT);
+#ifdef VIDEOMOD_VMODE
+	config_setting_set_int(set, VIDEOMOD_VMODE);
+#endif
+	/*
 	 * cheats section
 	 */
 	group = config_setting_add(root, "cheats", CONFIG_TYPE_GROUP);
@@ -320,6 +340,11 @@ void _config_print(const config_t *config)
 	/* elfldr */
 	PRINT_BOOL(SET_ELFLDR_INSTALL);
 	PRINT_U32(SET_ELFLDR_ADDR);
+
+	/* videomod */
+	PRINT_BOOL(SET_VIDEOMOD_INSTALL);
+	PRINT_U32(SET_VIDEOMOD_ADDR);
+	PRINT_INT(SET_VIDEOMOD_VMODE);
 
 	/* cheats */
 	PRINT_STRING(SET_CHEATS_FILE);
