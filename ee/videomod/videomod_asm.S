@@ -44,9 +44,9 @@ _start:
 	.ent	HookSetGsCrt
 HookSetGsCrt:
 	lw	$t0, videomode
-	bnezl	$t0, j_SetGsCrt		/* don't patch if zero */
+	bnezl	$t0, 1f			/* don't patch if zero */
 	move	$a1, $t0
-
+1:
 	/* jump to original SetGsCrt() */
 j_SetGsCrt:
 	j	.
