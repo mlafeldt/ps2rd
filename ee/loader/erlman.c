@@ -57,6 +57,7 @@ enum {
 	ERL_FILE_LIBPATCHES,
 	ERL_FILE_DEBUGGER,
 	ERL_FILE_ELFLDR,
+	ERL_FILE_VIDEOMOD,
 
 	ERL_FILE_NUM /* number of files */
 };
@@ -71,6 +72,7 @@ extern u8  _libdebug_erl_start[];
 extern u8  _libpatches_erl_start[];
 extern u8  _debugger_erl_start[];
 extern u8  _elfldr_erl_start[];
+extern u8  _videomod_erl_start[];
 
 static erl_file_t _erl_files[ERL_FILE_NUM] = {
 	{
@@ -102,6 +104,10 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 	{
 		.name = "elfldr.erl",
 		.start = _elfldr_erl_start,
+	},
+	{
+		.name = "videomod.erl",
+		.start = _videomod_erl_start,
 	}
 };
 
@@ -214,6 +220,17 @@ int install_erls(const config_t *config, engine_t *engine)
 		GET_SYMBOL(engine->codelist, "codelist");
 		GET_SYMBOL(engine->maxcallbacks, "maxcallbacks");
 		GET_SYMBOL(engine->callbacks, "callbacks");
+	}
+
+	/*
+	 * install videomod
+	 */
+	if (0) {
+		addr = 0x000f0000;
+		file = &_erl_files[ERL_FILE_VIDEOMOD];
+
+		if (__install_erl(file, addr) < 0)
+			return -1;
 	}
 
 	/*

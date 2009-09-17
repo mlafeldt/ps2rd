@@ -19,7 +19,7 @@ EE_ASFLAGS +=
 EE_BIN = artemis.elf
 
 ERL_FILES = engine_erl.o libkernel_erl.o libpatches_erl.o \
-	debugger_erl.o elfldr_erl.o
+	debugger_erl.o elfldr_erl.o videomod_erl.o
 ifeq ($(DEBUG),1)
 ERL_FILES += libc_erl.o libdebug_erl.o
 endif
