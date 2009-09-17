@@ -19,11 +19,9 @@
  * along with Artemis.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <syscallnr.h>
-
 #define F_EngineHandler
 #define F_CodeHandler
-#define F_BootCodeHandler
+/*#define F_BootCodeHandler*/
 
 #ifdef _HOOK_9
 #define F_HookSetupThread
@@ -604,9 +602,11 @@ HookSetupThread:
 	bgtz	$t1, 1b
 	addiu	$t3, 8
 3:
+#ifdef F_BootCodeHandler
 	/* process boot codes */
 	jal	BootCodeHandler
 	nop
+#endif
 	ld	$ra, 0($sp)
 	addiu	$sp, 0x10
 
