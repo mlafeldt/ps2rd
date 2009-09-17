@@ -30,6 +30,7 @@
 	 */
 	.globl	HookSetGsCrt
 	.globl	j_SetGsCrt
+	.globl	vmode
 
 _start:
 
@@ -43,7 +44,7 @@ _start:
  ******************************************************************************/
 	.ent	HookSetGsCrt
 HookSetGsCrt:
-	lw	$t0, videomode
+	lw	$t0, vmode
 	bnezl	$t0, 1f			/* don't patch if zero */
 	move	$a1, $t0
 1:
@@ -60,7 +61,7 @@ j_SetGsCrt:
  ******************************************************************************/
 	.section .bss
 
-videomode:
+vmode:
 	.word	0
 ydiff_lores:
 	.word	0

@@ -229,6 +229,10 @@ int install_erls(const config_t *config, engine_t *engine)
 
 		if (__install_erl(file, addr) < 0)
 			return -1;
+
+		int *vmode;
+		GET_SYMBOL(vmode, "vmode");
+		*vmode = _config_get_int(config, SET_VIDEOMOD_VMODE);
 	}
 
 	/*

@@ -73,7 +73,7 @@
 #define VIDEOMOD_INSTALL	0
 #endif
 #ifndef VIDEOMOD_ADDR
-#define VIDEOMOD_ADDR		0x000f0000
+#define VIDEOMOD_ADDR		0x000f8000
 #endif
 #ifndef VIDEOMOD_VMODE
 #define VIDEOMOD_VMODE		0
