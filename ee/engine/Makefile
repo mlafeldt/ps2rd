@@ -21,7 +21,8 @@ clean:
 rebuild: clean all
 
 engine.erl: $(EE_OBJS)
-	$(EE_CC) -mno-crt0 -nostartfiles -o $@ $(EE_OBJS) $(EE_CFLAGS) $(EE_INCS) $(EE_LDFLAGS) -Wl,-r
+	$(EE_CC) -mno-crt0 -nostartfiles -o $@ $(EE_OBJS) $(EE_CFLAGS) \
+		$(EE_INCS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $@
 	ee-size -x $@
 
