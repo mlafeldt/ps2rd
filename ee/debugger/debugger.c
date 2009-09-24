@@ -396,7 +396,7 @@ int MySifRebootIop(char *ioprp_path)
 	u32  	qid;
 	SifDmaTransfer_t dmat;
 
-	GS_BGCOLOUR = 0xff0000;
+	GS_BGCOLOUR = 0xff0000; /* ligth blue */
 
 	/* Reset IOP */
 	SifInitRpc(0);
@@ -415,7 +415,7 @@ int MySifRebootIop(char *ioprp_path)
 	fioInit();
 	fd = fioOpen(ioprp_path, O_RDONLY);
 	if (fd < 0) {
-		GS_BGCOLOUR = 0x0000ff;
+		GS_BGCOLOUR = 0x0000ff; /* ligth red */
 		while (1){;}
 	}
 
@@ -427,7 +427,7 @@ int MySifRebootIop(char *ioprp_path)
 	SifInitIopHeap();
 	ioprp_dest = SifAllocIopHeap(ioprp_size);
 	if (!ioprp_dest) {
-		GS_BGCOLOUR = 0x0000ff;
+		GS_BGCOLOUR = 0x0000ff; /* ligth red */
 		while (1){;}
 	}
 
@@ -440,7 +440,7 @@ int MySifRebootIop(char *ioprp_path)
 			rd_size = ioprp_size - rpos;
 		ret = fioRead(fd, g_buf, rd_size);
 		if (ret != rd_size) {
-			GS_BGCOLOUR = 0x0000ff;
+			GS_BGCOLOUR = 0x0000ff; /* ligth blue */
 			while (1){;}
 		}
 
@@ -528,7 +528,7 @@ int MySifRebootIop(char *ioprp_path)
 	SifExecModuleBuffer(memdisk_drv, size_memdisk_irx, 0, NULL, &ret);
 	SifLoadModuleAsync("rom0:UDNL", 7, "MDISK0:");
 
-	GS_BGCOLOUR = 0x008000;
+	GS_BGCOLOUR = 0x00ff00; /* lime green */
 
 	SifExitIopHeap();
 	SifLoadFileExit();
@@ -543,11 +543,13 @@ int MySifRebootIop(char *ioprp_path)
 	/* sync IOP */
 	while (!MySifSyncIop()) {;}
 
-	GS_BGCOLOUR = 0xffff00;
+	GS_BGCOLOUR = 0xffff00; /* cyan */
 
 	SifInitRpc(0);
 	SifLoadFileInit();
 	SifInitIopHeap();
+	sbv_patch_enable_lmb();
+	sbv_patch_disable_prefix_check();
 
 	if (g_debugger_opts.load_modules == LOAD_MODULES_ON) {
 		/* load our modules from kernel */
@@ -570,7 +572,7 @@ int MySifRebootIop(char *ioprp_path)
 		if (ret < 0)
 		while (1) ;
 
-		GS_BGCOLOUR = 0xff00ff;
+		GS_BGCOLOUR = 0xff00ff; /* ligth pink */
 
 		/* Binding debugger module RPC server */
 		rpcNTPBreset();
@@ -585,7 +587,7 @@ int MySifRebootIop(char *ioprp_path)
 	if (g_debugger_opts.auto_hook == AUTO_HOOK_ON)
 		patch_padRead();
 
-	GS_BGCOLOUR = 0x000000;
+	GS_BGCOLOUR = 0x000000; /* black */
 
 	/* set number of SifSetReg hooks to skip */
 	set_reg_hook = 4;

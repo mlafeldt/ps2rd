@@ -189,7 +189,7 @@ int patch_padRead(void)
 		}
 	}
 
- 	GS_BGCOLOUR = 0x00ff00; /* Lime while padRead patches */
+ 	GS_BGCOLOUR = 0x008000; /* Green while padRead patches */
 
 	/* Save original scePadRead ptr */
 	if (scePadRead_style == 2)
@@ -235,7 +235,7 @@ int patch_padRead(void)
 	}
 
 	if (!pattern_found)
-		GS_BGCOLOUR = 0xffffff; /* White, pattern not found */
+		GS_BGCOLOUR = 0x808080; /* gray, pattern not found */
 	else
 		GS_BGCOLOUR = 0x000000; /* Black, done */
 
