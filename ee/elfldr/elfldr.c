@@ -95,6 +95,8 @@ static void loadElf(void)
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;
 
+	GS_BGCOLOUR = 0x400040; /* deep purple */
+
 	ResetEE(0x7f);
 
 	/* wipe user memory */
@@ -124,6 +126,8 @@ static void loadElf(void)
 	SifLoadModule("rom0:SIO2MAN", 0, 0);
 	SifLoadModule("rom0:MCMAN", 0, 0);
 	SifLoadModule("rom0:MCSERV", 0, 0);
+
+	GS_BGCOLOUR = 0x004000; /* deep green */
 
 	/* load the ELF manually */
 	fioInit();
@@ -171,10 +175,12 @@ static void loadElf(void)
 	FlushCache(0);
 	FlushCache(2);
 
+	GS_BGCOLOUR = 0x000000; /* black */
+
 	/* finally, run game ELF ... */
 	ExecPS2((void*)elf_header.entry, NULL, g_argc, g_argv);
 error:
-	GS_BGCOLOUR = 0xffffff; /* white screen: error */
+	GS_BGCOLOUR = 0x404040; /* deep gray screen: error */
 	SleepThread();
 }
 
@@ -186,6 +192,11 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 {
 	char *p = g_argbuf;
 	int i;
+
+	GS_BGCOLOUR = 0x400000; /* deep blue */
+
+	DI();
+	ee_kmode_enter();
 
 	/* copy args from main ELF */
 	g_argc = argc > MAX_ARGS ? MAX_ARGS : argc;
@@ -202,6 +213,9 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 		g_argv[i + 1] = p;
 		p += strlen(argv[i]);
 	}
+
+	ee_kmode_exit();
+	EI();
 
 	/*
 	 * ExecPS2() does the following for us:
