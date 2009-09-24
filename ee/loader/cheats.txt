@@ -63,6 +63,12 @@ All Cars and Engines
 
 //--------
 
+"Soul Calibur 2 PAL /ID SLES_517.99"
+Mastercode
+902E2924 0C0BD9A3
+
+//--------
+
 "TimeSplitters PAL /ID SLES_500.78"
 Mastercode
 902D51F8 0C0B95F6
