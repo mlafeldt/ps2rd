@@ -69,6 +69,12 @@ All Cars and Engines
 
 //--------
 
+"Silent Hill 3 PAL /ID SLES_514.34"
+Mastercode
+9011F5C0 0C04412C
+
+//--------
+
 "Soul Calibur 2 PAL /ID SLES_517.99"
 Mastercode
 902E2924 0C0BD9A3
