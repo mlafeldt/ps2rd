@@ -3,20 +3,9 @@ This is a list of people that have contributed to Artemis.
 The fields are: alias name (A), real name (N), email (E), website (W),
 description (D), and snail mail address (S); A or N, and D are mandatory.
 
---------------------
+The list is sorted by (alias) name.
 
-A: misfire
-N: Mathias Lafeldt
-E: misfire@xploderfreax.de
-D: project maintainer and core developer
-D: common/libcheats/
-D: ee/debugger/
-D: ee/elfldr/
-D: ee/engine/
-D: ee/libconfig/ (port only)
-D: ee/loader/
-D: iop/netlog/
-S: Germany
+--------------------
 
 A: jimmikaelkael
 N: Jimenez Michael
@@ -29,3 +18,31 @@ D: iop/eesync/
 D: iop/memdisk/
 D: pc/ntpbclient/
 S: France
+
+A: Lazy Bastard
+N: Jason Witmer
+E: lbgshi@gmail.com
+W: http://gshi.org
+D: project initiator
+D: software tester
+S: TX, USA
+
+A: LiquidManZero
+D: software tester
+
+A: misfire
+N: Mathias Lafeldt
+E: misfire@xploderfreax.de
+D: project maintainer and core developer
+D: common/libcheats/
+D: ee/debugger/
+D: ee/elfldr/
+D: ee/engine/
+D: ee/libconfig/ (port only)
+D: ee/loader/
+D: ee/videomod/
+D: iop/netlog/
+S: Germany
+
+A: Viper187
+D: author of PS2CC (not part of Artemis)
