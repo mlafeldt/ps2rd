@@ -175,7 +175,7 @@ int patch_padRead(void)
 									ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern7, (u8 *)padReadpattern7_mask, sizeof(padReadpattern7));
 									if (!ptr) {
 										//while(1) {;}
-										GS_BGCOLOUR = 0xffffff; /* White, pattern not found */
+										GS_BGCOLOUR = 0x808080; /* Gray, pattern not found */
 										return 0;
 									}
 								}

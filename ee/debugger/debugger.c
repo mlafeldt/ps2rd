@@ -355,23 +355,28 @@ int MySifSyncIop(void)
 }
 
 /*
- * Get_EESYNC_Offset - return eesync module offset in IOPRP img
+ * Get_Mod_Offset - return a module offset in IOPRP img
  */
-int Get_EESYNC_Offset(romdir_t *romdir_fs)
+int Get_Mod_Offset(romdir_t *romdir_fs, const char *modname)
 {
 	int offset = 0;
+	int i, modname_len;
 
-	/* scan romdir fs for EESYNC module */
+	/* scan romdir fs for module */
 	while (strlen(romdir_fs->fileName) > 0) {
 
-		if ((romdir_fs->fileName[0] == 'E') &&
-			(romdir_fs->fileName[1] == 'E') &&
-			(romdir_fs->fileName[2] == 'S') &&
-			(romdir_fs->fileName[3] == 'Y') &&
-			(romdir_fs->fileName[4] == 'N') &&
-			(romdir_fs->fileName[5] == 'C')) {
-				return offset;
+		modname_len = strlen(modname);
+		char *p = (char *)romdir_fs->fileName;
+
+		for (i=0; ((i<modname_len) && (*p != 0)) ; i++) {
+			if (modname[i] != *p)
+				break;
+			p++;
 		}
+
+		if (i == modname_len)
+			return offset;
+
 		/* arrange irx size to next 16 bytes multiple to get offset of the module */
 		if ((romdir_fs->fileSize % 0x10)==0)
 			offset += romdir_fs->fileSize;
@@ -396,7 +401,7 @@ int MySifRebootIop(char *ioprp_path)
 	u32  	qid;
 	SifDmaTransfer_t dmat;
 
-	GS_BGCOLOUR = 0xff0000; /* ligth blue */
+	GS_BGCOLOUR = 0xff0000; /* blue */
 
 	/* Reset IOP */
 	SifInitRpc(0);
@@ -411,11 +416,11 @@ int MySifRebootIop(char *ioprp_path)
 	sbv_patch_disable_prefix_check();
 
 	/* read IOPRP img and send it on IOP mem */
-	GS_BGCOLOUR = 0x00ffff;
+	GS_BGCOLOUR = 0x00ffff; /* yellow */
 	fioInit();
 	fd = fioOpen(ioprp_path, O_RDONLY);
 	if (fd < 0) {
-		GS_BGCOLOUR = 0x0000ff; /* ligth red */
+		GS_BGCOLOUR = 0x0000ff; /* red */
 		while (1){;}
 	}
 
@@ -427,7 +432,7 @@ int MySifRebootIop(char *ioprp_path)
 	SifInitIopHeap();
 	ioprp_dest = SifAllocIopHeap(ioprp_size);
 	if (!ioprp_dest) {
-		GS_BGCOLOUR = 0x0000ff; /* ligth red */
+		GS_BGCOLOUR = 0x0000ff; /* red */
 		while (1){;}
 	}
 
@@ -440,7 +445,7 @@ int MySifRebootIop(char *ioprp_path)
 			rd_size = ioprp_size - rpos;
 		ret = fioRead(fd, g_buf, rd_size);
 		if (ret != rd_size) {
-			GS_BGCOLOUR = 0x0000ff; /* ligth blue */
+			GS_BGCOLOUR = 0x0000ff; /* red */
 			while (1){;}
 		}
 
@@ -448,7 +453,7 @@ int MySifRebootIop(char *ioprp_path)
 		 * offset in IOPRP and its replacement in kernel RAM
 		 */
 		if (rpos == 0) {
-			ioprp_offset = Get_EESYNC_Offset((romdir_t *)g_buf);
+			ioprp_offset = Get_Mod_Offset((romdir_t *)g_buf, "EESYNC");
 
 			const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
 
@@ -528,7 +533,7 @@ int MySifRebootIop(char *ioprp_path)
 	SifExecModuleBuffer(memdisk_drv, size_memdisk_irx, 0, NULL, &ret);
 	SifLoadModuleAsync("rom0:UDNL", 7, "MDISK0:");
 
-	GS_BGCOLOUR = 0x00ff00; /* lime green */
+	GS_BGCOLOUR = 0x00ff00; /* lime */
 
 	SifExitIopHeap();
 	SifLoadFileExit();
@@ -572,7 +577,7 @@ int MySifRebootIop(char *ioprp_path)
 		if (ret < 0)
 		while (1) ;
 
-		GS_BGCOLOUR = 0xff00ff; /* ligth pink */
+		GS_BGCOLOUR = 0xff00ff; /* magenta */
 
 		/* Binding debugger module RPC server */
 		rpcNTPBreset();

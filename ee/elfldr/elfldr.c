@@ -91,11 +91,12 @@ extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
  */
 static void loadElf(void)
 {
-	int i, fd;
+	int i, r, fd;
+	t_ExecData elf;
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;
 
-	GS_BGCOLOUR = 0x400040; /* deep purple */
+	GS_BGCOLOUR = 0x400040; /* dark purple */
 
 	ResetEE(0x7f);
 
@@ -127,7 +128,30 @@ static void loadElf(void)
 	SifLoadModule("rom0:MCMAN", 0, 0);
 	SifLoadModule("rom0:MCSERV", 0, 0);
 
-	GS_BGCOLOUR = 0x004000; /* deep green */
+	GS_BGCOLOUR = 0x004000; /* dark green */
+
+	memset(&elf, 0, sizeof(t_ExecData));
+
+	r = SifLoadElf(g_argv[0], &elf);
+	if ((!r) && (elf.epc)) {
+		/* exit services */
+		fioExit();
+		SifLoadFileExit();
+		SifExitIopHeap();
+		SifExitRpc();
+
+		FlushCache(0);
+		FlushCache(2);
+
+		GS_BGCOLOUR = 0x000000; /* black */
+
+		/* finally, run game ELF ... */
+		ExecPS2((void*)elf.epc, (void*)elf.gp, g_argc, g_argv);
+
+		SifInitRpc(0);
+	}
+
+	GS_BGCOLOUR = 0x000040; /* dark maroon */
 
 	/* load the ELF manually */
 	fioInit();
@@ -179,8 +203,9 @@ static void loadElf(void)
 
 	/* finally, run game ELF ... */
 	ExecPS2((void*)elf_header.entry, NULL, g_argc, g_argv);
+
 error:
-	GS_BGCOLOUR = 0x404040; /* deep gray screen: error */
+	GS_BGCOLOUR = 0x404040; /* dark gray screen: error */
 	SleepThread();
 }
 
@@ -193,7 +218,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	char *p = g_argbuf;
 	int i;
 
-	GS_BGCOLOUR = 0x400000; /* deep blue */
+	GS_BGCOLOUR = 0x400000; /* dark blue */
 
 	DI();
 	ee_kmode_enter();
@@ -216,6 +241,8 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 
 	ee_kmode_exit();
 	EI();
+
+	GS_BGCOLOUR = 0x004040; /* dark olive */
 
 	/*
 	 * ExecPS2() does the following for us:
