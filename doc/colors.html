@@ -1,0 +1,115 @@
+<html>
+
+<table style="font-size:85%" cellpadding="4" border="0">
+<tr>
+<th style="background:lightgrey" width="150px">Color name</th>
+<th style="background:lightgrey" width="100px">Hex code<br />
+R &#160; G &#160; B</th>
+<th style="background:lightgrey" width="500px">What's going on</th>
+</tr>
+
+<tr>
+<td colspan="3" style="background:whitesmoke;color:slategray;text-align:left"><big><b>elfldr debug colors</b></big></td>
+</tr>
+
+<tr style="background:#000040;color:white">
+<td>Dark Blue</td>
+<td align="center"><tt>00&#160;00&#160;40</tt></td>
+<td>LoadExecPS2 replacement is parsing args</td>
+</tr>
+
+<tr style="background:#404000;color:white">
+<td>Dark Olive</td>
+<td align="center"><tt>40&#160;40&#160;00</tt></td>
+<td>LoadExecPS2 replacement is executing loadElf</td>
+</tr>
+
+<tr style="background:#400040;color:white">
+<td>Dark Purple</td>
+<td align="center"><tt>40&#160;00&#160;40</tt></td>
+<td>loadElf is clearing memory and resetting IOP</td>
+</tr>
+
+<tr style="background:#004000;color:white">
+<td>Dark Green</td>
+<td align="center"><tt>00&#160;40&#160;00</tt></td>
+<td>loadElf is loading the ELF program</td>
+</tr>
+
+<tr style="background:#400000;color:white">
+<td>Dark Maroon</td>
+<td align="center"><tt>40&#160;00&#160;00</tt></td>
+<td>loadElf is trying to use alternative ELF loading</td>
+</tr>
+
+<tr style="background:#404040;color:white">
+<td>Dark Gray</td>
+<td align="center"><tt>40&#160;40&#160;40</tt></td>
+<td>loadElf encountered fatal error in alternative ELF loading</td>
+</tr>
+
+<tr>
+<td colspan="3" style="background:whitesmoke;color:slategray;text-align:left"><big><b>debugger debug colors</b></big></td>
+</tr>
+
+<tr style="background:#0000ff;color:white">
+<td>Blue</td>
+<td align="center"><tt>00&#160;00&#160;ff</tt></td>
+<td>IOP reset hook is resetting IOP with null arg</td>
+</tr>
+
+<tr style="background:#ffff00;color:black">
+<td>Yellow</td>
+<td align="center"><tt>ff&#160;ff&#160;00</tt></td>
+<td>IOP reset hook is reading/patching IOPRP to IOP memory</td>
+</tr>
+
+<tr style="background:#00ff00;color:black">
+<td>Lime</td>
+<td align="center"><tt>00&#160;ff&#160;00</tt></td>
+<td>IOP reset hook is resetting IOP with IOPRP from game</td>
+</tr>
+
+<tr style="background:#00ffff;color:black">
+<td>Cyan</td>
+<td align="center"><tt>00&#160;ff&#160;ff</tt></td>
+<td>IOP reset hook is reloading ethernet/debugger IOP modules</td>
+</tr>
+
+<tr style="background:#ff00ff;color:black">
+<td>Magenta</td>
+<td align="center"><tt>ff&#160;00&#160;ff</tt></td>
+<td>IOP reset hook is binding debugger IOP module RPC server</td>
+</tr>
+
+<tr style="background:#ff0000;color:black">
+<td>Red</td>
+<td align="center"><tt>ff&#160;00&#160;00</tt></td>
+<td>IOP reset hook encountered fatal error while reading IOPRP to IOP mem</td>
+</tr>
+
+<tr>
+<td colspan="3" style="background:whitesmoke;color:slategray;text-align:left"><big><b>Auto hook debug colors</b></big></td>
+</tr>
+
+<tr style="background:#800080;color:white">
+<td>Purple</td>
+<td align="center"><tt>80&#160;00&#160;80</tt></td>
+<td>Auto hook is scanning memory for opcode patterns</td>
+</tr>
+
+<tr style="background:#008000;color:white">
+<td>Green</td>
+<td align="center"><tt>00&#160;80&#160;00</tt></td>
+<td>Auto hook is patching memory</td>
+</tr>
+
+<tr style="background:#808080;color:black">
+<td>Gray</td>
+<td align="center"><tt>80&#160;80&#160;80</tt></td>
+<td>Auto hook didn't find any opcode patterns</td>
+</tr>
+
+</table>
+
+</html>
