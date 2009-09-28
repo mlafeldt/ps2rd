@@ -1,0 +1,19 @@
+[PATCH 1/1] SBV library: fix slib_get_exp_lib()
+
+Fix initialization of exp_lib_list in slib_get_exp_lib().
+
+Signed-off-by: jimmikaelkael <jimmikaelkael@wanadoo.fr>
+Signed-off-by: misfire <misfire@xploderfreax.de>
+
+diff --git a/ee/sbv/src/slib.c b/ee/sbv/src/slib.c
+--- a/ee/sbv/src/slib.c
++++ b/ee/sbv/src/slib.c
+@@ -110,7 +110,7 @@
+ 	void *cur_lib;
+ 	int len = strlen(name), count = 0;
+ 
+-	if (!exp_lib_list->head && !(exp_lib_list = slib_exp_lib_list()))
++	if (!(exp_lib_list = slib_exp_lib_list()) && !exp_lib_list->head)
+ 		return 0;
+ 
+ 	/* Read the tail export library to initiate the search.  */
