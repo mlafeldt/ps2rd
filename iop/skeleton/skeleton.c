@@ -51,7 +51,7 @@ enum {
 
 static SifRpcServerData_t g_rpc_sd __attribute__((aligned(64)));
 static SifRpcDataQueue_t g_rpc_qd __attribute__((aligned(64)));
-static u8 g_rpc_buf[SKELETON_MAX_MSG] __attribute__((aligned(64)));
+static u8 g_rpc_buf[SKELETON_BUF_MAX] __attribute__((aligned(64)));
 
 static void *rpc_handler(int cmd, void *buf, int size)
 {

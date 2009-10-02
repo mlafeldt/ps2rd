@@ -16,7 +16,7 @@
 #define SKELETON_VER_MIN	0
 
 /* RPC buffer size */
-#define SKELETON_MAX_MSG	1024
+#define SKELETON_BUF_MAX	1024
 
 int skeleton_init(int arg);
 int skeleton_exit(void);
