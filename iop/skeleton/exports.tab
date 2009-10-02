@@ -1,0 +1,12 @@
+DECLARE_EXPORT_TABLE(skeleton, 1, 0)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+
+	/* 4 */
+	DECLARE_EXPORT(skeleton_init)
+	DECLARE_EXPORT(skeleton_exit)
+END_EXPORT_TABLE
+
+void _retonly() {}
