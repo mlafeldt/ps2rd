@@ -57,6 +57,12 @@ No Times Saved Recorded
 
 //--------
 
+"Resident Evil Outbreak PAL /ID SLES_515.89"
+Mastercode
+9017E3A8 0C041A7C
+
+//--------
+
 "Ridge Racer V PAL /ID SCES_500.00"
 Mastercode
 902C8414 0C0B5F42
