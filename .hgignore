@@ -6,4 +6,5 @@ syntax: glob
 *.irx
 
 release/
+pc/skeleton/build/
 pc/ntpbclient/bin/ntpbclient
