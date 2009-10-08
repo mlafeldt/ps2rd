@@ -194,7 +194,7 @@ int install_erls(const config_t *config, engine_t *engine)
 			return -1;
 	} else {
 		/* export syscall functions if libkernel isn't installed */
-		erl_add_global_symbol("GetSyscall", (u32)GetSyscall);
+		erl_add_global_symbol("GetSyscallHandler", (u32)GetSyscallHandler);
 		erl_add_global_symbol("SetSyscall", (u32)SetSyscall);
 	}
 

@@ -23,6 +23,7 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <iopheap.h>
+#include <iopcontrol.h>
 #include <loadfile.h>
 #include <sifdma.h>
 #include <sifrpc.h>
@@ -96,6 +97,9 @@ extern int (*OldSifSetReg)(u32 register_num, int register_value);
 
 /* SifSetReg syscall hook counter */
 static int set_reg_hook = 0;
+
+/* SifSetDma syscall hook disable flag */
+static int dma_hook_disabled = 0;
 
 /* debugger ready state, allow it to know when to start RPC transfers */
 static int debugger_ready = 0;
@@ -296,65 +300,6 @@ static int get_module_from_kernel(u32 hash, void *buf)
 }
 
 /*
- * MySifResetIop - sceSifResetIop replacement function
- */
-int MySifResetIop(const char *arg, int flag)
-{
-	_sceSifCmdResetData reset_pkt;
-	struct t_SifDmaTransfer dmat;
-
-	SifExitRpc();
-	SifStopDma();
-
-	memset(&reset_pkt, 0, sizeof(_sceSifCmdResetData));
-
-	reset_pkt.chdr.psize = sizeof(_sceSifCmdResetData);
-	reset_pkt.chdr.fcode = 0x80000003;
-
-	reset_pkt.flag = flag;
-
-	if (arg != NULL) {
-		strncpy(reset_pkt.arg, arg, 0x50);
-		reset_pkt.arg[0x50] = '\0';
-		reset_pkt.size = strlen(reset_pkt.arg) + 1;
-	}
-
-	dmat.src  = &reset_pkt;
-	dmat.dest = (void *)SifGetReg(0x80000000); /* SIF_REG_SUBADDR */
-	dmat.size = sizeof reset_pkt;
-	dmat.attr = 0x40 | SIF_DMA_INT_O;
-	SifWriteBackDCache(&reset_pkt, sizeof reset_pkt);
-
-	DI();
-	ee_kmode_enter();
-	if (!OldSifSetDma(&dmat, 1)) {
-		ee_kmode_exit();
-		EI();
-		return 0;
-	}
-	ee_kmode_exit();
-	EI();
-
-	OrigSifSetReg(SIF_REG_SMFLAG, 0x10000);
-	OrigSifSetReg(SIF_REG_SMFLAG, 0x20000);
-	OrigSifSetReg(0x80000002, 0);
-	OrigSifSetReg(0x80000000, 0);
-
-	return 1;
-}
-
-/*
- * MySifSyncIop - sceSifSyncIop replacement function
- */
-int MySifSyncIop(void)
-{
-	if (SifGetReg(SIF_REG_SMFLAG) & 0x40000)
-		return 1;
-
-	return 0;
-}
-
-/*
  * Get_Mod_Offset - return a module offset in IOPRP img
  */
 int Get_Mod_Offset(romdir_t *romdir_fs, const char *modname)
@@ -405,8 +350,10 @@ int MySifRebootIop(char *ioprp_path)
 
 	/* Reset IOP */
 	SifInitRpc(0);
-	while (!MySifResetIop(NULL, 0)) {;}
-	while (!MySifSyncIop()){;}
+	dma_hook_disabled = 1;
+	while (!SifIopReset(NULL, 0)) {;}
+	while (!SifIopSync()){;}
+	dma_hook_disabled = 0;
 
 	/* Init services & apply SBV patches */
 	SifInitRpc(0);
@@ -546,7 +493,7 @@ int MySifRebootIop(char *ioprp_path)
 	OrigSifSetReg(0x80000000, 0);
 
 	/* sync IOP */
-	while (!MySifSyncIop()) {;}
+	while (!SifIopSync()) {;}
 
 	GS_BGCOLOUR = 0xffff00; /* cyan */
 
@@ -625,12 +572,12 @@ u32 NewSifSetDma(SifDmaTransfer_t *sdd, s32 len)
 		}
 	}
 
-	/* increment libkernel's IOP reboot counter, this allow
-	 * to detect RPC services unbinding
-	 */
-	_iop_reboot_count++;
-
-	if (ioprp_img) {
+	if ((!dma_hook_disabled) && (ioprp_img)) {
+		/* increment libkernel's IOP reboot counter, this allow
+		 * to detect RPC services unbinding
+	 	 */
+		_iop_reboot_count++;
+	
 		/* it's a reset with cdrom IOPRP so we perform it ourselves */
 		MySifRebootIop(ioprp_path);
 	}
@@ -842,10 +789,10 @@ int _init(void)
 	clear_autohook_tab();
 
 	/* Hook syscalls */
-	OldSifSetDma = GetSyscall(__NR_SifSetDma);
+	OldSifSetDma = GetSyscallHandler(__NR_SifSetDma);
 	SetSyscall(__NR_SifSetDma, HookSifSetDma);
 
-	OldSifSetReg = GetSyscall(__NR_SifSetReg);
+	OldSifSetReg = GetSyscallHandler(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
 	SetSyscall(__NR_OrigSifSetReg, OldSifSetReg);
 

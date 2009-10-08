@@ -24,7 +24,7 @@
 #include <syscallnr.h>
 
 char *erl_id = "videomod";
-/* Import GetSyscall() and SetSyscall() from libkernel.erl. */
+/* Import GetSyscallHandler() and SetSyscall() from libkernel.erl. */
 #if 0
 char *erl_dependancies[] = {
 	"libkernel",
@@ -41,7 +41,7 @@ extern u32 j_SetGsCrt;
 
 int _init(void)
 {
-	OldSetGsCrt = GetSyscall(__NR_SetGsCrt);
+	OldSetGsCrt = GetSyscallHandler(__NR_SetGsCrt);
 	j_SetGsCrt = MAKE_J(OldSetGsCrt);
 	SetSyscall(__NR_SetGsCrt, KSEG0(HookSetGsCrt));
 

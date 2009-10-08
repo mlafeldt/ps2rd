@@ -259,7 +259,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 int _init(void)
 {
 	/* Hook syscall */
-	OldLoadExecPS2 = GetSyscall(__NR_LoadExecPS2);
+	OldLoadExecPS2 = GetSyscallHandler(__NR_LoadExecPS2);
 	SetSyscall(__NR_LoadExecPS2, HookLoadExecPS2);
 
 	return 0;

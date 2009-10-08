@@ -25,8 +25,8 @@
 
 char *erl_id = "engine";
 /*
- * Import GetSyscall() and SetSyscall() from libkernel.erl. If libkernel is not
- * installed, the boot loader will provide those functions instead.
+ * Import GetSyscallHandler() and SetSyscall() from libkernel.erl. If libkernel
+ * is not installed, the boot loader will provide those functions instead.
  */
 #if 0
 char *erl_dependancies[] = {
@@ -53,7 +53,7 @@ int _init(void)
 {
 	/* Hook syscall */
 #ifdef _HOOK_9
-	OldSetupThread = GetSyscall(__NR_SetupThread);
+	OldSetupThread = GetSyscallHandler(__NR_SetupThread);
 	j_SetupThread = MAKE_J(OldSetupThread);
 	SetSyscall(__NR_SetupThread, KSEG0(HookSetupThread));
 #endif
