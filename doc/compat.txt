@@ -4,7 +4,7 @@ There're still a lot of games you can't hack with Artemis, but we're working
 hard on improving compatibility.
 
 A list of working games can be found here:
-http://bitbucket.org/misfire/artemis/wiki/Compat
+https://bitbucket.org/misfire/artemis/wiki/Compat
 
 
 EOF

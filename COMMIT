@@ -1,17 +1,26 @@
-Artemis Commit Policy
-written by misfire <misfire@xploderfreax.de>
+The Mercurial repository at https://bitbucket.org/misfire/artemis/ is maintained
+by misfire. If you have anything to contribute, don't hesitate to contact him.
 
+Submitting patches is the favored way to contribute changes. For this, the first
+thing to do is to clone the repository:
 
-All development of Artemis takes place at http://bitbucket.org/misfire/artemis/.
+$ hg clone https://bitbucket.org/misfire/artemis/
 
-I'm the maintainer of Artemis and take responsibility for it. If you have
-anything to contribute, don't hesitate to send me patches.
+To create a patch from your changes:
 
-Artemis is written and distributed under the GNU General Public License which
-means that its source code is freely-distributed and available to the general
-public.
+$ hg di -g [FILE] > foo.patch
 
-You may only contribute to Artemis if you agree with the terms of the GPL.
+Of course, you can also commit offline with "hg ci", and create patches from
+your changesets:
 
+$ hg out -p [-r REV]
+or
+$ hg log -p -r REV
 
-EOF
+Please try to always create a patch against the latest revision. Use "hg in" to
+show new changesets found in the online repository, and "hg pull" to actually
+pull changes to your local repository.
+
+Finally, you can submit the patch files via email to misfire@xploderfreax.de
+
+Thanks in advance.
