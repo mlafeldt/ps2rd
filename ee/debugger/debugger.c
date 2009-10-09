@@ -185,6 +185,7 @@ struct _ip_config {
 typedef struct {
 	int auto_hook;
 	int patch_loadmodule;
+	int disable_iopreset_hook;
 	int rpc_mode;
 	int load_modules;
 	struct _ip_config ipconfig;
@@ -211,6 +212,7 @@ void set_debugger_opts(const debugger_opts_t *opts)
 {
 	g_debugger_opts.auto_hook = opts->auto_hook;
 	g_debugger_opts.patch_loadmodule = opts->patch_loadmodule;
+	g_debugger_opts.disable_iopreset_hook = opts->disable_iopreset_hook;
 	g_debugger_opts.rpc_mode = opts->rpc_mode;
 	g_debugger_opts.load_modules = opts->load_modules;
 
@@ -618,10 +620,15 @@ void NewSifSetReg(u32 regnum, int regval)
 		set_reg_hook--;
 
 		if (set_reg_hook == 0) {
+			/* IOP reset hook is complete so debugger is ready to dump */
 			debugger_ready = 1;
-			/* we could unhook some syscalls if needed here
-			 * or call some post reset treatment
-			 */
+
+			/* IOP reset unhook is done if needed */
+			if (g_debugger_opts.disable_iopreset_hook) {
+				SetSyscall(__NR_SifSetDma, OldSifSetDma);
+				SetSyscall(__NR_SifSetReg, OldSifSetReg);
+				SetSyscall(__NR_OrigSifSetReg, 0);
+			}
 		}
 		return;
 	}
@@ -791,6 +798,7 @@ int _init(void)
 	/* Set default debugger options */
 	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
 	g_debugger_opts.patch_loadmodule = PATCH_LM_OFF;
+	g_debugger_opts.disable_iopreset_hook = 0;
 	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
 	g_debugger_opts.load_modules = LOAD_MODULES_ON;
 

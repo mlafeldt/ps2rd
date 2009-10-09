@@ -38,7 +38,7 @@ char *module_tab[3] = {
 };
 
 /* _sceSifLoadModule prototype */
-int (*_SifLoadModule)(const char *path, int arg_len, const char *args, int *modres, int fno);
+int (*_sceSifLoadModule)(const char *path, int arg_len, const char *args, int *modres, int fno);
 
 /*
  * hook function for _sceSifLoadModule
@@ -80,7 +80,7 @@ static int Hook_SifLoadModule(const char *path, int arg_len, const char *args, i
 		ret = 0;
 	}
 	else {
-		ret = _SifLoadModule(path, arg_len, args, modres, fno);
+		ret = _sceSifLoadModule(path, arg_len, args, modres, fno);
 	}
 
 	return ret;
@@ -130,7 +130,7 @@ int patch_loadModule(void)
  	GS_BGCOLOUR = 0xcbc0ff; /* Pink while _sceSifLoadModule patches */
 
 	/* Save original _sceSifLoadModule ptr */
-	_SifLoadModule = (void *)ptr;
+	_sceSifLoadModule = (void *)ptr;
 
 	/* Retrieve _sceSifLoadModule call Instruction code */
 	inst = 0x0c000000;
