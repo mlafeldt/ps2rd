@@ -57,6 +57,9 @@ extern int SifLoadModuleAsync(const char *path, int arg_len, const char *args);
 extern void clear_autohook_tab(void);
 extern int patch_padRead(void);
 
+/* loadmodule_hooks.c functions */
+extern int patch_loadModule(void);
+
 /* debugger_rpc.c functions */
 extern int rpcNTPBinit(void);
 extern int rpcNTPBreset(void);
@@ -161,6 +164,10 @@ static int haltState = 0;
 #define AUTO_HOOK_OFF	0
 #define AUTO_HOOK_ON	1
 
+/* to control _SifLoadModule patch */
+#define PATCH_LM_OFF	0
+#define PATCH_LM_ON	1
+
 /* to control debugger RPC mode */
 #define RPC_M_NORMAL	0
 #define RPC_M_NOWAIT	1
@@ -177,6 +184,7 @@ struct _ip_config {
 
 typedef struct {
 	int auto_hook;
+	int patch_loadmodule;
 	int rpc_mode;
 	int load_modules;
 	struct _ip_config ipconfig;
@@ -202,6 +210,7 @@ static int g_ipconfig_len;
 void set_debugger_opts(const debugger_opts_t *opts)
 {
 	g_debugger_opts.auto_hook = opts->auto_hook;
+	g_debugger_opts.patch_loadmodule = opts->patch_loadmodule;
 	g_debugger_opts.rpc_mode = opts->rpc_mode;
 	g_debugger_opts.load_modules = opts->load_modules;
 
@@ -539,6 +548,10 @@ int MySifRebootIop(char *ioprp_path)
 	if (g_debugger_opts.auto_hook == AUTO_HOOK_ON)
 		patch_padRead();
 
+	/* automatic _SifLoadModule hooking is done if needed */
+	if (g_debugger_opts.patch_loadmodule == PATCH_LM_ON)
+		patch_loadModule();
+
 	GS_BGCOLOUR = 0x000000; /* black */
 
 	/* set number of SifSetReg hooks to skip */
@@ -577,7 +590,7 @@ u32 NewSifSetDma(SifDmaTransfer_t *sdd, s32 len)
 		 * to detect RPC services unbinding
 	 	 */
 		_iop_reboot_count++;
-	
+
 		/* it's a reset with cdrom IOPRP so we perform it ourselves */
 		MySifRebootIop(ioprp_path);
 	}
@@ -777,6 +790,7 @@ int _init(void)
 {
 	/* Set default debugger options */
 	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
+	g_debugger_opts.patch_loadmodule = PATCH_LM_OFF;
 	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
 	g_debugger_opts.load_modules = LOAD_MODULES_ON;
 
