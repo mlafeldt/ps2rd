@@ -65,6 +65,11 @@ Section "debugger"
 
   Enable automatic hooking to hack games without the need for hook codes.
 
+* patch_loadmodule [bool, false by default]
+
+  Enable automatic patching of _SifLoadModule() to prevent games from loading
+  certain IOP modules, e.g. dev9.irx and smap.irx.
+
 * rpc_mode [integer, 1 by default]
 
   Set SIF RPC mode to blocking (0) or non-blocking (1).
