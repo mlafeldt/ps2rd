@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
 	int auto_hook;
 	int patch_loadmodule;
+	int disable_iopreset_hook;
 	int rpc_mode;
 	int load_modules;
 	struct {
@@ -266,6 +267,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		memset(&opts, 0, sizeof(opts));
 		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
 		opts.patch_loadmodule = _config_get_bool(config, SET_DEBUGGER_PATCH_LOADMODULE);
+		opts.disable_iopreset_hook = _config_get_bool(config, SET_DEBUGGER_DISABLE_IOPRESET_HOOK);
 		opts.rpc_mode = _config_get_int(config, SET_DEBUGGER_RPC_MODE);
 		opts.load_modules = _config_get_bool(config, SET_DEBUGGER_LOAD_MODULES);
 		strncpy(opts.ip_config.ipaddr, _config_get_string(config, SET_DEBUGGER_IPADDR), 15);

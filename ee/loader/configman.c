@@ -36,6 +36,7 @@ static const char *setting_paths[] = {
 	"debugger.addr",
 	"debugger.auto_hook",
 	"debugger.patch_loadmodule",
+	"debugger.disable_iopreset_hook",
 	"debugger.rpc_mode",
 	"debugger.load_modules",
 	"debugger.ipaddr",
@@ -191,7 +192,6 @@ void _config_build(config_t *config)
 #ifdef ENGINE_ADDR
 	config_setting_set_int(set, ENGINE_ADDR);
 #endif
-
 	/*
 	 * debugger section
 	 */
@@ -212,6 +212,10 @@ void _config_build(config_t *config)
 	set = config_setting_add(group, "patch_loadmodule", CONFIG_TYPE_BOOL);
 #ifdef DEBUGGER_PATCH_LOADMODULE
 	config_setting_set_bool(set, DEBUGGER_PATCH_LOADMODULE);
+#endif
+	set = config_setting_add(group, "disable_iopreset_hook", CONFIG_TYPE_BOOL);
+#ifdef DEBUGGER_DISABLE_IOPRESET_HOOK
+	config_setting_set_bool(set, DEBUGGER_DISABLE_IOPRESET_HOOK);
 #endif
 	set = config_setting_add(group, "rpc_mode", CONFIG_TYPE_INT);
 #ifdef DEBUGGER_RPC_MODE
@@ -333,6 +337,7 @@ void _config_print(const config_t *config)
 	PRINT_U32(SET_DEBUGGER_ADDR);
 	PRINT_BOOL(SET_DEBUGGER_AUTO_HOOK);
 	PRINT_BOOL(SET_DEBUGGER_PATCH_LOADMODULE);
+	PRINT_BOOL(SET_DEBUGGER_DISABLE_IOPRESET_HOOK);
 	PRINT_INT(SET_DEBUGGER_RPC_MODE);
 	PRINT_BOOL(SET_DEBUGGER_LOAD_MODULES);
 	PRINT_STRING(SET_DEBUGGER_IPADDR);
