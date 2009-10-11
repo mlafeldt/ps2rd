@@ -21,7 +21,7 @@ EE_BIN = artemis.elf
 ERL_FILES = engine_erl.o libkernel_erl.o libpatches_erl.o \
 	debugger_erl.o elfldr_erl.o videomod_erl.o
 ifeq ($(DEBUG),1)
-ERL_FILES += libc_erl.o libdebug_erl.o
+ERL_FILES +=
 endif
 
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o \

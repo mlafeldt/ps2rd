@@ -52,7 +52,7 @@ typedef struct {
 enum {
 	ERL_FILE_ENGINE = 0,
 	ERL_FILE_LIBKERNEL,
-#ifdef _DEBUG
+#if 0
 	ERL_FILE_LIBC,
 	ERL_FILE_LIBDEBUG,
 #endif
@@ -67,7 +67,7 @@ enum {
 /* Statically linked ERL files */
 extern u8  _engine_erl_start[];
 extern u8  _libkernel_erl_start[];
-#ifdef _DEBUG
+#if 0
 extern u8  _libc_erl_start[];
 extern u8  _libdebug_erl_start[];
 #endif
@@ -85,7 +85,7 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 		.name = "libkernel.erl",
 		.start = _libkernel_erl_start,
 	},
-#ifdef _DEBUG
+#if 0
 	{
 		.name = "libc.erl",
 		.start = _libc_erl_start,
@@ -179,7 +179,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		file = &_erl_files[ERL_FILE_LIBKERNEL];
 		if (__install_erl(file, addr) < 0)
 			return -1;
-#ifdef _DEBUG
+#if 0
 		addr += ALIGN(file->erl->fullsize, 64);
 		file = &_erl_files[ERL_FILE_LIBC];
 		if (__install_erl(file, addr) < 0)

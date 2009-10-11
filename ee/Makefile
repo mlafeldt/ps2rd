@@ -8,8 +8,6 @@ all:
 	make -C videomod
 	bin2o videomod/videomod.erl loader/videomod_erl.o _videomod_erl
 	bin2o $(PS2SDK)/ee/lib/libkernel.erl loader/libkernel_erl.o _libkernel_erl
-	bin2o $(PS2SDK)/ee/lib/libc.erl loader/libc_erl.o _libc_erl
-	bin2o $(PS2SDK)/ee/lib/libdebug.erl loader/libdebug_erl.o _libdebug_erl
 	bin2o $(PS2SDK)/ee/lib/libpatches.erl loader/libpatches_erl.o _libpatches_erl
 	make -C loader
 
