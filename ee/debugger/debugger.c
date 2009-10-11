@@ -128,7 +128,6 @@ typedef struct {
 #define HASH_PS2IP	0x00776900
 #define HASH_PS2SMAP	0x0769a3f0
 #define HASH_DEBUGGER	0x0b9bdb62
-#define HASH_NETLOG	0x074cb357
 #define HASH_MEMDISK	0x03c3b0eb
 #define HASH_EESYNC	0x06bcb043
 
@@ -526,11 +525,6 @@ int MySifRebootIop(char *ioprp_path)
 		ret = load_module_from_kernel(HASH_PS2SMAP, g_ipconfig_len, g_ipconfig);
 		if (ret < 0)
 			while (1) ;
-#if 0
-		ret = load_module_from_kernel(HASH_NETLOG, 0, NULL);
-		if (ret < 0)
-			while (1) ;
-#endif
 		ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
 		if (ret < 0)
 		while (1) ;

@@ -35,7 +35,6 @@
 #include "mypad.h"
 #include "mystring.h"
 #include "myutil.h"
-#include "netlog_rpc.h"
 
 #define APP_NAME	"Artemis"
 #define APP_VERSION	"0.4 WIP"
