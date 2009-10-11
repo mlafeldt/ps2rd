@@ -21,6 +21,12 @@ Mastercode
 
 //--------
 
+"Gran Turismo 4 PAL /ID SCES_517.19"
+Mastercode
+9058EF88 0C1691C9
+
+//--------
+
 "Metal Gear Solid 2-Sons Of Liberty PAL /ID SLES_503.83"
 Mastercode
 901650DC 0C05B3FE
