@@ -1,4 +1,12 @@
 
+//--------
+
+"Amplitude Demo PAL /ID SCED_519.05"
+Mastercode
+9036EC5C 0C0E005B
+
+//--------
+
 "Devil May Cry PAL /ID SLES_503.58"
 Mastercode
 9010C1DC 0C045528
@@ -49,6 +57,12 @@ Mastercode
 
 //--------
 
+"Primval Demo PAL /ID SCED_514.84"
+Mastercode
+9045FAAC 0C11A03D
+
+//--------
+
 "Resident Evil 4 PAL /ID SLES_537.02"
 Mastercode
 902A6EDC 0C0A74B2
@@ -93,6 +107,12 @@ Mastercode
 
 //--------
 
+"This is Football 2003 Demo PAL /ID SCED_511.65"
+Mastercode
+903FCC1C 0C0FA509
+
+//--------
+
 "TimeSplitters PAL /ID SLES_500.78"
 Mastercode
 902D51F8 0C0B95F6
@@ -125,3 +145,9 @@ Unlock All Levels
 Unlock Ninja Mode
 203839DC 00000000
 20387CE0 00000000
+
+//--------
+
+"WRC II Extreme Demo PAL /ID SCED_516.32"
+Mastercode
+90229724 0C055050
