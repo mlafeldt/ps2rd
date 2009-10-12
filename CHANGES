@@ -8,9 +8,10 @@
 - Added automatic patching of _SifLoadModule() to prevent network games from
   loading their dev9.irx and smap.irx modules. This way, we can hack games like
   Gran Turismo 4, PES 2008, and Sniper Elite (enable debugger.patch_loadmodule).
-- Added unhook_iop_reset. tbc
+- Added ability to disable the IOP reset hook after the first reset (enable
+  debugger.unhook_iop_reset). This is similar to HD Loader's mode 3.
 - Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
-- Added overview about debug colors.
+- Added overview about debug colors, see doc/colors.html.
 
 0.3 (Sep 16 2009)
 - Added support for DNAS games; Metal Gear Solid 3 is now hackable.
