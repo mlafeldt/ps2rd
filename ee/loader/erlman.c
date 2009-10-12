@@ -232,9 +232,17 @@ int install_erls(const config_t *config, engine_t *engine)
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
-		int *vmode;
+		int *vmode, *ydiff;
+		void (*YPosHandler)(void) = NULL;
+
 		GET_SYMBOL(vmode, "vmode");
 		*vmode = _config_get_int(config, SET_VIDEOMOD_VMODE);
+		GET_SYMBOL(ydiff, "ydiff_lores");
+		*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
+		GET_SYMBOL(ydiff, "ydiff_hires");
+		*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
+		GET_SYMBOL(YPosHandler, "YPosHandler");
+		/* TODO set data address breakpoint */
 	}
 
 	/*
@@ -263,6 +271,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		/* set debugger options */
 		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
 		debugger_opts_t opts;
+
 		GET_SYMBOL(set_debugger_opts, "set_debugger_opts");
 		memset(&opts, 0, sizeof(opts));
 		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
