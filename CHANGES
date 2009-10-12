@@ -1,3 +1,17 @@
+0.4 (Oct xx 2009)
+- Added video mode patcher. tbc
+- Finally fixed relocation of common symbols for all ERLs - no more SDK patches.
+- ELF loader: copy LoadExecPS2 args in kernel mode to fix some multi-ELF games.
+  Try to load ELF with SifLoadElf() first, allowing Soul Calibur 2 to start.
+- Apply SBV patches a 2nd time before loading our modules, ensuring that
+  LoadModuleBuffer() works for games like TimeSplitters (pink screen problem).
+- Added automatic patching of _SifLoadModule() to prevent network games from
+  loading their dev9.irx and smap.irx modules. This way, we can hack games like
+  Gran Turismo 4, PES 2008, and Sniper Elite (enable debugger.patch_loadmodule).
+- Added disable_iopreset_hook. tbc
+- Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
+- Added overview about debug colors.
+
 0.3 (Sep 16 2009)
 - Added support for DNAS games; Metal Gear Solid 3 is now hackable.
 - Added ELF selector to directly boot/hack demos, for instance.
