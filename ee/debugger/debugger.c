@@ -711,6 +711,9 @@ static int execRemoteCmd(void)
 	int ret;
 	u8 cmd_buf[64];
 
+	if (g_debugger_opts.rpc_mode == -1)
+		return 0;
+
 	/* get the remote command by RPC */
 	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, g_debugger_opts.rpc_mode);
 	rpcNTPBSync(0, NULL, &ret);
