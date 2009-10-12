@@ -236,7 +236,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	for (i = 0; i < argc; i++) {
 		__strcpy(p, argv[i]);
 		g_argv[i + 1] = p;
-		p += strlen(argv[i]);
+		p += strlen(argv[i]) + 1;
 	}
 
 	ee_kmode_exit();
