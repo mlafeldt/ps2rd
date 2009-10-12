@@ -30,6 +30,7 @@ Mastercode
 //--------
 
 "Gran Turismo 4 PAL /ID SCES_517.19"
+// needs patch_loadmodule
 Mastercode
 9058EF88 0C1691C9
 
@@ -110,6 +111,8 @@ Mastercode
 "This is Football 2003 Demo PAL /ID SCED_511.65"
 Mastercode
 903FCC1C 0C0FA509
+Infinite Time
+20720FB0 00000000
 
 //--------
 
@@ -128,6 +131,7 @@ Invisible
 //--------
 
 "TimeSplitters 2 PAL /ID SLES_508.77"
+// needs patch_loadmodule
 Mastercode
 9044DBEC 0C12407B
 Unlimited Ammunition
@@ -138,6 +142,7 @@ Unlock All Levels
 //--------
 
 "TimeSplitters 2 Demo PAL /ID SLED_508.84"
+// needs patch_loadmodule
 Mastercode
 903BAB84 0C0F2B1D
 Infinite Ammo-Silenced Pistol
