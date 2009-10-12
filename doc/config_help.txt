@@ -67,8 +67,15 @@ Section "debugger"
 
 * patch_loadmodule [bool, false by default]
 
-  Enable automatic patching of _SifLoadModule() to prevent games from loading
-  certain IOP modules, e.g. dev9.irx and smap.irx.
+  Enable automatic patching of _SifLoadModule() to control the way IOP modules
+  are loaded by games. With network games, this is required to prevent loading
+  of dev9.irx and smap.irx. Otherwise, they'd conflict with their homebrew
+  counterparts.
+
+* disable_iopreset_hook [bool, false by default]
+
+  Set it to true to disable the IOP reset hook after the first reset. This
+  method is similar to HDLoader's mode 3.
 
 * rpc_mode [integer, 1 by default]
 
