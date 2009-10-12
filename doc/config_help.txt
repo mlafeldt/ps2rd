@@ -72,7 +72,7 @@ Section "debugger"
   of dev9.irx and smap.irx. Otherwise, they'd conflict with their homebrew
   counterparts.
 
-* disable_iopreset_hook [bool, false by default]
+* unhook_iop_reset [bool, false by default]
 
   Set it to true to disable the IOP reset hook after the first reset. This
   method is similar to HD Loader's mode 3.

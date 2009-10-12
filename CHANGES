@@ -8,7 +8,7 @@
 - Added automatic patching of _SifLoadModule() to prevent network games from
   loading their dev9.irx and smap.irx modules. This way, we can hack games like
   Gran Turismo 4, PES 2008, and Sniper Elite (enable debugger.patch_loadmodule).
-- Added disable_iopreset_hook. tbc
+- Added unhook_iop_reset. tbc
 - Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
 - Added overview about debug colors.
 
