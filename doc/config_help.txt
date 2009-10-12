@@ -75,7 +75,7 @@ Section "debugger"
 * disable_iopreset_hook [bool, false by default]
 
   Set it to true to disable the IOP reset hook after the first reset. This
-  method is similar to HDLoader's mode 3.
+  method is similar to HD Loader's mode 3.
 
 * rpc_mode [integer, 1 by default]
 
@@ -126,6 +126,30 @@ Section "elfldr"
 * addr [32-bit offset, 0x000ff000 by default]
 
   Specifies the load address of the ELF loader.
+
+
+Section "videomod"
+----------------
+
+* install [bool, false by default]
+
+  Set it to true if you want to install the video mode patcher.
+
+* addr [32-bit offset, 0x000f8000 by default]
+
+  Specifies the load address of the video mode patcher.
+
+* vmode [integer, 2 by default]
+
+  Set the video mode to use. tbc
+
+* ydiff_lores [integer, 0 by default]
+
+  Defines the ydiff value for low resolution mode. tbc
+
+* ydiff_hires [integer, 0 by default]
+
+  Defines the ydiff value for high resolution mode. tbc
 
 
 Section "cheats"
