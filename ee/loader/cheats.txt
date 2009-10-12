@@ -137,6 +137,16 @@ Unlock All Levels
 
 //--------
 
+"TimeSplitters 2 Demo PAL /ID SLED_508.84"
+Mastercode
+903BAB84 0C0F2B1D
+Infinite Ammo-Silenced Pistol
+21AE2968 00000063
+Infinite Ammo-Sniper Rifle
+21AE2970 00000063
+
+//--------
+
 "Tom Clancy's Splinter Cell PAL /ID SLES_514.66"
 Mastercode
 90129A84 0C048534
