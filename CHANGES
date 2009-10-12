@@ -10,6 +10,7 @@
   Gran Turismo 4, PES 2008, and Sniper Elite (enable debugger.patch_loadmodule).
 - Added ability to disable the IOP reset hook after the first reset (enable
   debugger.unhook_iop_reset). This is similar to HD Loader's mode 3.
+- Setting debugger.rpc_mode to -1 disables RPC for compatibility tests.
 - Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
 - Added overview about debug colors, see doc/colors.html.
 
