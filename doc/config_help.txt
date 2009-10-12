@@ -79,7 +79,10 @@ Section "debugger"
 
 * rpc_mode [integer, 1 by default]
 
-  Set SIF RPC mode to blocking (0) or non-blocking (1).
+  Set SIF RPC mode to one of the following values:
+    0 - blocking
+    1 - non-blocking
+   -1 - disable RPC completely (only for compatibility tests)
 
 * load_modules [bool, true by default]
 
