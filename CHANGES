@@ -1,5 +1,5 @@
-0.4 (Oct xx 2009)
-- Added video mode patcher. tbc
+0.4 (Oct 13 2009)
+- Added video mode patcher.
 - Finally fixed relocation of common symbols for all ERLs - no more SDK patches.
 - ELF loader: copy LoadExecPS2 args in kernel mode and nul-terminate them
   properly to fix some multi-ELF games (e.g. Splinter Cell). Try to load ELF
@@ -14,7 +14,7 @@
 - Setting debugger.rpc_mode to -1 disables RPC for compatibility tests.
 - Now there's only one dump command for all memory areas (NTPB protocol).
 - Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
-- Added overview about debug colors, see doc/colors.html.
+- Added more documentation, e.g. doc/colors.html and doc/compat.txt.
 
 0.3 (Sep 16 2009)
 - Added support for DNAS games; Metal Gear Solid 3 is now hackable.
