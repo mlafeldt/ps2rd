@@ -1,10 +1,71 @@
 $Id$
 
-There're still a lot of games you can't hack with Artemis, but we're working
-hard on improving compatibility.
+There're still games you can't hack with Artemis, but we're working hard on
+improving compatibility.
 
 A list of working games can be found here:
 https://bitbucket.org/misfire/artemis/wiki/Compat
+
+By definition, a game is compatible and deserves the status "Working" when you
+can dump memory at pretty much any point. There're also games that are only
+partially compatible (status "Incomplete") or don't work at all ("Nothing").
+
+Artemis changes the background color to keep you informed about certain events
+and errors - see doc/colors.html for an overview. Please always name this color
+when reporting a non-working game.
+
+Here're some specific steps to test compatibility. You can mainly influence
+results by changing various settings of the debugger in the configuration file.
+(It is assumed that your network is set up properly.)
+
+1) Run the first test with these settings:
+ * auto_hook = true
+ * patch_loadmodule = false
+ * unhook_iop_reset = false
+ * rpc_mode = 1
+ * load_modules = true
+
+2) If the game starts, but you cannot connect/halt/dump, try this:
+ * auto_hook = true
+ * patch_loadmodule = true
+ * unhook_iop_reset = false
+ * rpc_mode = 1
+ * load_modules = true
+
+3) If the game crashes, use these settings (unhook IOP reset):
+ * auto_hook = true
+ * patch_loadmodule = false
+ * unhook_iop_reset = true
+ * rpc_mode = 1
+ * load_modules = true
+
+4) If it's still not working, try this (disable RPC):
+ * auto_hook = true
+ * patch_loadmodule = false
+ * unhook_iop_reset = false
+ * rpc_mode = -1
+ * load_modules = true
+
+5) Still no luck? Then change settings to (use blocking RPC):
+ * auto_hook = true
+ * patch_loadmodule = false
+ * unhook_iop_reset = false
+ * rpc_mode = 0
+ * load_modules = true
+
+6) Last but not least, try this (don't load additional IOP modules):
+ * auto_hook = true
+ * patch_loadmodule = false
+ * unhook_iop_reset = false
+ * rpc_mode = 0
+ * load_modules = false
+
+It is also possible that auto hooking fails to find a proper hook location. Then
+you can try to disable it, and add your own hook code(s) to the cheats file.
+
+Please report any results to the compatibility list. Be as specific as possible.
+
+Thanks in advance.
 
 
 EOF
