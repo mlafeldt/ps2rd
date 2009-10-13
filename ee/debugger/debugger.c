@@ -242,7 +242,7 @@ static void *get_module_by_hash(u32 hash, int *size)
 	ee_kmode_enter();
 
 	/*
-	 * find module by hash and copy it to user memory
+	 * find module by hash
 	 */
 	while (irx_ptr->hash) {
 		if (irx_ptr->hash == hash) {
@@ -602,8 +602,9 @@ void NewSifSetReg(u32 regnum, int regval)
 		set_reg_hook--;
 
 		if (set_reg_hook == 0) {
-			/* IOP reset hook is complete so debugger is ready to dump */
-			debugger_ready = 1;
+			/* IOP reset hook is complete so debugger is ready to dump, if modules installed */
+			if (g_debugger_opts.load_modules == LOAD_MODULES_ON)
+				debugger_ready = 1;
 
 			/* IOP reset unhook is done if needed */
 			if (g_debugger_opts.unhook_iop_reset) {
