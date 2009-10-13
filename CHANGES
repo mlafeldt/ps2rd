@@ -12,6 +12,7 @@
 - Added ability to disable the IOP reset hook after the first reset (enable
   debugger.unhook_iop_reset). This is similar to HD Loader's mode 3.
 - Setting debugger.rpc_mode to -1 disables RPC for compatibility tests.
+- Now there's only one dump command for all memory areas (NTPB protocol).
 - Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
 - Added overview about debug colors, see doc/colors.html.
 
