@@ -50,13 +50,13 @@ WSADATA *WsaData;
 #define SERVER_TCP_PORT  		4234
 #define SERVER_UDP_PORT  		4244
 
-char g_server_ip[16] = "192.168.0.10";
-unsigned char pktbuffer[65536];
-char netlogbuffer[1024];
+static char g_server_ip[16] = "192.168.0.10";
+static unsigned char pktbuffer[65536];
+static char netlogbuffer[1024];
 
 /* NTPB header magic */
 #define ntpb_MagicSize  		6
-const unsigned char ntpb_hdrMagic[6] = {'\xff', '\x00', 'N', 'T', 'P', 'B'};
+static const unsigned char ntpb_hdrMagic[6] = {'\xff', '\x00', 'N', 'T', 'P', 'B'};
 #define ntpb_hdrSize  			10
 
 static int main_socket = -1;
@@ -71,12 +71,12 @@ static int main_socket = -1;
 #define NTPBCMD_SEND_DUMP 		0x300
 #define NTPBCMD_END_TRANSMIT		0xffff
 
-pthread_t netlog_thread_id;
+static pthread_t netlog_thread_id;
 
 /*
  * printVer - print program version
  */
-void printVer(void)
+static void printVer(void)
 {
 	printf("ntpbclient version %s\n", PROGRAM_VER);
 }
@@ -84,7 +84,7 @@ void printVer(void)
 /*
  * printUsage - Usage screen print
  */
-void printUsage(void)
+static void printUsage(void)
 {
 	printf("Usage: ntpbclient <command> [ARGS] [OPTION]\n");
 	printf("ntpbclient command-line version %s\n", PROGRAM_VER);
@@ -105,7 +105,7 @@ void printUsage(void)
 /*
  * InitWS2 - Windows specific: Winsock init.
  */
-WSADATA *InitWS2(void)
+static WSADATA *InitWS2(void)
 {
 	int 	r;			/* catches return value of WSAStartup 	*/
 	static 	WSADATA WsaData;	/* receives data from WSAStartup	*/
@@ -142,7 +142,7 @@ WSADATA *InitWS2(void)
 /*
  * clientConnect - connect to ntpbserver.
  */
-int clientConnect(void)
+static int clientConnect(void)
 {
 	int r, tcp_socket, err;
 	struct sockaddr_in peer;
@@ -176,7 +176,7 @@ error:
 /*
  * clientDisconnect - disconnect client from ntpbserver.
  */
-int clientDisconnect(void)
+static int clientDisconnect(void)
 {
 	_closesocket(main_socket);
 
@@ -186,7 +186,7 @@ int clientDisconnect(void)
 /*
  * HexaToDecimal - return decimal value from hex value passed as string
  */
-unsigned int HexaToDecimal(const char* pszHexa)
+static unsigned int HexaToDecimal(const char* pszHexa)
 {
 	unsigned int ret = 0, t = 0, n = 0;
 	const char *c = pszHexa;
@@ -214,7 +214,7 @@ unsigned int HexaToDecimal(const char* pszHexa)
 /*
  * check_ntpb_header - minimal check of the packet header
  */
-int check_ntpb_header(void *buf)
+static int check_ntpb_header(void *buf)
 {
 	int i;
 	unsigned char *pbuf = (unsigned char *)buf;
@@ -233,7 +233,7 @@ int check_ntpb_header(void *buf)
 /*
  * SendRemoteCmd - send a command to the remote server
  */
-int SendRemoteCmd(int cmd, unsigned char *buf, int size)
+static int SendRemoteCmd(int cmd, unsigned char *buf, int size)
 {
 	int ntpbpktSize, sndSize, rcvSize;
 
@@ -270,7 +270,7 @@ int SendRemoteCmd(int cmd, unsigned char *buf, int size)
 /*
  * receiveData - retrieve datas sent by the server
  */
-int receiveData(char *dumpfile, unsigned int dump_size, int flag)
+static int receiveData(char *dumpfile, unsigned int dump_size, int flag)
 {
 	int rcvSize, sndSize, packetSize, ntpbpktSize, ntpbCmd, recv_size, sizeWritten;
 	unsigned int dump_wpos = 0;
@@ -358,7 +358,7 @@ int receiveData(char *dumpfile, unsigned int dump_size, int flag)
 /*
  * netlogThread - thread to log netlog messages to a text file
  */
-void *netlogThread(void *thread_id)
+static void *netlogThread(void *thread_id)
 {
 	int udp_socket;
 	struct sockaddr_in peer;
@@ -410,7 +410,7 @@ error:
 /*
  * printLog - print log file to screen
  */
-int printLog(void)
+static int printLog(void)
 {
 	FILE *fh_log;
 	int logsize, r;
@@ -436,7 +436,7 @@ int printLog(void)
 /*
  * clearLog - clear log file
  */
-int clearLog(void)
+static int clearLog(void)
 {
 	FILE *fh_log;
 
@@ -451,7 +451,7 @@ int clearLog(void)
 /*
  * execCmdHalt - send remote cmd HALT to server
  */
-int execCmdHalt(void)
+static int execCmdHalt(void)
 {
 	int r;
 
@@ -489,7 +489,7 @@ int execCmdHalt(void)
 /*
  * execCmdResume - send remote cmd RESUME to server
  */
-int execCmdResume(void)
+static int execCmdResume(void)
 {
 	int r;
 
@@ -527,7 +527,7 @@ int execCmdResume(void)
 /*
  * execCmdDump - send remote cmd DUMP to server
  */
-int execCmdDump(char *psz_dumpstart, char *psz_dumpend, char *psz_outfile)
+static int execCmdDump(char *psz_dumpstart, char *psz_dumpend, char *psz_outfile)
 {
 	int r, dump_size, remote_cmd;
 	unsigned int dump_start, dump_end;
