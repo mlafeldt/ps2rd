@@ -142,9 +142,14 @@ Section "videomod"
 
   Specifies the load address of the video mode patcher.
 
-* vmode [integer, 2 by default]
+* vmode [integer, 2 for NTSC by default]
 
   Set the video mode to use. tbc
+
+* yfix [bool, true by default]
+
+  Enable automatic fixing of vertical (y) screen position based on the values
+  'ydiff_lores' and 'ydiff_hires'.
 
 * ydiff_lores [integer, 0 by default]
 

@@ -233,22 +233,26 @@ int install_erls(const config_t *config, engine_t *engine)
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
-		int *vmode, *ydiff;
-		void (*YPosHandler)(void) = NULL;
-
+		int *vmode;
 		GET_SYMBOL(vmode, "vmode");
 		*vmode = _config_get_int(config, SET_VIDEOMOD_VMODE);
-		GET_SYMBOL(ydiff, "ydiff_lores");
-		*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
-		GET_SYMBOL(ydiff, "ydiff_hires");
-		*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
-		GET_SYMBOL(YPosHandler, "YPosHandler");
 
-		/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
-		install_debug_handler(YPosHandler);
-		InitBPC();
-		SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
-		D_PRINTF("%s: y-fix breakpoint set\n", __FUNCTION__);
+		if (_config_get_bool(config, SET_VIDEOMOD_YFIX)) {
+			int *ydiff;
+			void (*YPosHandler)(void) = NULL;
+
+			GET_SYMBOL(ydiff, "ydiff_lores");
+			*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
+			GET_SYMBOL(ydiff, "ydiff_hires");
+			*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
+
+			/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
+			GET_SYMBOL(YPosHandler, "YPosHandler");
+			install_debug_handler(YPosHandler);
+			InitBPC();
+			SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
+			D_PRINTF("%s: y-fix breakpoint set\n", __FUNCTION__);
+		}
 	}
 
 	/*

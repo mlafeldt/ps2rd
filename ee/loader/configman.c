@@ -49,6 +49,7 @@ static const char *setting_paths[] = {
 	"videomod.install",
 	"videomod.addr",
 	"videomod.vmode",
+	"videomod.yfix",
 	"videomod.ydiff_lores",
 	"videomod.ydiff_hires",
 	"cheats.file",
@@ -282,6 +283,10 @@ void _config_build(config_t *config)
 #ifdef VIDEOMOD_VMODE
 	config_setting_set_int(set, VIDEOMOD_VMODE);
 #endif
+	set = config_setting_add(group, "yfix", CONFIG_TYPE_BOOL);
+#ifdef VIDEOMOD_YFIX
+	config_setting_set_bool(set, VIDEOMOD_YFIX);
+#endif
 	set = config_setting_add(group, "ydiff_lores", CONFIG_TYPE_INT);
 #ifdef VIDEOMOD_YDIFF_LORES
 	config_setting_set_int(set, VIDEOMOD_YDIFF_LORES);
@@ -366,6 +371,7 @@ void _config_print(const config_t *config)
 	PRINT_BOOL(SET_VIDEOMOD_INSTALL);
 	PRINT_U32(SET_VIDEOMOD_ADDR);
 	PRINT_INT(SET_VIDEOMOD_VMODE);
+	PRINT_BOOL(SET_VIDEOMOD_YFIX);
 	PRINT_INT(SET_VIDEOMOD_YDIFF_LORES);
 	PRINT_INT(SET_VIDEOMOD_YDIFF_HIRES);
 
