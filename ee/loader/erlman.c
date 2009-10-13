@@ -244,7 +244,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
 		GET_SYMBOL(YPosHandler, "YPosHandler");
 
-		/* Trap writes to GS registers DISPLAY1 and DISPLAY2 */
+		/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
 		install_debug_handler(YPosHandler);
 		InitBPC();
 		SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
@@ -318,8 +318,14 @@ void uninstall_erls(void)
 
 	for (i = 0; i < ERL_FILE_NUM; i++) {
 		file = &_erl_files[i];
-		if (file->erl != NULL)
+		if (file->erl != NULL) {
+			if (i == ERL_FILE_VIDEOMOD) {
+				/* disable y-fix breakpoint */
+				InitBPC();
+				install_debug_handler(NULL);
+			}
 			__uninstall_erl(file);
+		}
 	}
 }
 
