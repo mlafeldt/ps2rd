@@ -1,0 +1,549 @@
+
+ // THIS IS A WORK IN PROGRESS!
+ // If you have info to add, please email me at peori@oopo.net.
+
+ // Info obtained from:
+ // - Gustavo Scotti (gustavo@scotti.com)
+ // - Marcus R. Brown (mrbrown@0xd6.org)
+ // - Herben (?) - Video mode information.
+ // - Loser (?) - More video mode information.
+ // - Hiryu (?) - Even more video mode information.
+
+  void gs_setmode(int interlace, int mode, int field) {
+
+   __asm__ __volatile__(
+
+    "li  $3, 0x02      \n"   // Specify the syscall. (reg 3)
+
+    "add $4, $0, %0    \n"   // Specify the arguments. (regs 4 - 11)
+    "add $5, $0, %1    \n"   //
+    "add $6, $0, %2    \n"   //
+
+    "syscall           \n"   // Perform the syscall.
+    "nop               \n"   //
+
+    :
+    : "r" (interlace), "r" (mode), "r" (field)
+
+   );
+
+  }
+
+ arguments are from $4 - $11, then on the stack
+ return code is located in v0
+
+ ------------------------------------------------------------
+  0x01: ResetEE
+ ------------------------------------------------------------
+
+  Reset the EE onboard peripherals: DMAC, VU1, VIF1, GIF,
+  VU0, VIF0, IPU, and INTC.  The devmask parameter
+  determines which peripherals to reset.  The EE INTC is
+  always reset.
+
+  USAGE:
+
+   void ResetEE(unsigned int devmask);
+
+  ARGUMENTS:
+
+   devmask (each bit can be set individually):
+
+    0x01: Reset the DMAC (resets all channels except SIF0-2).
+    0x02: Reset VU1.
+    0x04: Reset VIF1 and VIF0.
+    0x08: Reset the GIF.
+    0x10: Reset VU0.
+    0x40: Reset the IPU.
+
+ ------------------------------------------------------------
+  0x02: SetGsCrt
+ ------------------------------------------------------------
+
+  This syscall is used to reset the GS and set a video mode
+  from a list of pre-defined modes. Other modes can be set
+  manually via registers, but its safer to use these modes.
+
+  USAGE:
+
+   void SetGsCrt(interlace, mode, field);
+
+  ARGUMENTS:
+
+   interlace:
+
+    0x00: Non-interlaced.
+    0x01: Interlaced.
+
+   mode:
+
+    0x02: NTSC          ( 640 x  448 @ 59.940Hz)
+    0x03: PAL           ( 640 x  512 @ 50.000Hz)
+
+    0x1A: VGA-640@60    ( 640 x  480 @ 59.940Hz)
+    0x1B: VGA-640@72    ( 640 x  480 @ 72.809Hz)
+    0x1C: VGA-640@75    ( 640 x  480 @ 75.000Hz)
+    0x1D: VGA-640@85    ( 640 x  480 @ 85.008Hz)
+    0x2A: VGA-800@56    ( 800 x  600 @ 56.250Hz)
+    0x2B: VGA-800@60    ( 800 x  600 @ 60.317Hz)
+    0x2C: VGA-800@72    ( 800 x  600 @ 72.188Hz)
+    0x2D: VGA-800@75    ( 800 x  600 @ 75.000Hz)
+    0x2E: VGA-800@85    ( 800 x  600 @ 85.061Hz)
+    0x3B: VGA-1024@60   (1024 x  768 @ 60.004Hz)
+    0x3C: VGA-1024@70   (1024 x  768 @ 70.069Hz)
+    0x3D: VGA-1024@75   (1024 x  768 @ 75.029Hz)
+    0x3E: VGA-1024@85   (1024 x  768 @ 84.997Hz)
+    0x4A: VGA-1280@60   (1280 x 1024 @ 60.020Hz)
+    0x4B: VGA-1280@75   (1280 x 1024 @ 75.025Hz)
+
+    0x50: HDTV-480P     ( 720 x  480)
+    0x51: HDTV-1080I    (1920 x 1080)
+    0x52: HDTV-720P     (1280 x  720)
+
+    0x72: DVDNTSC       ( 640 x  448 @ ??.???Hz)
+    0x73: DVDPAL        ( 720 x  480 @ ??.???Hz)
+    0x73: DVD480P       ( 720 x  480 @ ??.???Hz)
+
+   field:
+
+    0x00: Field mode. (Read Every Other Line)
+    0x01: Frame mode. (Read Every Line)
+
+ ------------------------------------------------------------
+  0x03: (UNIMPLEMENTED)
+ ------------------------------------------------------------
+  0x04: Exit
+ ------------------------------------------------------------
+
+  Exits the currently running program and returns execution
+  to the Browser.
+
+  USAGE:
+
+   void Exit(void);
+
+ ------------------------------------------------------------
+ 0x05: (RFU005)
+ ------------------------------------------------------------
+ 0x06: LoadExecPS2
+ ------------------------------------------------------------
+
+  Exits the currently running program and executes the
+  program specified by the filename argument.  The argc and
+  argv arguments are passed to the new program's main()
+  routine, except that argv[0] is set to the filename
+  argument (the arguments are shifted and argc is
+  incremented by one).
+
+  Note that whatever code that was running when this call
+  is made is terminated, there is no way to return to the
+  caller.
+
+  The only accepted filesystems for LoadExecPS2 are
+  "cdrom:" and "rom0:", trying to use this on "mc0:" or
+  "host:" will fail.
+
+  USAGE:
+
+   void LoadExecPS2(const char *filename, int argc, char
+                    *argv[]);
+
+  ARGUMENTS:
+
+   filename:
+
+    The name of the file to execute.
+
+   argc:
+
+    The number of items contained in the argv array.
+
+   argv: 
+
+    A (char *) array pointing to each program argument.
+    The called program will be passed both argc and argv in
+    main().
+
+ ------------------------------------------------------------
+ 0x07: ExecPS2
+ ------------------------------------------------------------
+
+  Exits the currently running program and executes the code
+  located at the address specified by the pc argument.
+  The argc and argv arguments are passed to the new program's
+  main() routine.
+
+  Because the current program is terminated, the only
+  possible way to return to the caller is to use ExecPS2 on
+  the calling program's startup routine.
+
+  USAGE:
+
+   void ExecPS2(unsigned int pc, unsigned int gp, int argc,
+            char *argv[]);
+
+  ARGUMENTS:
+
+   pc:
+
+    The address of the code to execute (the value of the PC
+    register).
+
+   gp:
+
+    The initial value of the General Purpose, or GP
+    register.
+
+   argc:
+
+    The number of items contained in the argv array.
+
+   argv:
+
+    A (char *) array pointing to each program argument.
+    The called program will be passed both argc and argv in
+    main().
+  
+ ------------------------------------------------------------
+ 0x08: (UNIMPLEMENTED)
+ ------------------------------------------------------------
+ 0x09: (RFU009)
+ ------------------------------------------------------------
+ 0x0A: AddSbusIntcHandler
+ ------------------------------------------------------------
+
+  Installs a handler for the SBUS interrupt specified in
+  the intc argument.  SBUS interrupts are a useful mix of
+  hardware and software interrupts (the r5900 MIPS variant
+  within the EE doesn't support normal software
+  interrupts).
+
+  In short, the SBUS is the hardware interface that
+  connects the EE to the IOP.  Either the EE or IOP can
+  trigger a SBUS interrupt on the other processor (see
+  Interrupt2Iop()).  The interrupt number is determined by
+  checking a SBUS register that is shared by both
+  processors.
+
+  You can install up to 16 SBUS handlers, with each one
+  corresponding to the SBUS interrupt number.
+
+  USAGE:
+
+   int AddSbusIntcHandler(unsigned int intc, void
+        (*handler)(unsigned int intc));
+
+  ARGUMENTS:
+
+   intc:
+
+    The SBUS interrupt number that this handler will
+    handle.  This can be any number between 0 and 15.
+
+   handler:
+
+    A pointer to a function that will be called when this
+    SBUS interrupt is triggered.  The handler is passed the
+    intc that was triggered (so that one handler can handle
+    multiple interrupts).
+
+ ------------------------------------------------------------
+ 0x0B: RemoveSbusIntcHandler
+ ------------------------------------------------------------
+
+  Removes a previously installed SBUS interrupt handler.
+
+  USAGE:
+
+   int RemoveSbusIntcHandler(unsigned int intc);
+
+  ARGUMENTS:
+
+   intc:
+
+    The SBUS interrupt that will have it's handler removed.
+    This can be any number between 0 and 15.
+
+ ------------------------------------------------------------
+ 0x0C: Interrupt2Iop
+ ------------------------------------------------------------
+
+  Causes the SBUS interrupt specified in intc to be
+  triggered on the IOP.
+
+  Note that although sending SBUS interrupts from the IOP
+  to the EE is supported by the IOP kernel (via the SIFMAN
+  module), the code to do so isn't obvious.  This sample
+  routine demonstrates how to trigger a SBUS interrupt on
+  the EE from the IOP:
+
+  int Interrupt2EE(unsigned int intc) {
+      int flag = 1 << intc;
+
+      /* If the interrupt was triggered (but not
+         acknowledged) return.  */
+      if (sceSifGetSMFlag() & flag)
+          return;
+
+      sceSifSetSMFlag(flag);
+      sceSifIntrMain();
+  }
+
+  Please see the IOP sifman.h header in ps2drv for details
+  on the above routines.
+
+  USAGE:
+
+   int Interrupt2Iop(int intc);
+
+  ARGUMENTS:
+
+   intc:
+
+    The SBUS interrupt that will be triggered on the IOP.
+    This can be any number between 0 and 15.
+
+ ------------------------------------------------------------
+ 0x0D: (SetVTLBRefillHandler)
+ ------------------------------------------------------------
+ 0x0E: (SetVCommonHandler)
+ ------------------------------------------------------------
+ 0x0F: (SetVInterruptHandler)
+ ------------------------------------------------------------
+ 0x10: (AddIntcHandler)
+ ------------------------------------------------------------
+ 0x11: (RemoveIntcHandler)
+ ------------------------------------------------------------
+ 0x12: (AddDmacHandler)
+ ------------------------------------------------------------
+ 0x13: (RemoveDmacHandler)
+ ------------------------------------------------------------
+ 0x14: (_EnableIntc)
+ ------------------------------------------------------------
+ 0x15: (_DisableIntc)
+ ------------------------------------------------------------
+ 0x16: (_EnableDmac)
+ ------------------------------------------------------------
+ 0x17: (_DisableDmac)
+ ------------------------------------------------------------
+ 0x18: (SetAlarm)
+ ------------------------------------------------------------
+ 0x19: (ReleaseAlarm)
+ ------------------------------------------------------------
+-0x1A: (iEnableIntc)
+ ------------------------------------------------------------
+-0x1B: (iDisableIntc)
+ ------------------------------------------------------------
+-0x1C: (iEnableDmac)
+ ------------------------------------------------------------
+-0x1D: (iDisableDmac)
+ ------------------------------------------------------------
+-0x1E: (iSetAlarm)
+ ------------------------------------------------------------
+-0x1F: (iReleaseAlarm)
+ ------------------------------------------------------------
+ 0x20: (CreateThread)
+ ------------------------------------------------------------
+ 0x21: (DeleteThread)
+ ------------------------------------------------------------
+ 0x22: (StartThread)
+ ------------------------------------------------------------
+ 0x23: (ExitThread)
+ ------------------------------------------------------------
+ 0x24: (ExitDeleteThread)
+./ee/startup/crt0.s:    syscall                 # ExitDeleteThread(void)
+ ------------------------------------------------------------
+ 0x25: (TerminateThread)
+ ------------------------------------------------------------
+-0x26: (iTerminateThread)
+ ------------------------------------------------------------
+ 0x27: (DisableDispatchThread)
+ ------------------------------------------------------------
+ 0x28: (EnableDispatchThread)
+ ------------------------------------------------------------
+ 0x29: (ChangeThreadPriority)
+ ------------------------------------------------------------
+-0x2A: (iChangeThreadPriority)
+ ------------------------------------------------------------
+ 0x2B: (RotateThreadReadyQueue)
+ ------------------------------------------------------------
+-0x2C: (iRotateThreadReadyQueue)
+ ------------------------------------------------------------
+ 0x2D: (ReleaseWaitThread)
+ ------------------------------------------------------------
+-0x2E: (iReleaseWaitThread)
+ ------------------------------------------------------------
+ 0x2F: (GetThreadId)
+ ------------------------------------------------------------
+ 0x30: (ReferThreadStatus)
+ ------------------------------------------------------------
+-0x31: (iReferThreadStatus)
+ ------------------------------------------------------------
+ 0x32: (SleepThread)
+ ------------------------------------------------------------
+ 0x33: (WakeupThread)
+ ------------------------------------------------------------
+-0x34: (iWakeupThread)
+ ------------------------------------------------------------
+ 0x35: (CancelWakeupThread)
+ ------------------------------------------------------------
+-0x36: (iCancelWakeupThread)
+ ------------------------------------------------------------
+ 0x37: (SuspendThread)
+ ------------------------------------------------------------
+-0x38: (iSuspendThread)
+ ------------------------------------------------------------
+ 0x39: (ResumeThread)
+ ------------------------------------------------------------
+-0x3A: (iResumeThread)
+ ------------------------------------------------------------
+ 0x3B: (JoinThread)
+ ------------------------------------------------------------
+ 0x3C: (RFU060)
+./ee/startup/crt0.s:    syscall                 # RFU060(gp, stack, stack_size, args, root_func)
+<mrbrown> RFU060 the main thread
+# RFU060(gp, stack, stack_size, args, root_func)
+ ------------------------------------------------------------
+  0x3D: (RFU061)
+ ------------------------------------------------------------
+
+  Description:	Sets up the heap.
+  Arguments:	heap_start, heap_size
+
+./ee/startup/crt0.s:    syscall                 # RFU061(heap_start, heap_size)
+<mrbrown> RFU061 iirc sets up the heap
+# RFU061(heap_start, heap_size)
+ ------------------------------------------------------------
+ 0x3E: (EndOfHeap)
+ ------------------------------------------------------------
+ 0x3F: (UNKNOWN)
+ ------------------------------------------------------------
+ 0x40: (CreateSema)
+ ------------------------------------------------------------
+ 0x41: (DeleteSema)
+ ------------------------------------------------------------
+ 0x42: (SignalSema)
+ ------------------------------------------------------------
+-0x43: (iSignalSema)
+ ------------------------------------------------------------
+ 0x44: (WaitSema)
+ ------------------------------------------------------------
+ 0x45: (PollSema)
+ ------------------------------------------------------------
+-0x46: (iPollSema)
+ ------------------------------------------------------------
+ 0x47: (ReferSemaStatus)
+ ------------------------------------------------------------
+-0x48: (iReferSemaStatus)
+ ------------------------------------------------------------
+-0x49: (iDeleteSema)
+ ------------------------------------------------------------
+ 0x4A: (SetOsdConfigParam)
+ ------------------------------------------------------------
+ 0x4B: (GetOsdConfigParam)
+ ------------------------------------------------------------
+ 0x4C: (GetGsHParam)
+ ------------------------------------------------------------
+ 0x4D: (GetGsVParam)
+ ------------------------------------------------------------
+ 0x4E: (SetGsHParam)
+ ------------------------------------------------------------
+ 0x4F: (SetGsVParam)
+ ------------------------------------------------------------
+ 0x50: (CreateEventFlag)
+ ------------------------------------------------------------
+ 0x51: (DeleteEventFlag)
+ ------------------------------------------------------------
+ 0x52: (SetEventFlag)
+ ------------------------------------------------------------
+ 0x53: (iSetEventFlag)
+ ------------------------------------------------------------
+ 0x5C: (EnableIntcHandler)
+ ------------------------------------------------------------
+-0x5C: (iEnableIntcHandler)
+ ------------------------------------------------------------
+ 0x5D: (DisableIntcHandler)
+ ------------------------------------------------------------
+-0x5D: (iDisableIntcHandler)
+ ------------------------------------------------------------
+ 0x5E: (EnableDmacHandler)
+ ------------------------------------------------------------
+-0x5E: (iEnableDmacHandler)
+ ------------------------------------------------------------
+ 0x5F: (DisableDmacHandler)
+ ------------------------------------------------------------
+-0x5F: (iDisableDmacHandler)
+ ------------------------------------------------------------
+ 0x60: (KSeg0)
+ ------------------------------------------------------------
+ 0x61: (EnableCache)
+ ------------------------------------------------------------
+ 0x62: (DisableCache)
+ ------------------------------------------------------------
+ 0x63: (GetCop0)
+ ------------------------------------------------------------
+ 0x64: (FlushCache)
+./ee/startup/crt0.s:    syscall                 # FlushCache(0) - Writeback data cache
+ ------------------------------------------------------------
+ 0x66: (CpuConfig)
+ ------------------------------------------------------------
+-0x67: (iGetCop0)
+ ------------------------------------------------------------
+-0x68: (iFlushCache)
+ ------------------------------------------------------------
+ 0x69: (RFU105)
+ ------------------------------------------------------------
+-0x6A: (iCpuConfig)
+ ------------------------------------------------------------
+ 0x6B: (SifStopDma)
+ ------------------------------------------------------------
+ 0x6C: (SetCPUTimerHandler)
+ ------------------------------------------------------------
+ 0x6D: (SetCPUTimer)
+ ------------------------------------------------------------
+ 0x6E: (SetOsdConfigParam2)
+ ------------------------------------------------------------
+ 0x6F: (GetOsdConfigParam2)
+ ------------------------------------------------------------
+ 0x70: (GsGetIMR)
+ ------------------------------------------------------------
+-0x70: (iGsGetIMR)
+ ------------------------------------------------------------
+ 0x71: (GsPutIMR)
+ ------------------------------------------------------------
+-0x71: (iGsPutIMR)
+ ------------------------------------------------------------
+ 0x72: (SetPgifHandler)
+ ------------------------------------------------------------
+ 0x73: (SetVSyncFlag)
+ ------------------------------------------------------------
+ 0x74: (SetSyscall)
+ ------------------------------------------------------------
+ 0x75: (//_print)
+ ------------------------------------------------------------
+ 0x76: (SifDmaStat)
+ ------------------------------------------------------------
+-0x76: (iSifDmaStat)
+ ------------------------------------------------------------
+ 0x77: (SifSetDma)
+ ------------------------------------------------------------
+-0x77: (iSifSetDma)
+ ------------------------------------------------------------
+ 0x78: (SifSetDChain)
+ ------------------------------------------------------------
+-0x78: (iSifSetDChain)
+ ------------------------------------------------------------
+ 0x79: (SifSetReg)
+ ------------------------------------------------------------
+ 0x7A: (SifGetReg)
+ ------------------------------------------------------------
+ 0x7B: (ExecOSD)
+ ------------------------------------------------------------
+ 0x7C: (Deci2Call)
+ ------------------------------------------------------------
+ 0x7D: (PSMode)
+ ------------------------------------------------------------
+ 0x7E: (MachineType)
+ ------------------------------------------------------------
+ 0x7F: (GetMemorySize)
+ ------------------------------------------------------------
