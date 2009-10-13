@@ -22,6 +22,7 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <erl.h>
+#include <hwbp.h>
 #include <string.h>
 #include "configman.h"
 #include "erlman.h"
@@ -242,7 +243,12 @@ int install_erls(const config_t *config, engine_t *engine)
 		GET_SYMBOL(ydiff, "ydiff_hires");
 		*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
 		GET_SYMBOL(YPosHandler, "YPosHandler");
-		/* TODO set data address breakpoint */
+
+		/* Trap writes to GS registers DISPLAY1 and DISPLAY2 */
+		install_debug_handler(YPosHandler);
+		InitBPC();
+		SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
+		D_PRINTF("%s: y-fix breakpoint set\n", __FUNCTION__);
 	}
 
 	/*

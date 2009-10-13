@@ -76,6 +76,23 @@ void flush_caches(void)
 }
 
 /**
+ * install_debug_handler - Install debug exception handler.
+ * @handler: handler function
+ */
+void install_debug_handler(const void *handler)
+{
+	u32 *p = (u32*)0x80000100;
+
+	DI();
+	ee_kmode_enter();
+	p[0] = MAKE_J(handler);
+	p[1] = 0;
+	ee_kmode_exit();
+	EI();
+	FlushCache(0);
+}
+
+/**
  * reset_iop - Resets the IOP.
  * @img: filename of IOP replacement image; may be NULL
  */

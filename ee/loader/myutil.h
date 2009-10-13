@@ -47,6 +47,7 @@ enum dev {
 u32 kmem_read(void *addr, void *buf, u32 size);
 u32 kmem_write(void *addr, const void *buf, u32 size);
 void flush_caches(void);
+void install_debug_handler(const void *handler);
 void reset_iop(const char *img);
 int load_modules(const char **modv);
 int set_dir_name(char *filename);
