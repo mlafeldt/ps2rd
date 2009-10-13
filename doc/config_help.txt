@@ -144,20 +144,25 @@ Section "videomod"
 
 * vmode [integer, 2 for NTSC by default]
 
-  Set the video mode to use. tbc
+  Force the video mode to NTSC (2) or PAL (3). For a complete list of modes,
+  take a look at the SetGsCrt() syscall in doc/ee-syscalls.txt. More detailed
+  information can be found in doc/ps2videomodes.txt.
 
 * yfix [bool, true by default]
 
-  Enable automatic fixing of vertical (y) screen position based on the values
-  'ydiff_lores' and 'ydiff_hires'.
+  Enable automatic fixing of the vertical (y) screen position based on the
+  values of 'ydiff_lores' and 'ydiff_hires'. Try out different values to get
+  optimal results for your TV.
 
 * ydiff_lores [integer, 0 by default]
 
-  Defines the ydiff value for low resolution mode. tbc
+  Defines the signed offset to be added to the DY field of the GS registers
+  DISPLAY1 and DISPLAY2 in low resolution mode (DH < 257).
 
 * ydiff_hires [integer, 0 by default]
 
-  Defines the ydiff value for high resolution mode. tbc
+  Defines the signed offset to be added to the DY field of the GS registers
+  DISPLAY1 and DISPLAY2 in high resolution mode (DH >= 257).
 
 
 Section "cheats"
