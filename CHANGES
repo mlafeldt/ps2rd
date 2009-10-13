@@ -3,12 +3,12 @@
 - Finally fixed relocation of common symbols for all ERLs - no more SDK patches.
 - ELF loader: copy LoadExecPS2 args in kernel mode and nul-terminate them
   properly to fix some multi-ELF games (e.g. Splinter Cell). Try to load ELF
-  with SifLoadElf() first, allowing Soul Calibur 2 to partially boot.
+  with SifLoadElf() first, allowing PES 2008 to boot.
 - Apply SBV patches a 2nd time before loading our modules, ensuring that
   LoadModuleBuffer() works for games like TimeSplitters (pink screen problem).
 - Added automatic patching of _SifLoadModule() to prevent network games from
   loading their dev9.irx and smap.irx modules. This way, we can hack games like
-  Gran Turismo 4, PES 2008, and Sniper Elite (enable debugger.patch_loadmodule).
+  GT4, Sniper Elite, and TimeSplitters 2 (enable debugger.patch_loadmodule).
 - Added ability to disable the IOP reset hook after the first reset (enable
   debugger.unhook_iop_reset). This is similar to HD Loader's mode 3.
 - Setting debugger.rpc_mode to -1 disables RPC for compatibility tests.
