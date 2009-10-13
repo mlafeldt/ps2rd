@@ -35,7 +35,7 @@
 #include <debug.h>
 
 /*
- * TODO: Eventually, this is where all the hacking magic happens:
+ * This is where all the hacking magic happens:
  * - load our IOP modules on IOP reboot
  * - handle SIF RPC (send EE RAM to IOP etc.)
  * - manage code and hook list of cheat engine
@@ -132,29 +132,16 @@ typedef struct {
 #define HASH_EESYNC	0x06bcb043
 
 /* defines for communication with debugger module */
-#define NTPBCMD_PRINT_EEDUMP 		0x301
-#define NTPBCMD_PRINT_IOPDUMP		0x302
-#define NTPBCMD_PRINT_KERNELDUMP 	0x303
-#define NTPBCMD_PRINT_SCRATCHPADDUMP	0x304
+#define NTPBCMD_SEND_DUMP 		0x300
 
 #define REMOTE_CMD_NONE			0x000
-#define REMOTE_CMD_DUMPEE		0x101
-#define REMOTE_CMD_DUMPIOP		0x102
-#define REMOTE_CMD_DUMPKERNEL		0x103
-#define REMOTE_CMD_DUMPSCRATCHPAD	0x104
+#define REMOTE_CMD_DUMP			0x100
 #define REMOTE_CMD_HALT			0x201
 #define REMOTE_CMD_RESUME		0x202
 #define REMOTE_CMD_ADDMEMPATCHES	0x501
 #define REMOTE_CMD_CLEARMEMPATCHES	0x502
 #define REMOTE_CMD_ADDRAWCODES		0x601
 #define REMOTE_CMD_CLEARRAWCODES	0x602
-
-#define PRINT_DUMP			0x300
-
-#define EE_DUMP				1
-#define IOP_DUMP			2
-#define KERNEL_DUMP			3
-#define SCRATCHPAD_DUMP			4
 
 /* to control Halted/Resumed game state */
 static int haltState = 0;
@@ -242,12 +229,14 @@ void get_ipconfig(void)
 }
 
 /*
- * load_module_from_kernel - Load IOP module from kernel RAM.
+ * get_module_by_hash - Locate an IOP module in kernel RAM.
  */
-static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
+static void *get_module_by_hash(u32 hash, int *size)
 {
 	const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
-	int irxsize = 0, ret;
+	void *addr = NULL;
+
+	*size = 0;
 
 	DI();
 	ee_kmode_enter();
@@ -257,8 +246,8 @@ static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
 	 */
 	while (irx_ptr->hash) {
 		if (irx_ptr->hash == hash) {
-			irxsize = irx_ptr->size;
-			memcpy(g_buf, irx_ptr->addr, irxsize);
+			*size = irx_ptr->size;
+			addr =  irx_ptr->addr;
 			break;
 		}
 		irx_ptr++;
@@ -268,8 +257,33 @@ static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
 	EI();
 
 	/* not found */
-	if (!irxsize)
+	if (!*size)
+		return NULL;
+
+	return addr;
+}
+
+/*
+ * load_module_from_kernel - Load IOP module from kernel RAM.
+ */
+static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
+{
+	void *ptr;
+	int irxsize, ret;
+
+	/* get module address */
+	ptr = get_module_by_hash(hash, &irxsize);
+
+	/* not found */
+	if (!ptr)
 		return -1;
+
+	/* copy the module to g_buf */
+	DI();
+	ee_kmode_enter();
+	memcpy(g_buf, ptr, irxsize);
+	ee_kmode_exit();
+	EI();
 
 	/* load module from buffer */
 	SifExecModuleBuffer(g_buf, irxsize, arg_len, args, &ret);
@@ -281,30 +295,22 @@ static int load_module_from_kernel(u32 hash, u32 arg_len, const char *args)
  */
 static int get_module_from_kernel(u32 hash, void *buf)
 {
-	const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
-	int irxsize = 0;
+	void *ptr;
+	int irxsize;
 
-	DI();
-	ee_kmode_enter();
-
-	/*
-	 * find module by hash and copy it to user memory
-	 */
-	while (irx_ptr->hash) {
-		if (irx_ptr->hash == hash) {
-			irxsize = irx_ptr->size;
-			memcpy(buf, irx_ptr->addr, irxsize);
-			break;
-		}
-		irx_ptr++;
-	}
-
-	ee_kmode_exit();
-	EI();
+	/* get module address */
+	ptr = get_module_by_hash(hash, &irxsize);
 
 	/* not found */
-	if (!irxsize)
+	if (!ptr)
 		return -1;
+
+	/* copy the module to buffer */
+	DI();
+	ee_kmode_enter();
+	memcpy(buf, ptr, irxsize);
+	ee_kmode_exit();
+	EI();
 
 	return irxsize;
 }
@@ -411,25 +417,7 @@ int MySifRebootIop(char *ioprp_path)
 		 */
 		if (rpos == 0) {
 			ioprp_offset = Get_Mod_Offset((romdir_t *)g_buf, "EESYNC");
-
-			const ramfile_t *irx_ptr = (ramfile_t*)IRX_ADDR;
-
-			DI();
-			ee_kmode_enter();
-
-			/* find module by hash */
-			while (irx_ptr->hash) {
-				if (irx_ptr->hash == HASH_EESYNC) {
-					/* Get EESYNC replacement module address & size */
-					eesync_ptr = irx_ptr->addr;
-					eesync_size = irx_ptr->size;
-					break;
-				}
-				irx_ptr++;
-			}
-
-			ee_kmode_exit();
-			EI();
+			eesync_ptr = get_module_by_hash(HASH_EESYNC, &eesync_size);
 		}
 
 		/* replace EESYNC module before to send on IOP mem,
@@ -650,14 +638,9 @@ static int read_mem(void *addr, int size, void *buf)
 /*
  * send_dump: this function send a dump to the client
  */
-static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
+static int sendDump(u32 dump_start, u32 dump_end)
 {
 	int r, len, sndSize, dumpSize, dpos, rpos;
-
-	if (dump_type == IOP_DUMP) {
-		dump_start |= 0xbc000000;
-		dump_end   |= 0xbc000000;
-	}
 
 	len = dump_end - dump_start;
 
@@ -682,7 +665,7 @@ static int sendDump(int dump_type, u32 dump_start, u32 dump_end)
 		/* sending dump part datas */
 		rpos = 0;
 		while (rpos < dumpSize) {
-			rpcNTPBsendData(PRINT_DUMP + dump_type, &g_buf[rpos], sndSize, g_debugger_opts.rpc_mode);
+			rpcNTPBsendData(NTPBCMD_SEND_DUMP, &g_buf[rpos], sndSize, g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &r);
 			rpos += sndSize;
 			if ((dumpSize - rpos) < 8192)
@@ -720,17 +703,8 @@ static int execRemoteCmd(void)
 
 	if (remote_cmd != REMOTE_CMD_NONE) {
 		/* handle Dump requests */
-		if (remote_cmd == REMOTE_CMD_DUMPEE) {
-			sendDump(EE_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
-		}
-		else if (remote_cmd == REMOTE_CMD_DUMPIOP) {
-			sendDump(IOP_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
-		}
-		else if (remote_cmd == REMOTE_CMD_DUMPKERNEL) {
-			sendDump(KERNEL_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
-		}
-		else if (remote_cmd == REMOTE_CMD_DUMPSCRATCHPAD) {
-			sendDump(SCRATCHPAD_DUMP, *((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
+		if (remote_cmd == REMOTE_CMD_DUMP) {
+			sendDump(*((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
 		}
 		/* handle Halt request */
 		else if (remote_cmd == REMOTE_CMD_HALT) {

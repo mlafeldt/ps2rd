@@ -61,26 +61,14 @@ const unsigned char ntpb_hdrMagic[6] = {'\xff', '\x00', 'N', 'T', 'P', 'B'};
 
 static int main_socket = -1;
 
-/* command line commands stuff */
-#define MEMZONE_EE 			"EE"
-#define MEMZONE_IOP 			"IOP"
-#define MEMZONE_KERNEL 			"Kernel"
-#define MEMZONE_SCRATCHPAD 		"ScratchPad"
-
 /* Remote commands to be sent to server */
 #define REMOTE_CMD_NONE			0x000
-#define REMOTE_CMD_DUMPEE		0x101
-#define REMOTE_CMD_DUMPIOP		0x102
-#define REMOTE_CMD_DUMPKERNEL		0x103
-#define REMOTE_CMD_DUMPSCRATCHPAD	0x104
+#define REMOTE_CMD_DUMP			0x100
 #define REMOTE_CMD_HALT			0x201
 #define REMOTE_CMD_RESUME		0x202
 
 /* commands sent in return by server */
-#define NTPBCMD_PRINT_EEDUMP 		0x301
-#define NTPBCMD_PRINT_IOPDUMP		0x302
-#define NTPBCMD_PRINT_KERNELDUMP 	0x303
-#define NTPBCMD_PRINT_SCRATCHPADDUMP	0x304
+#define NTPBCMD_SEND_DUMP 		0x300
 #define NTPBCMD_END_TRANSMIT		0xffff
 
 pthread_t netlog_thread_id;
@@ -101,9 +89,8 @@ void printUsage(void)
 	printf("Usage: ntpbclient <command> [ARGS] [OPTION]\n");
 	printf("ntpbclient command-line version %s\n", PROGRAM_VER);
 	printf("Supported commands:\n");
-	printf("\t --dump, -D <memzone> <start_address> <end_address> <outfile>\n");
-	printf("\t \t memzone = 'EE', 'IOP', 'Kernel', 'ScrathPad'\n");
-	printf("\t\t\t\t\t Dump PS2 memory to a file\n");
+	printf("\t --dump, -D <start_address> <end_address> <outfile>\n");
+	printf("\t \t Dump PS2 memory to a file\n");
 	printf("\t --halt, -H\t\t\t Halt game execution\n");
 	printf("\t --resume, -R\t\t\t Resume game execution\n");
 	printf("\t --log, --printlog, -L\t\t Show log file\n");
@@ -328,10 +315,7 @@ int receiveData(char *dumpfile, unsigned int dump_size, int flag)
 
 			switch(ntpbCmd) { /* treat Client Request here */
 
-				case NTPBCMD_PRINT_EEDUMP:
-				case NTPBCMD_PRINT_IOPDUMP:
-				case NTPBCMD_PRINT_KERNELDUMP:
-				case NTPBCMD_PRINT_SCRATCHPADDUMP:
+				case NTPBCMD_SEND_DUMP:
 
 					if (flag) {
 						if ((dump_wpos + ntpbpktSize) > dump_size)
@@ -543,18 +527,11 @@ int execCmdResume(void)
 /*
  * execCmdDump - send remote cmd DUMP to server
  */
-int execCmdDump(char *psz_memzone, char *psz_dumpstart, char *psz_dumpend, char *psz_outfile)
+int execCmdDump(char *psz_dumpstart, char *psz_dumpend, char *psz_outfile)
 {
 	int r, dump_size, remote_cmd;
 	unsigned int dump_start, dump_end;
 	unsigned char cmdBuf[16];
-
-	/* just a few checks */
-	if ((strcmp(psz_memzone, MEMZONE_EE)) && (strcmp(psz_memzone, MEMZONE_IOP)) && \
-		(strcmp(psz_memzone, MEMZONE_KERNEL)) && (strcmp(psz_memzone, MEMZONE_SCRATCHPAD))) {
-		printUsage();
-		return -3;
-	}
 
 	dump_start = HexaToDecimal(psz_dumpstart);
 	dump_end = HexaToDecimal(psz_dumpend);
@@ -563,39 +540,6 @@ int execCmdDump(char *psz_memzone, char *psz_dumpstart, char *psz_dumpend, char 
 	if (dump_size <= 0) {
 		printf("invalid address range...\n");
 		return -3;
-	}
-
-	if (!strcmp(psz_memzone, MEMZONE_EE)) {
-		if ((dump_start < 0x00080000) || (dump_start > 0x02000000) ||
-			(dump_end < 0x0080000) || (dump_end > 0x02000000)) {
-			printf("invalid address range for EE dump...\n");
-			return -3;
-		}
-		remote_cmd = REMOTE_CMD_DUMPEE;
-	}
-	if (!strcmp(psz_memzone, MEMZONE_IOP)) {
-		if ((dump_start < 0x00000000) || (dump_start > 0x00200000) ||
-			(dump_end < 0x00000000) || (dump_end > 0x00200000)) {
-			printf("invalid address range for IOP dump...\n");
-			return -3;
-		}
-		remote_cmd = REMOTE_CMD_DUMPIOP;
-	}
-	if (!strcmp(psz_memzone, MEMZONE_KERNEL)) {
-		if ((dump_start < 0x80000000) || (dump_start > 0x82000000) ||
-			(dump_end < 0x80000000) || (dump_end > 0x82000000)) {
-			printf("invalid address range for Kernel dump...\n");
-			return -3;
-		}
-		remote_cmd = REMOTE_CMD_DUMPKERNEL;
-	}
-	if (!strcmp(psz_memzone, MEMZONE_SCRATCHPAD)) {
-		if ((dump_start < 0x70000000) || (dump_start > 0x70004000) ||
-			(dump_end < 0x70000000) || (dump_end > 0x70004000)) {
-			printf("invalid address range for ScratchPad dump...\n");
-			return -3;
-		}
-		remote_cmd = REMOTE_CMD_DUMPSCRATCHPAD;
 	}
 
 	/* connect client */
@@ -609,6 +553,8 @@ int execCmdDump(char *psz_memzone, char *psz_dumpstart, char *psz_dumpend, char 
 	*((unsigned int *)&cmdBuf[0]) = dump_start;
 	*((unsigned int *)&cmdBuf[4]) = dump_end;
 
+	remote_cmd = REMOTE_CMD_DUMP;
+
 	/* send remote cmd */
 	r = SendRemoteCmd(remote_cmd, cmdBuf, 8);
 	if (r < 0) {
@@ -616,7 +562,7 @@ int execCmdDump(char *psz_memzone, char *psz_dumpstart, char *psz_dumpend, char 
 		return -4;
 	}
 
-	printf("Please wait while dumping %s @0x%08x-0x%08x to %s...\n", psz_memzone, dump_start, dump_end, psz_outfile);
+	printf("Please wait while dumping 0x%08x-0x%08x to %s...\n", dump_start, dump_end, psz_outfile);
 
 	/* receive dump */
 	r = receiveData(psz_outfile, dump_size, 1);
@@ -644,7 +590,7 @@ int main(int argc, char **argv, char **env)
 {
 
 	/* args check */
-	if ((argc < 2) || (argc > 8)) {
+	if ((argc < 2) || (argc > 7)) {
 		printUsage();
 		return 0;
 	}
@@ -694,17 +640,17 @@ int main(int argc, char **argv, char **env)
 		else
 			printUsage();
 	}
-	else if (argc == 6) {
+	else if (argc == 5) {
 		if (!strcmp(argv[1], "--dump") || !strcmp(argv[1], "-D"))
-			execCmdDump(argv[2], argv[3], argv[4], argv[5]);
+			execCmdDump(argv[2], argv[3], argv[4]);
 		else
 			printUsage();
 	}
-	else if (argc == 8) {
+	else if (argc == 7) {
 		if (!strcmp(argv[1], "--dump") || !strcmp(argv[1], "-D")) {
-			if (!strcmp(argv[6], "-ip")) {
-				strcpy(g_server_ip, argv[7]);
-				execCmdDump(argv[2], argv[3], argv[4], argv[5]);
+			if (!strcmp(argv[5], "-ip")) {
+				strcpy(g_server_ip, argv[6]);
+				execCmdDump(argv[2], argv[3], argv[4]);
 			}
 			else
 				printUsage();
