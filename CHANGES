@@ -1,8 +1,9 @@
 0.4 (Oct xx 2009)
 - Added video mode patcher. tbc
 - Finally fixed relocation of common symbols for all ERLs - no more SDK patches.
-- ELF loader: copy LoadExecPS2 args in kernel mode to fix some multi-ELF games.
-  Try to load ELF with SifLoadElf() first, allowing Soul Calibur 2 to start.
+- ELF loader: copy LoadExecPS2 args in kernel mode and nul-terminate them
+  properly to fix some multi-ELF games (e.g. Splinter Cell). Try to load ELF
+  with SifLoadElf() first, allowing Soul Calibur 2 to partially boot.
 - Apply SBV patches a 2nd time before loading our modules, ensuring that
   LoadModuleBuffer() works for games like TimeSplitters (pink screen problem).
 - Added automatic patching of _SifLoadModule() to prevent network games from
