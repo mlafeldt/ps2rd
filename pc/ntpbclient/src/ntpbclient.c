@@ -1,5 +1,5 @@
 /*
- * ntpbclient.c - PC side of remote debugger
+ * ntpbclient.c - PC debugger client
  *
  * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
@@ -38,7 +38,7 @@
 #include <sys/stat.h>
 #include <pthread.h>
 
-#define PROGRAM_VER "0.2"
+#define PROGRAM_VER "0.3"
 
 #ifdef _WIN32
 WSADATA *WsaData;
