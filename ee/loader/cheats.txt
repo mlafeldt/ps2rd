@@ -146,9 +146,13 @@ Unlock All Levels
 Mastercode
 903BAB84 0C0F2B1D
 Infinite Ammo-Silenced Pistol
-21AE2968 00000063
+//21AE2968 00000063
 Infinite Ammo-Sniper Rifle
-21AE2970 00000063
+//21AE2970 00000063
+Infinite Ammo-All Weapons
+20306F7C 24020063
+Extra Ammo-All Weapons
+10306F7C 00001021
 
 //--------
 
