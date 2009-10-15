@@ -143,16 +143,16 @@ Unlock All Levels
 
 "TimeSplitters 2 Demo PAL /ID SLED_508.84"
 // needs patch_loadmodule
+JC Pad 1
+D043015C 0000????
 Mastercode
 903BAB84 0C0F2B1D
-Infinite Ammo-Silenced Pistol
-//21AE2968 00000063
-Infinite Ammo-Sniper Rifle
-//21AE2970 00000063
-Infinite Ammo-All Weapons
-20306F7C 24020063
-Extra Ammo-All Weapons
+Infinite Ammo
+20306F80 00000000
+Extra Ammo
 //10306F7C 00001021
+Infinite Health
+207040F4 42800000
 
 //--------
 
