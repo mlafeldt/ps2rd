@@ -117,7 +117,7 @@ YPosHandler:
 	/* decode store instruction at ErrorEPC (level 2 exception) */
 	mfc0	$k0, $30
 	.set	at
-	sw	$k0, epc
+	sw	$k0, errorpc
 	.set	noat
 	lw	$t0, 0($k0)		/* t0 = opcode at ErrorEPC */
 	srl	$t1, $t0, 16
@@ -310,7 +310,7 @@ ydiff_lores:
 ydiff_hires:
 	.word	0
 
-epc:
+errorpc:
 	.word	0
 
 	.p2align 4
