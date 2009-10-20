@@ -1,3 +1,8 @@
+0.4.1 (Oct 20 2009)
+- The USB modules are now included and loaded by default, allowing you to read
+  files from the mass: device. To disable USB support, change the new setting
+  loader.usb_support to false.
+
 0.4 (Oct 13 2009)
 - Added video mode patcher.
 - Finally fixed relocation of common symbols for all ERLs - no more SDK patches.
