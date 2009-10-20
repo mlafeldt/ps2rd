@@ -177,19 +177,20 @@ int init_irx_modules(const config_t *config)
 		i++;
 	}
 
-#if 1
-	SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
-	if (ret < 0) {
-		D_PRINTF("%s: failed to load module usbd.irx (%i)\n",
-			__FUNCTION__, ret);
+	if (_config_get_bool(config, SET_USB_SUPPORT)) {
+		SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
+		if (ret < 0) {
+			D_PRINTF("%s: failed to load module usbd.irx (%i)\n",
+				__FUNCTION__, ret);
+		}
+
+		SifExecModuleBuffer(_usb_mass_irx_start, _usb_mass_irx_size, 0, NULL, &ret);
+		if (ret < 0) {
+			D_PRINTF("%s: failed to load module usb_mass.irx (%i)\n",
+				__FUNCTION__, ret);
+		}
 	}
 
-	SifExecModuleBuffer(_usb_mass_irx_start, _usb_mass_irx_size, 0, NULL, &ret);
-	if (ret < 0) {
-		D_PRINTF("%s: failed to load module usb_mass.irx (%i)\n",
-			__FUNCTION__, ret);
-	}
-#endif
 	copy_modules_to_kernel(config);
 
 	return 0;
