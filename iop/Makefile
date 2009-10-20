@@ -4,6 +4,7 @@ all:
 	make -C debugger
 	make -C memdisk
 	make -C eesync
+	make -C usb_mass
 
 clean:
 	make -C dev9 clean
@@ -11,5 +12,6 @@ clean:
 	make -C debugger clean
 	make -C memdisk clean
 	make -C eesync clean
+	make -C usb_mass clean
 
 rebuild: clean all
