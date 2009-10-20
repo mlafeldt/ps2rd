@@ -55,14 +55,12 @@ extern u8  _eesync_irx_start[];
 extern u8  _eesync_irx_end[];
 extern int _eesync_irx_size;
 
-#ifdef _USB
 extern u8  _usbd_irx_start[];
 extern u8  _usbd_irx_end[];
 extern int _usbd_irx_size;
 extern u8  _usb_mass_irx_start[];
 extern u8  _usb_mass_irx_end[];
 extern int _usb_mass_irx_size;
-#endif
 
 /* TODO: make it configurable */
 #define IRX_ADDR	0x80030000
@@ -179,7 +177,7 @@ int init_irx_modules(const config_t *config)
 		i++;
 	}
 
-#ifdef _USB
+#if 1
 	SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
 	if (ret < 0) {
 		D_PRINTF("%s: failed to load module usbd.irx (%i)\n",

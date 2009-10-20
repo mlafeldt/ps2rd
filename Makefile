@@ -14,14 +14,7 @@
 # consequences mainly important for the developers.
 DEBUG = 1
 
-# When USB is 1, USB support will be activated by loading the IOP modules
-# usbd.irx and usb_mass.irx. Unfortunately, the latter is _not_ open source, and
-# we're not allowed to include it directly. As a workaround, get yourself a copy
-# of usb_mass.irx, and set the environment variable USB_MASS to its file path,
-# e.g. export USB_MASS=/usr/local/ps2dev/irx/usb_mass.irx
-USB = 0
-
-VARS=DEBUG=$(DEBUG) USB=$(USB)
+VARS=DEBUG=$(DEBUG)
 
 all: check
 	make -C iop
@@ -31,10 +24,8 @@ all: check
 	bin2o iop/memdisk/memdisk.irx ee/loader/memdisk_irx.o _memdisk_irx
 	bin2o iop/eesync/eesync.irx ee/loader/eesync_irx.o _eesync_irx
 	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx
-	if [ $(USB) = "1" ]; then \
-		bin2o $(PS2SDK)/iop/irx/usbd.irx ee/loader/usbd_irx.o _usbd_irx; \
-		bin2o $(USB_MASS) ee/loader/usb_mass_irx.o _usb_mass_irx; \
-	fi
+	bin2o $(PS2SDK)/iop/irx/usbd.irx ee/loader/usbd_irx.o _usbd_irx
+	bin2o iop/usb_mass/usb_mass.irx ee/loader/usb_mass_irx.o _usb_mass_irx
 	$(VARS) make -C ee
 	make -C pc
 
@@ -65,9 +56,5 @@ release: all
 check:
 	@if [ -z $(PS2SDK) ]; then \
 		echo "PS2SDK env var not set." >&2; \
-		exit 1; \
-	fi
-	@if [ $(USB) = "1" ] && [ -z $(USB_MASS) ]; then \
-		echo "USB_MASS env var not set." >&2; \
 		exit 1; \
 	fi
