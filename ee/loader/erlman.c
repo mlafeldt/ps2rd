@@ -334,6 +334,8 @@ void uninstall_erls(void)
 }
 
 
+/* XXX these functions should be moved */
+
 /**
  * engine_add_hook - Add a hook to an engine's hook list.
  * @engine: engine context

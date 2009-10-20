@@ -29,6 +29,7 @@
 static const char *setting_paths[] = {
 	"loader.iop_reset",
 	"loader.sbv_patches",
+	"loader.usb_support",
 	"loader.boot2",
 	"engine.install",
 	"engine.addr",
@@ -173,12 +174,16 @@ void _config_build(config_t *config)
 	group = config_setting_add(root, "loader", CONFIG_TYPE_GROUP);
 
 	set = config_setting_add(group, "iop_reset", CONFIG_TYPE_BOOL);
-#ifndef _NO_IOPRESET
-	config_setting_set_bool(set, 1);
+#ifdef IOP_RESET
+	config_setting_set_bool(set, IOP_RESET);
 #endif
 	set = config_setting_add(group, "sbv_patches", CONFIG_TYPE_BOOL);
-#ifndef _NO_SBV
-	config_setting_set_bool(set, 1);
+#ifdef SBV_PATCHES
+	config_setting_set_bool(set, SBV_PATCHES);
+#endif
+	set = config_setting_add(group, "usb_support", CONFIG_TYPE_BOOL);
+#ifdef USB_SUPPORT
+	config_setting_set_bool(set, USB_SUPPORT);
 #endif
 	set = config_setting_add(group, "boot2", CONFIG_TYPE_ARRAY);
 
@@ -341,6 +346,7 @@ void _config_print(const config_t *config)
 	/* loader */
 	PRINT_BOOL(SET_IOP_RESET);
 	PRINT_BOOL(SET_SBV_PATCHES);
+	PRINT_BOOL(SET_USB_SUPPORT);
 	PRINT_STRING_ARRAY(SET_BOOT2);
 
 	/* engine */

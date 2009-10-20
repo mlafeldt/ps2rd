@@ -12,7 +12,7 @@ EE_LDFLAGS += -s
 endif
 
 EE_INCS += -I$(PS2SDK)/ports/include
-EE_CFLAGS += #-D_NO_SBV -D_NO_IOPRESET
+EE_CFLAGS +=
 EE_LDFLAGS += -L$(PS2SDK)/ports/lib
 EE_ASFLAGS +=
 

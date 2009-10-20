@@ -22,6 +22,12 @@ Section "loader"
    - sbv_patch_disable_prefix_check
    - sbv_patch_user_mem_clear
 
+* usb_support [bool, true by default]
+
+  If this setting is true, USB support will be activated by loading the IOP
+  modules usbd.irx and usb_mass.irx. They are required to read files from the
+  mass: device.
+
 * boot2 [string array, not set by default]
 
   'boot2' holds a list of ELF pathnames (including arguments). You can later

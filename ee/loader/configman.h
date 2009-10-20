@@ -26,6 +26,16 @@
 #include <libconfig.h>
 
 /* Define some default settings */
+#ifndef IOP_RESET
+#define IOP_RESET		1
+#endif
+#ifndef SBV_PATCHES
+#define SBV_PATCHES		1
+#endif
+#ifndef USB_SUPPORT
+#define USB_SUPPORT		1
+#endif
+
 #ifndef ENGINE_INSTALL
 #define ENGINE_INSTALL		1
 #endif
@@ -97,6 +107,7 @@ enum setting_key {
 	/* loader */
 	SET_IOP_RESET = 0,
 	SET_SBV_PATCHES,
+	SET_USB_SUPPORT,
 	SET_BOOT2,
 	/* engine */
 	SET_ENGINE_INSTALL,
