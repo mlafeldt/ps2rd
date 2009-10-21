@@ -1,9 +1,9 @@
----====---
-   ps2rd
----=======---
+---========================---
+   ps2rd - PS2 remote debugger
+---===========================---
 
-ps2rd is a collection of tools to debug commercial PS2 games remotely over
-Ethernet.
+ps2rd is a collection of open source tools to debug commercial PS2 games
+remotely over Ethernet.
 
 The debugging capabilities will include:
 - dump contents of PS2 memory
@@ -26,7 +26,7 @@ The directory doc/ is generally the first place to look for any documentation.
    Disclaimer
 ---==========---
 
-ps2rd IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER ENTERTAINMENT,
+PS2RD IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER ENTERTAINMENT,
 INC. ALL TRADEMARKS ARE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ps2rd comes with ABSOLUTELY NO WARRANTY. It is covered by the GNU General Public
