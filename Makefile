@@ -1,4 +1,4 @@
-# This is the main Makefile of Artemis.
+# This is the main makefile of ps2rd.
 #
 # The build targets are:
 #  check   - check for environment variables (invoked by all)
@@ -42,12 +42,12 @@ release: all
 	rm -rf release
 	mkdir -p release/ps2 release/pc
 	if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
-		ps2-packer -v ee/loader/artemis.elf release/ps2/artemis.elf; \
-		chmod +x release/ps2/artemis.elf; \
+		ps2-packer -v ee/loader/ps2rd.elf release/ps2/ps2rd.elf; \
+		chmod +x release/ps2/ps2rd.elf; \
 	else \
-		cp ee/loader/artemis.elf release/ps2/artemis.elf; \
+		cp ee/loader/ps2rd.elf release/ps2/ps2rd.elf; \
 	fi
-	cp ee/loader/artemis.conf release/ps2/
+	cp ee/loader/ps2rd.conf release/ps2/
 	cp ee/loader/cheats.txt release/ps2/
 	cp pc/ntpbclient/bin/* release/pc/
 	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
