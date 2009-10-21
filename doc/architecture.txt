@@ -1,6 +1,6 @@
 $Id$
 
-Artemis Software Architecture
+ps2rd Software Architecture
 written by misfire <misfire@xploderfreax.de>
 
 NOTE: This document is far from being complete.
@@ -13,8 +13,8 @@ libconfig
 
 ee/libconfig/
 
-The current version of Artemis uses a PS2 port of libconfig - a simple library
-for manipulating structured configuration files - to read and store its
+The current version of ps2rd uses a PS2 port of libconfig - a simple library for
+manipulating structured configuration files - to read and store its
 configuration (see config_help.txt for details).
 
 Home of libconfig:
@@ -26,7 +26,7 @@ libcheats
 
 common/libcheats/
 
-Furthermore, Artemis makes use of the libcheats library to read, manipulate, and
+Furthermore, ps2rd makes use of the libcheats library to read, manipulate, and
 write cheat codes in text format - see cheats_format.txt.
 
 

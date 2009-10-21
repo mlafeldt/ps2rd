@@ -1,6 +1,6 @@
 $Id$
 
-Artemis includes a cheat system which has many features people are used to from
+ps2rd includes a cheat system which has many features people are used to from
 commercial products like CB and AR.
 
 The current version allows you to load cheat codes from a text file and to
@@ -13,7 +13,7 @@ document also explains the concept of game IDs, and how to use them to auto-
 matically activate cheats for a certain game.
 
 Last but not least, take a look at doc/code_types.txt for a complete list of
-available code types. Note that Artemis only supports _raw_ codes.
+available code types. Note that ps2rd only supports _raw_ codes.
 
 Happy cheating!
 

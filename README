@@ -1,8 +1,8 @@
 ---====---
-   Artemis
+   ps2rd
 ---=======---
 
-Artemis is a collection of tools to debug commercial PS2 games remotely over
+ps2rd is a collection of tools to debug commercial PS2 games remotely over
 Ethernet.
 
 The debugging capabilities will include:
@@ -10,9 +10,9 @@ The debugging capabilities will include:
 - write data to PS2 memory
 - set breakpoints/watchpoints
 
-Read doc/debugging.txt to find out more about debugging with Artemis.
+Read doc/debugging.txt to find out more about debugging with ps2rd.
 
-Artemis also includes a powerful cheat system.
+ps2rd also includes a powerful cheat system.
 
 The current version allows you to load cheat codes from a text file and to
 automatically activate them for the inserted game.
@@ -26,13 +26,13 @@ The directory doc/ is generally the first place to look for any documentation.
    Disclaimer
 ---==========---
 
-ARTEMIS IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER
-ENTERTAINMENT, INC. ALL TRADEMARKS ARE PROPERTY OF THEIR RESPECTIVE OWNERS.
+ps2rd IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER ENTERTAINMENT,
+INC. ALL TRADEMARKS ARE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
-Artemis comes with ABSOLUTELY NO WARRANTY. It is covered by the GNU General
-Public License. Please see file COPYING for further information.
+ps2rd comes with ABSOLUTELY NO WARRANTY. It is covered by the GNU General Public
+License. Please see file COPYING for further information.
 
-Besides the PS2SDK from ps2dev.org, Artemis makes use of these libraries:
+Besides the PS2SDK from ps2dev.org, ps2rd makes use of these libraries:
 - libconfig by Mark Lindner et al. (http://www.hyperrealm.com/libconfig/)
 - libcheats by misfire <misfire@xploderfreax.de>
 
@@ -47,8 +47,8 @@ file COPYING.LESSER for further information.
 Artemis community repository:
 https://bitbucket.org/artemis/artemis/
 
-misfire's Artemis development branch:
-https://bitbucket.org/misfire/artemis/
+misfire's ps2rd repository:
+https://bitbucket.org/misfire/ps2rd/
 
 GSHI hacking and development forums:
 http://gshi.org/vb/

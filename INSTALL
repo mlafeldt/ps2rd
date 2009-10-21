@@ -1,4 +1,4 @@
-To build the PS2 part of Artemis, you need a working PS2DEV toolchain with an
+To build the PS2 part of ps2rd, you need a working PS2DEV toolchain with an
 up-to-date version of the PS2SDK.
 
 First, you have to install the PS2 ports of libconfig and libcheats to the SDK,
@@ -13,11 +13,11 @@ $ cd common/libcheats/
 $ make -f Makefile.PS2
 # make -f Makefile.PS2 install
 
-Now, go to the project's root directory to finally build the Artemis executable:
+Now, go to the project's root directory to finally build the ps2rd executable:
 
 $ make rebuild
 
-This will create ee/loader/artemis.elf.
+This will create ee/loader/ps2rd.elf.
 
 Currently, it is recommended to run the ELF with ps2link (you need the high-
 loading version!) and ps2client:
@@ -25,7 +25,7 @@ loading version!) and ps2client:
 $ cd ee/loader/
 $ make run
 
-If you want to boot it from mass, memory card, etc., make sure that artemis.conf
+If you want to boot it from mass, memory card, etc., make sure that ps2rd.conf
 is placed in the same folder as the ELF.
 
 
