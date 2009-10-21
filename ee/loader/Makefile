@@ -16,7 +16,7 @@ EE_CFLAGS +=
 EE_LDFLAGS += -L$(PS2SDK)/ports/lib
 EE_ASFLAGS +=
 
-EE_BIN = artemis.elf
+EE_BIN = ps2rd.elf
 
 ERL_FILES = engine_erl.o libkernel_erl.o libpatches_erl.o \
 	debugger_erl.o elfldr_erl.o videomod_erl.o
