@@ -41,7 +41,7 @@ rebuild: clean all
 release: all
 	rm -rf release
 	mkdir -p release/ps2 release/pc
-	if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
+	@if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
 		ps2-packer -v ee/loader/ps2rd.elf release/ps2/ps2rd.elf; \
 		chmod +x release/ps2/ps2rd.elf; \
 	else \
