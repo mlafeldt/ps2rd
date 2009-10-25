@@ -19,17 +19,6 @@ D: iop/memdisk/
 D: pc/ntpbclient/
 S: France
 
-A: Lazy Bastard
-N: Jason Witmer
-E: lbgshi@gmail.com
-W: http://gshi.org
-D: initiator of Project Artemis
-D: software tester
-S: TX, USA
-
-A: LiquidManZero
-D: software tester
-
 A: misfire
 N: Mathias Lafeldt
 E: misfire@xploderfreax.de
