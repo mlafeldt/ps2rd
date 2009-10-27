@@ -1,3 +1,7 @@
+0.4.2 (Oct 27 2009)
+- This is an intermediate version created after renaming the project to "ps2rd".
+  It doesn't include any bug fixes or new features.
+
 0.4.1 (Oct 20 2009)
 - The USB modules are now included and loaded by default, allowing you to read
   files from the mass: device. To disable USB support, change the new setting
