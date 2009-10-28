@@ -8,9 +8,9 @@ remotely over Ethernet. The system deploys a client-server architecture, where
 the PS2 serves requests from a debugger client run on a PC.
 
 Remote debugging capabilities include:
-- dump contents of PS2 memory
-- write data to PS2 memory (not implemented yet)
-- set breakpoints/watchpoints (not implemented yet)
+- Dump contents of PS2 memory to PC
+- (planned) Write data to PS2 memory
+- (planned) Set breakpoints/watchpoints
 
 More features will be added as development continues.
 

@@ -5,21 +5,28 @@
 ps2rd is a collection of open source tools to debug commercial PS2 games
 remotely over Ethernet.
 
-The debugging capabilities will include:
-- dump contents of PS2 memory
-- write data to PS2 memory
-- set breakpoints/watchpoints
+Features:
 
-Read doc/debugging.txt to find out more about debugging with ps2rd.
+- Dump contents of PS2 memory to PC
+- (planned) Write data to PS2 memory
+- (planned) Set breakpoints/watchpoints
+- Powerful cheat system similar to CB or AR
 
-ps2rd also includes a powerful cheat system.
+Requirements:
 
-The current version allows you to load cheat codes from a text file and to
-automatically activate them for the inserted game.
+- PS2 game console with Ethernet port/adapter
+- Ability to run homebrew on PS2 (FMCB, Independence Exploit, etc.)
+- PC with Linux or Windows OS
+- Ethernet cable for PC-PS2 connection
 
-Read doc/cheating.txt for more information.
 
-The directory doc/ is generally the first place to look for any documentation.
+---==========---
+   Documentation
+---=============---
+
+Instructions on how to compile and install ps2rd can be found in the INSTALL
+file. The directory doc/ is generally the first place to look for further
+documentation.
 
 
 ---=======---
@@ -47,11 +54,11 @@ file COPYING.LESSER for further information.
 ps2rd project site:
 https://bitbucket.org/misfire/ps2rd/
 
+PSX-Scene forums:
+http://psx-scene.com/forums/
+
 GSHI hacking and development forums:
 http://gshi.org/vb/
-
-GSHI IRC channel:
-join #gshi at irc.max-evolution.com
 
 
 ---======================---
