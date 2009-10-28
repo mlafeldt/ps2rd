@@ -1,5 +1,3 @@
-$Id$
-
 There're still games you can't hack with ps2rd, but we're working hard on
 improving compatibility.
 

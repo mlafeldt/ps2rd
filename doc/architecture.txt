@@ -1,5 +1,3 @@
-$Id$
-
 ps2rd Software Architecture
 written by misfire <misfire@xploderfreax.de>
 

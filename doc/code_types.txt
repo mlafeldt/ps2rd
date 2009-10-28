@@ -1,5 +1,3 @@
-$Id$
-
 Code Types supported by ps2rd
 written by misfire <misfire@xploderfreax.de>
 
