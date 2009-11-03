@@ -1,4 +1,4 @@
-IOP_MODULES=dev9 smap debugger memdisk eesync usb_mass
+IOP_MODULES=debugger dev9 eesync memdisk usb_mass SMSMAP SMSTCPIP
 
 all:
 	@for m in $(IOP_MODULES); do \
