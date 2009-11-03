@@ -38,7 +38,7 @@
 #include "lwip/api_msg.h"
 #include "lwip/memp.h"
 
-#include "../../SMSUTILS/smsutils.h"
+#include <sysclib.h>
 
 struct netbuf* netbuf_new ( void ) {
  struct netbuf *buf = memp_malloc ( MEMP_NETBUF );
@@ -97,7 +97,7 @@ void netbuf_copy_partial (
 
    lDiff = buf_copy_len > lDiff ? lDiff : buf_copy_len;
 
-   mips_memcpy (
+   memcpy (
     &(  ( char* )dataptr      )[ left   ],
     &(  ( char* )p -> payload )[ offset ],
     lDiff

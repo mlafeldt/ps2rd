@@ -767,7 +767,7 @@ udp_new(void) {
   /* could allocate UDP PCB? */
   if (pcb != NULL) {
     /* initialize PCB to all zeroes */
-    mips_memset(pcb, 0, sizeof(struct udp_pcb));
+    memset(pcb, 0, sizeof(struct udp_pcb));
     pcb->ttl = UDP_TTL;
   }
   

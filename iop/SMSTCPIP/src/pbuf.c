@@ -765,7 +765,7 @@ pbuf_take(struct pbuf *p)
           head = q;
         }
         /* copy pbuf payload */
-        mips_memcpy(q->payload, p->payload, p->len);
+        memcpy(q->payload, p->payload, p->len);
         q->tot_len = p->tot_len;
         q->len = p->len;
         /* in case p was the first pbuf, it is no longer refered to by

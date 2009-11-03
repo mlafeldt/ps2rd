@@ -199,7 +199,7 @@ struct linger {
   #define FD_SET(n, p)  ((p)->fd_bits[(n)/8] |=  (1 << ((n) & 7)))
   #define FD_CLR(n, p)  ((p)->fd_bits[(n)/8] &= ~(1 << ((n) & 7)))
   #define FD_ISSET(n,p) ((p)->fd_bits[(n)/8] &   (1 << ((n) & 7)))
-  #define FD_ZERO(p)    mips_memset((void*)(p),0,sizeof(*(p)))
+  #define FD_ZERO(p)    memset((void*)(p),0,sizeof(*(p)))
 
   typedef struct fd_set {
           unsigned char fd_bits [(FD_SETSIZE+7)/8];

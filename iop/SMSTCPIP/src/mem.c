@@ -120,7 +120,7 @@ mem_init(void)
   //Boman666: Originally ram was the array now called ramblock. I didn't experience any problem but ram could end up incorrecly
   //aligned, causing a crash.
   ram=MEM_ALIGN(ramblock+MEM_ALIGNMENT-1);
-  mips_memset(ram, 0, MEM_SIZE);
+  memset(ram, 0, MEM_SIZE);
   mem = (struct mem *)ram;
   mem->next = MEM_SIZE;
   mem->prev = 0;
@@ -187,7 +187,7 @@ mem_reallocm(void *rmem, mem_size_t newsize)
   if (nmem == NULL) {
     return mem_realloc(rmem, newsize);
   }
-  mips_memcpy(nmem, rmem, newsize);
+  memcpy(nmem, rmem, newsize);
   mem_free(rmem);
   return nmem;
 }
