@@ -16,9 +16,9 @@
 #include "intrman.h"
 #include "ps2ip.h"
 #include "stdio.h"
+#include "sysclib.h"
 #include "thbase.h"
 #include "thsemap.h"
 #include "thevent.h"
-#include "../SMSUTILS/smsutils.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

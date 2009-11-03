@@ -25,7 +25,7 @@
 #include "thbase.h"
 #include "dev9.h"
 #include "ps2ip.h"
-#include "../SMSUTILS/smsutils.h"
+#include "sysclib.h"
 
 #define	SET			1
 #define	CLEAR			0
@@ -1248,7 +1248,7 @@ GetNodeAddr(SMap* pSMap)
 	}
 	if	(u16Sum!=u16CHKSum)
 	{
-		mips_memset(pSMap->au8HWAddr,0,6);
+		memset(pSMap->au8HWAddr,0,6);
 		return	-1;
 	}
 	return	0;
@@ -1295,7 +1295,7 @@ SMap_Init(void)
 {
 	SMap*		pSMap=&SMap0;
 
-	mips_memset(pSMap,0,sizeof(*pSMap));
+	memset(pSMap,0,sizeof(*pSMap));
 
 	BaseInit(pSMap);
 	if	(GetNodeAddr(pSMap)<0)
@@ -1401,7 +1401,7 @@ SMapStatus SMap_Send ( struct pbuf* apPacket ) {
   u8* lpDst = ( u8* )sl_TXBuf;
   while ( apPacket ) {
    int lLen = apPacket -> len;
-   mips_memcpy ( lpDst, apPacket -> payload, lLen );
+   memcpy ( lpDst, apPacket -> payload, lLen );
    lpDst   += apPacket -> len;
    apPacket = apPacket -> next;
   }  /* end while */
