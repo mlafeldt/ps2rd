@@ -390,6 +390,7 @@ udp_input(struct pbuf *p, struct netif *inp)
     pbuf_free(p);
   }
   end:
+    return;
 
 }
 /**

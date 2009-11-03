@@ -39,7 +39,8 @@
 
 #include "lwip/sockets.h"
 
-#include "sysclib.h"
+#include <thsemap.h>
+#include <sysclib.h>
 #include <errno.h>
 
 #define NUM_SOCKETS MEMP_NUM_NETCONN

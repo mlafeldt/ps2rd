@@ -38,7 +38,11 @@
 #include "lwip/api_msg.h"
 #include "lwip/memp.h"
 
+#include <thsemap.h>
 #include <sysclib.h>
+
+extern void tcpip_apimsg(struct api_msg *apimsg);
+
 
 struct netbuf* netbuf_new ( void ) {
  struct netbuf *buf = memp_malloc ( MEMP_NETBUF );

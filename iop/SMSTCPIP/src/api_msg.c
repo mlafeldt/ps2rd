@@ -37,6 +37,8 @@
 #include "lwip/sys.h"
 #include "lwip/tcpip.h"
 
+#include <thsemap.h>
+
 #if LWIP_RAW
 static int
 recv_raw(void *arg, struct raw_pcb *pcb, struct pbuf *p,

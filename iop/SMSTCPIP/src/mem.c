@@ -46,7 +46,8 @@
 
 #include "lwip/stats.h"
 
-#include "sysclib.h"
+#include <thsemap.h>
+#include <sysclib.h>
 
 struct mem {
   mem_size_t next, prev;

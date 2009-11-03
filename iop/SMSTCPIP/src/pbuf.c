@@ -70,7 +70,8 @@
 
 #include "lwip/sys.h"
 
-#include "sysclib.h"
+#include <sysclib.h>
+#include <intrman.h>
 
 static u8_t pbuf_pool_memory[(PBUF_POOL_SIZE * MEM_ALIGN_SIZE(PBUF_POOL_BUFSIZE + sizeof(struct pbuf)))];
 
