@@ -25,6 +25,7 @@
 #include "thbase.h"
 #include "dev9.h"
 #include "ps2ip.h"
+
 #include "sysclib.h"
 
 #define	SET			1
@@ -144,7 +145,6 @@ typedef struct SMapCircularBuffer
 	u8			u8IndexEnd;
 } SMapCB;
 
-
 typedef struct SMap
 {
 	u32				u32Flags;
@@ -156,8 +156,17 @@ typedef struct SMap
 	u8					u8RXIndex;
 	u16				u16RXPTR;
 	SMapBD*			pRXBD;
+	struct			SMapPhySpecific *phy_specific;
 } SMap;
 
+/*
+ * PHY specific functions
+ */
+struct SMapPhySpecific {
+	int (* get_link_status) (SMap*);
+	int (* get_speed) (SMap *);
+	int (* get_duplex) (SMap *);
+};
 
 //Register Offset and Definitions
 #define	SMAP_PIOPORT_DIR	0x2C
@@ -428,6 +437,27 @@ typedef struct SMap
 #define	DsPHYTER_10BTSCR		0x1A
 #define	DsPHYTER_CDCTRL		0x1B
 
+/*
+ * STEPHY1 10/100 Fast Ethernet 3.3V Transceiver (used in SCPH-10281)
+ */
+#define ST_OUI			0x0080E1
+#define STEPHY1_XCR		0x00
+#define STEPHY1_XSR		0x01
+#define STEPHY1_PID1		0x02
+#define	  STEPHY1_IDR1_VAL	0x1c04
+#define STEPHY1_PID2		0x03
+#define STEPHY1_ANA		0x04
+#define STEPHY1_ANLPA		0x05
+#define STEPHY1_ANE		0x06
+/* extended registers */
+#define STEPHY1_XCIIS		0x11 /* XCVR Configuration Information and Interrupt Status Register */
+#define   STEPHY1_XCIIS_100M	(1 << 9)
+#define   STEPHY1_XCIIS_FDX	(1 << 8)
+#define   STEPHY1_XCIIS_LINK	(1 << 4)
+#define STEPHY1_XIE		0x12 /* XCVR Interrupt Enable Register */
+#define STEPHY1_100CTR		0x13 /* 100Base-TX PHY Control Status Register */
+#define STEPHY1_XMC		0x14 /* XCVR Mode Control Register */
+
 static SMap         SMap0;
 extern struct netif NIF;
 
@@ -441,8 +471,11 @@ static void		EMAC3Init(SMap* pSMap,int iReset);
 static void		EMAC3ReInit(SMap* pSMap);
 static int		PhyInit(SMap* pSMap,int iReset);
 static int		PhyReset(SMap* pSMap);
+static void		PhySetSpecific(SMap* pSMap);
 static int		AutoNegotiation(SMap* pSMap,int iEnableAutoNego);
 static int		ConfirmAutoNegotiation(SMap* pSMap);
+static int		PhyGetSpeed(SMap* pSMap);
+static int		PhyGetDuplex(SMap* pSMap);
 static void		ForceSPD100M(SMap* pSMap);
 static void		ForceSPD10M(SMap* pSMap);
 static void		ConfirmForceSPD(SMap* pSMap);
@@ -450,6 +483,28 @@ static void		PhySetDSP(SMap* pSMap);
 static void		Reset(SMap* pSMap,int iReset);
 static int		GetNodeAddr(SMap* pSMap);
 static void		BaseInit(SMap* pSMap);
+
+/* NS DP83847 specific functions */
+static int  DsPHYTER_get_link_status(SMap* pSMap);
+static int  DsPHYTER_get_speed(SMap* pSMap);
+static int  DsPHYTER_get_duplex(SMap* pSMap);
+
+/* ST STEPHY1 specific functions */
+static int  STEPHY1_get_link_status(SMap* pSMap);
+static int  STEPHY1_get_speed(SMap* pSMap);
+static int  STEPHY1_get_duplex(SMap* pSMap);
+
+static struct SMapPhySpecific DsPHYTER_phy = {
+	DsPHYTER_get_link_status,
+	DsPHYTER_get_speed,
+	DsPHYTER_get_duplex
+};
+
+static struct SMapPhySpecific STEPHY1_phy = {
+	STEPHY1_get_link_status,
+	STEPHY1_get_speed,
+	STEPHY1_get_duplex
+};
 
 /*--------------------------------------------------------------------------*/
 static inline u32 EMAC3REG_READ ( SMap* pSMap,u32 u32Offset ) {
@@ -781,6 +836,8 @@ static int PhyInit ( SMap* pSMap, int iReset ) {
  if ( iVal < 0 ) return iVal;
  if ( iReset   ) return 0;
 
+ PhySetSpecific(pSMap);
+ 
  iVal = AutoNegotiation ( pSMap, DISABLE );
 
  if ( iVal == 0 ) {
@@ -818,6 +875,31 @@ static int PhyReset ( SMap* pSMap ) {
 
 }  /* end PhyReset */
 
+static void
+PhySetSpecific(SMap* pSMap)
+{
+	int iID1;
+
+	iID1 = _smap_phy_read ( DsPHYTER_PHYIDR1 );
+	switch (iID1) {
+	case PHY_IDR1_VAL:
+	{
+		pSMap->phy_specific = &DsPHYTER_phy;
+		break;
+	}
+	case STEPHY1_IDR1_VAL:
+	{
+		pSMap->phy_specific = &STEPHY1_phy;
+		break;
+	}
+	default:
+	{
+		pSMap->phy_specific = NULL;
+		break;
+	}
+	}
+}
+
 static int
 AutoNegotiation(SMap* pSMap,int iEnableAutoNego)
 {
@@ -852,12 +934,18 @@ ConfirmAutoNegotiation(SMap* pSMap)
 	int	iA;
 	int	iPhyVal;
 	int     spdrev;
+	int link_up_flag = 0;
+	int full_duplex_flag = 0;
+	int speed_100m_flag = 0;	
 
 	for	(iA=SMAP_AUTONEGO_TIMEOUT;iA!=0;--iA)
 	{
 
 		//Auto nego timeout is 3s.
-		if	(_smap_phy_read(DsPHYTER_BMSR)&PHY_BMSR_ANCP)
+		iPhyVal = _smap_phy_read(DsPHYTER_BMSR);
+		if ((link_up_flag == 0) && (iPhyVal & PHY_BMSR_LINK))
+			link_up_flag = 1;
+ 		if (iPhyVal & PHY_BMSR_ANCP)
 		{
 			break;
 		}
@@ -871,63 +959,152 @@ ConfirmAutoNegotiation(SMap* pSMap)
 	// **ARGH: UGLY HACK! FIXME! **
 	spdrev = SMAP_REG16(pSMap, SPD_R_REV_1);
 	
-	if (spdrev >= 0x13)
-	{
-		dbgprintf("Disabling autonegotiation sync on v12 - seems to work anyway - beware, hack inside.\n");
-		return  0;
-	}
+	//if (spdrev >= 0x13)
+	//{
+	//	dbgprintf("Disabling autonegotiation sync on v12 - seems to work anyway - beware, hack inside.\n");
+	//	return  0;
+	//}
 
 	//Confirm speed & duplex mode.
-
 	for	(iA=SMAP_LOOP_COUNT;iA!=0;--iA)
 	{
-        iPhyVal = _smap_phy_read ( DsPHYTER_PHYSTS );
-		if	((iPhyVal&PHY_STS_ANCP)&&(iPhyVal&PHY_STS_LINK))
-		{
-			break;
+        iPhyVal = _smap_phy_read ( DsPHYTER_BMSR );
+		if ((link_up_flag == 0) && (iPhyVal & PHY_BMSR_LINK))
+			link_up_flag = 1;
+		if ((iPhyVal & PHY_BMSR_ANCP) && link_up_flag == 1) {
+			speed_100m_flag = PhyGetSpeed(pSMap);
+			full_duplex_flag = PhyGetDuplex(pSMap);
+ 			break;
 		}
 		DelayThread(1000);
 	}
 	if	(iA==0)
 	{
-
 		//Error.
 
-		dbgprintf("ConfirmAutoNegotiation: Auto-negotiation error?? (PHYSTS=%x)\n",iPhyVal);
+		dbgprintf("ConfirmAutoNegotiation: Auto-negotiation error?? (BMSR=%x, link_up_flag=%d)\n", iPhyVal, link_up_flag);			
 	}
 	else
 	{
 		u32	u32E3Val=EMAC3REG_READ(pSMap,SMAP_EMAC3_MODE1);
 
 		dbgprintf("ConfirmAutoNegotiation: Auto-negotiation complete. %s %s duplex mode.\n",
-					 (iPhyVal&PHY_STS_10M) ? "10Mbps":"100Mbps",(iPhyVal&PHY_STS_FDX) ? "Full":"Half");
-
-		if	(iPhyVal&PHY_STS_FDX)
+					 (speed_100m_flag == 0) ? "10Mbps":"100Mbps",(full_duplex_flag != 0) ? "Full":"Half");
+				 
+		if (full_duplex_flag)
 		{
-
 			//Full duplex mode.
 
 			u32E3Val|=(E3_FDX_ENABLE|E3_FLOWCTRL_ENABLE|E3_ALLOW_PF);
 		}
 		else
 		{
-
 			//Half duplex mode.
 
 			u32E3Val&=~(E3_FDX_ENABLE|E3_FLOWCTRL_ENABLE|E3_ALLOW_PF);
-			if	(iPhyVal&PHY_STS_10M)
+			if (speed_100m_flag == 0)
 			{
 				u32E3Val&=~E3_IGNORE_SQE;
 			}
-		}
+		}	
 		u32E3Val&=~E3_MEDIA_MSK;
-		u32E3Val|=iPhyVal&PHY_STS_10M ? E3_MEDIA_10M:E3_MEDIA_100M;
+		u32E3Val|=speed_100m_flag==0 ? E3_MEDIA_10M:E3_MEDIA_100M;
 
 		EMAC3REG_WRITE(pSMap,SMAP_EMAC3_MODE1,u32E3Val);
 	}
 	return	0;
 }
 
+static int
+DsPHYTER_get_link_status(SMap* pSMap)
+{
+	int iPhyVal;
+
+	iPhyVal = _smap_phy_read(DsPHYTER_PHYSTS);
+
+	if (iPhyVal & PHY_STS_LINK)
+		return 1;
+		
+	return 0;
+}
+
+static int
+DsPHYTER_get_speed(SMap* pSMap)
+{
+	int iPhyVal;
+
+	iPhyVal = _smap_phy_read(DsPHYTER_PHYSTS);
+
+	if (iPhyVal & PHY_STS_100M)
+		return 1;
+		
+	return 0;
+}
+
+static int
+DsPHYTER_get_duplex(SMap* pSMap)
+{
+	int iPhyVal;
+
+	iPhyVal = _smap_phy_read(DsPHYTER_PHYSTS);
+
+	if (iPhyVal & PHY_STS_FDX)
+		return 1;
+		
+	return 0;
+}
+
+static int
+STEPHY1_get_link_status(SMap* pSMap)
+{
+	int iPhyVal;
+
+	iPhyVal = _smap_phy_read(STEPHY1_XCIIS);
+
+	if (!(iPhyVal & STEPHY1_XCIIS_LINK))
+		return 1;
+		
+	return 0;
+		
+}
+
+static int
+STEPHY1_get_speed(SMap* pSMap)
+{
+	int iPhyVal;
+
+	iPhyVal = _smap_phy_read(STEPHY1_XCIIS);
+
+	if (iPhyVal & STEPHY1_XCIIS_100M)
+		return 1;
+		
+	return 0;
+}
+
+static int
+STEPHY1_get_duplex(SMap* pSMap)
+{
+	int iPhyVal;
+
+	iPhyVal = _smap_phy_read(STEPHY1_XCIIS);
+
+	if (iPhyVal & STEPHY1_XCIIS_FDX)
+		return 1;
+		
+	return 0;
+}
+
+static int
+PhyGetSpeed(SMap* pSMap)
+{
+	return pSMap->phy_specific->get_speed(pSMap);
+}
+
+static int
+PhyGetDuplex(SMap* pSMap)
+{
+	return pSMap->phy_specific->get_duplex(pSMap);
+}
 
 static void ForceSPD100M ( SMap* apSMap ) {
 
@@ -1017,7 +1194,6 @@ validlink:
 
 		if	(iPhyVal&PHY_STS_LINK)
 		{
-
 			//Valid link.
 
 			pSMap->u32Flags|=SMAP_F_CHECK_FORCE10M;
@@ -1055,6 +1231,12 @@ PhySetDSP(SMap* pSMap)
 		return;
 	}
 
+	if (iID1 == STEPHY1_IDR1_VAL)
+	{
+		pSMap->u32Flags|=SMAP_F_LINKVALID;
+		return;
+	}
+	
 	if	(pSMap->u32Flags&SMAP_F_LINKVALID)
 	{
 		return;
