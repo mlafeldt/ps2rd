@@ -1,4 +1,4 @@
-ERL_MODULES=debugger elfldr engine videomod
+ERL_MODULES = debugger elfldr engine videomod
 
 all:
 	@for m in $(ERL_MODULES); do \
