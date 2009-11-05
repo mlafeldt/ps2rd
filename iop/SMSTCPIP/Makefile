@@ -37,3 +37,7 @@ include $(PS2SDKSRC)/iop/Rules.release
 
 IOP_CFLAGS  += -DLWIP_NOASSERT -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s
+
+ifeq ($(NETLOG),1)
+IOP_CFLAGS += -D_NETLOG
+endif
