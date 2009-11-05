@@ -91,9 +91,7 @@ typedef struct {
 } _sceSifCmdResetData __attribute__((aligned(16)));
 
 /* for syscall hooks */
-extern void OrigSifSetReg(u32 register_num, int register_value);
 extern void HookSifSetReg(u32 register_num, int register_value);
-extern int __NR_OrigSifSetReg;
 extern u32 HookSifSetDma(SifDmaTransfer_t *sdd, s32 len);
 extern u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len);
 extern int (*OldSifSetReg)(u32 register_num, int register_value);
@@ -485,10 +483,14 @@ int MySifRebootIop(char *ioprp_path)
 	SifExitRpc();
 
 	/* as sceSifIopReset does... */
-	OrigSifSetReg(SIF_REG_SMFLAG, 0x10000);
-	OrigSifSetReg(SIF_REG_SMFLAG, 0x20000);
-	OrigSifSetReg(0x80000002, 0);
-	OrigSifSetReg(0x80000000, 0);
+	DI();
+	ee_kmode_enter();
+	OldSifSetReg(SIF_REG_SMFLAG, 0x10000);
+	OldSifSetReg(SIF_REG_SMFLAG, 0x20000);
+	OldSifSetReg(0x80000002, 0);
+	OldSifSetReg(0x80000000, 0);
+	ee_kmode_exit();
+	EI();
 
 	/* sync IOP */
 	while (!SifIopSync()) {;}
@@ -610,14 +612,17 @@ void NewSifSetReg(u32 regnum, int regval)
 			if (g_debugger_opts.unhook_iop_reset) {
 				SetSyscall(__NR_SifSetDma, OldSifSetDma);
 				SetSyscall(__NR_SifSetReg, OldSifSetReg);
-				SetSyscall(__NR_OrigSifSetReg, 0);
 			}
 		}
 		return;
 	}
 
 	/* Call original SifSetReg */
-	OrigSifSetReg(regnum, regval);
+	DI();
+	ee_kmode_enter();
+	OldSifSetReg(regnum, regval);
+	ee_kmode_exit();
+	EI();
 }
 
 /*
@@ -788,7 +793,6 @@ int _init(void)
 
 	OldSifSetReg = GetSyscallHandler(__NR_SifSetReg);
 	SetSyscall(__NR_SifSetReg, HookSifSetReg);
-	SetSyscall(__NR_OrigSifSetReg, OldSifSetReg);
 
 	return 0;
 }
@@ -802,7 +806,6 @@ int _fini(void)
 	SetSyscall(__NR_SifSetDma, OldSifSetDma);
 
 	SetSyscall(__NR_SifSetReg, OldSifSetReg);
-	SetSyscall(__NR_OrigSifSetReg, 0);
 
 	return 0;
 }

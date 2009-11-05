@@ -8,10 +8,6 @@
 .extern NewSifSetReg
 .extern NewSifSetDma
 
-#* SifSetReg syscall replacement number
-.globl __NR_OrigSifSetReg
-__NR_OrigSifSetReg: 	.word 251
-
 #* pointer to original SifSetReg syscall
 .globl OldSifSetReg
 OldSifSetReg: 			.word 0
@@ -33,20 +29,6 @@ HookSifSetReg:
 	jr 	$ra
 	sw 	$v1, 8($sp)
 .end	HookSifSetReg
-
-#**************************************************************************
-#*
-#* OrigSifSetReg: call the original SifSetReg as syscall
-#*
-#**************************************************************************
-.globl	OrigSifSetReg
-.ent	OrigSifSetReg
-OrigSifSetReg:
-	lw	$v1, __NR_OrigSifSetReg
-	syscall
-	jr	$ra
-	nop
-.end	OrigSifSetReg
 
 #**************************************************************************
 #*
