@@ -18,7 +18,7 @@ DEBUG = 1
 SMS_MODULES = 1
 
 # Enable or disable netlog support (log messages sent over UDP)
-NETLOG = 1
+NETLOG = 0
 
 VARS=DEBUG=$(DEBUG) SMS_MODULES=$(SMS_MODULES) NETLOG=$(NETLOG)
 
