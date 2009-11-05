@@ -10,17 +10,16 @@
 # The following variables can influence the build process:
 
 # Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
-# messages will be printed to host: when using ps2link. There're also some other
-# consequences mainly important for the developers.
+# messages will be printed to host: when using ps2link.
 DEBUG = 1
+
+# Enable or disable netlog support (send log messages over UDP)
+NETLOG = 0
 
 # Set SMS_MODULES to 1 to build ps2rd with the network modules from SMS.
 SMS_MODULES = 1
 
-# Enable or disable netlog support (log messages sent over UDP)
-NETLOG = 0
-
-VARS=DEBUG=$(DEBUG) SMS_MODULES=$(SMS_MODULES) NETLOG=$(NETLOG)
+VARS=DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
 
 all: check
 	$(VARS) make -C iop
