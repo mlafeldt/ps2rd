@@ -1,4 +1,3 @@
-
 #include <loadcore.h>
 #include <stdio.h>
 #include <sysclib.h>
@@ -13,7 +12,9 @@
 #include <io_common.h>
 #include <ps2ip.h>
 
+#ifdef _NETLOG
 #include "netlog.h"
+#endif
 
 #define MODNAME "NTPBServer"
 IRX_ID(MODNAME, 1, 0);
@@ -263,9 +264,9 @@ int handleClient(int client_socket) // retrieving a packet sent by the Client
 {
 	int rcvSize, sndSize, packetSize, ntpbpktSize, recv_size, sent_size;
 	u8 *pbuf;
-
+#ifdef _NETLOG
 	netlog_send("%s: Client Connection OK\n", MODNAME);
-
+#endif
 	pbuf = (u8 *)&ntpb_buf[0];
 
 	while (1) {
@@ -297,9 +298,9 @@ int handleClient(int client_socket) // retrieving a packet sent by the Client
 			cmdsize = ntpbpktSize;
 			if (cmdsize)
 				memcpy(cmdbuf, &pbuf[ntpb_hdrSize], cmdsize);
-
+#ifdef _NETLOG
 			netlog_send("%s: server received command 0x%04x size=%d\n", MODNAME, remote_cmd, cmdsize);
-
+#endif
 			// prepare a response
 			*((u16 *)&pbuf[6]) = 0;
 			packetSize = ntpb_hdrSize + 2;
@@ -336,34 +337,34 @@ conn_retry:
 	peer.sin_family = AF_INET;
 	peer.sin_port = htons(SERVER_TCP_PORT);
 	peer.sin_addr.s_addr = htonl(INADDR_ANY);
-
+#ifdef _NETLOG
 	netlog_send("%s: server init starting...\n", MODNAME);
-
+#endif
 	// create the socket
 	tcp_socket = lwip_socket(AF_INET, SOCK_STREAM, 0);
 	if (tcp_socket < 0) {
 		err = -1;
 		goto error;
 	}
-
+#ifdef _NETLOG
 	netlog_send("%s: server socket created.\n", MODNAME);
-
+#endif
 	r = lwip_bind(tcp_socket,(struct sockaddr *)&peer,sizeof(peer));
 	if (r < 0) {
 		err = -2;
 		goto error;
 	}
-
+#ifdef _NETLOG
 	netlog_send("%s: bind OK.\n", MODNAME);
-
+#endif
 	r = lwip_listen(tcp_socket, 3);
 	if (r < 0) {
 		err = -3;
 		goto error;
 	}
-
+#ifdef _NETLOG
 	netlog_send("%s: server ready!\n", MODNAME);
-
+#endif
 	while(1) {
 		peerlen = sizeof(peer);
 		r = lwip_accept(tcp_socket,(struct sockaddr *)&peer, &peerlen);
@@ -377,13 +378,17 @@ conn_retry:
 		r = handleClient(client_socket);
 		if (r < 0) {
 			lwip_close(client_socket);
+#ifdef _NETLOG
 			netlog_send("%s: Client Connection closed - error %d\n", MODNAME, r);
+#endif
 		}
 	}
 
 error:
 	lwip_close(client_socket);
+#ifdef _NETLOG
 	netlog_send("%s: Client Connection closed - error %d\n", MODNAME, err);
+#endif
 	goto conn_retry;
 }
 
@@ -517,11 +522,11 @@ int _start(int argc, char** argv)
 	iop_sema_t smp;
 
 	SifInitRpc(0);
-
+#ifdef _NETLOG
 	// init netlog
 	netlog_init(0, SERVER_UDP_PORT);
 	netlog_send("hello from debugger.irx\n");
-
+#endif
 	// Starting ntpbserver Remote Procedure Call server
 	start_RPC_server();
 

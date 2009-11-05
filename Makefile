@@ -17,7 +17,10 @@ DEBUG = 1
 # Set SMS_MODULES to 1 to build ps2rd with the network modules from SMS.
 SMS_MODULES = 1
 
-VARS=DEBUG=$(DEBUG) SMS_MODULES=$(SMS_MODULES)
+# Enable or disable netlog support (log messages sent over UDP)
+NETLOG = 1
+
+VARS=DEBUG=$(DEBUG) SMS_MODULES=$(SMS_MODULES) NETLOG=$(NETLOG)
 
 all: check
 	$(VARS) make -C iop
