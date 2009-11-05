@@ -959,11 +959,11 @@ ConfirmAutoNegotiation(SMap* pSMap)
 	// **ARGH: UGLY HACK! FIXME! **
 	spdrev = SMAP_REG16(pSMap, SPD_R_REV_1);
 	
-	//if (spdrev >= 0x13)
-	//{
-	//	dbgprintf("Disabling autonegotiation sync on v12 - seems to work anyway - beware, hack inside.\n");
-	//	return  0;
-	//}
+	if (spdrev >= 0x13)
+	{
+		dbgprintf("Disabling autonegotiation sync on v12 - seems to work anyway - beware, hack inside.\n");
+		return  0;
+	}
 
 	//Confirm speed & duplex mode.
 	for	(iA=SMAP_LOOP_COUNT;iA!=0;--iA)
