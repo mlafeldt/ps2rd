@@ -7,6 +7,14 @@ Mastercode
 
 //--------
 
+"Black PAL /ID SLES_538.86"
+Mastercode
+9029C9A8 0C0D7181
+Skip FMV
+20294C60 24020001
+
+//--------
+
 "Devil May Cry PAL /ID SLES_503.58"
 Mastercode
 9010C1DC 0C045528
