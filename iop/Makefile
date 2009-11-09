@@ -11,13 +11,13 @@ endif
 all:
 	@for m in $(IOP_MODULES); do \
 		echo "* [IOP] Building $$m ..."; \
-		make -C $$m; \
+		$(MAKE) -C $$m; \
 	done
 
 clean:
 	@for m in $(IOP_MODULES); do \
 		echo "* [IOP] Cleaning $$m ..."; \
-		make -C $$m clean; \
+		$(MAKE) -C $$m clean; \
 	done
 
 rebuild: clean all

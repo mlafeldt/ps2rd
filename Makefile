@@ -24,7 +24,7 @@ VARS=DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
 .SILENT:
 
 all: check
-	$(VARS) make -C iop
+	$(VARS) $(MAKE) -C iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
 	bin2o iop/dev9/ps2dev9.irx ee/loader/ps2dev9_irx.o _ps2dev9_irx
 	bin2o iop/eesync/eesync.irx ee/loader/eesync_irx.o _eesync_irx
@@ -38,14 +38,14 @@ all: check
 		bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx; \
 		bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \
 	fi
-	$(VARS) make -C ee
-	make -C pc
+	$(VARS) $(MAKE) -C ee
+	$(MAKE) -C pc
 
 clean:
-	$(VARS) make -C ee clean
+	$(VARS) $(MAKE) -C ee clean
 	rm -f ee/loader/*_irx.o
-	$(VARS) make -C iop clean
-	make -C pc clean
+	$(VARS) $(MAKE) -C iop clean
+	$(MAKE) -C pc clean
 	rm -rf release/
 
 rebuild: clean all

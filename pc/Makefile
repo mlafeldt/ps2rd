@@ -2,10 +2,10 @@
 
 all:
 	echo "* [PC] Building ntpbclient ..."
-	make -C ntpbclient
+	$(MAKE) -C ntpbclient
 
 clean:
 	echo "* [PC] Cleaning ntpbclient ..."
-	make -C ntpbclient clean
+	$(MAKE) -C ntpbclient clean
 
 rebuild: clean all
