@@ -3,7 +3,7 @@ IOP_OBJS = main.o smap_opt.o smap.o imports.o
 IOP_LIBS =
 
 IOP_INCS +=
-IOP_CFLAGS += -Wall -fno-builtin
+IOP_CFLAGS += -Wall -fno-builtin -DFORCE_100M_FD
 IOP_ASFLAGS +=
 IOP_LDFLAGS += -s
 

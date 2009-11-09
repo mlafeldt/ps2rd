@@ -156,17 +156,21 @@ typedef struct SMap
 	u8					u8RXIndex;
 	u16				u16RXPTR;
 	SMapBD*			pRXBD;
+#ifndef FORCE_100M_FD	
 	struct			SMapPhySpecific *phy_specific;
+#endif	
 } SMap;
 
 /*
  * PHY specific functions
  */
+#ifndef FORCE_100M_FD
 struct SMapPhySpecific {
 	int (* get_link_status) (SMap*);
 	int (* get_speed) (SMap *);
 	int (* get_duplex) (SMap *);
 };
+#endif
 
 //Register Offset and Definitions
 #define	SMAP_PIOPORT_DIR	0x2C
@@ -471,6 +475,9 @@ static void		EMAC3Init(SMap* pSMap,int iReset);
 static void		EMAC3ReInit(SMap* pSMap);
 static int		PhyInit(SMap* pSMap,int iReset);
 static int		PhyReset(SMap* pSMap);
+#ifdef FORCE_100M_FD
+static void		__ForceSPD100M_FD(SMap* pSMap);
+#else
 static void		PhySetSpecific(SMap* pSMap);
 static int		AutoNegotiation(SMap* pSMap,int iEnableAutoNego);
 static int		ConfirmAutoNegotiation(SMap* pSMap);
@@ -479,11 +486,13 @@ static int		PhyGetDuplex(SMap* pSMap);
 static void		ForceSPD100M(SMap* pSMap);
 static void		ForceSPD10M(SMap* pSMap);
 static void		ConfirmForceSPD(SMap* pSMap);
+#endif
 static void		PhySetDSP(SMap* pSMap);
 static void		Reset(SMap* pSMap,int iReset);
 static int		GetNodeAddr(SMap* pSMap);
 static void		BaseInit(SMap* pSMap);
 
+#ifndef FORCE_100M_FD
 /* NS DP83847 specific functions */
 static int  DsPHYTER_get_link_status(SMap* pSMap);
 static int  DsPHYTER_get_speed(SMap* pSMap);
@@ -505,6 +514,7 @@ static struct SMapPhySpecific STEPHY1_phy = {
 	STEPHY1_get_speed,
 	STEPHY1_get_duplex
 };
+#endif
 
 /*--------------------------------------------------------------------------*/
 static inline u32 EMAC3REG_READ ( SMap* pSMap,u32 u32Offset ) {
@@ -836,8 +846,9 @@ static int PhyInit ( SMap* pSMap, int iReset ) {
  if ( iVal < 0 ) return iVal;
  if ( iReset   ) return 0;
 
+#ifndef FORCE_100M_FD 
  PhySetSpecific(pSMap);
- 
+
  iVal = AutoNegotiation ( pSMap, DISABLE );
 
  if ( iVal == 0 ) {
@@ -850,6 +861,9 @@ static int PhyInit ( SMap* pSMap, int iReset ) {
  }  /* end if */
 
  ForceSPD100M ( pSMap );
+#else
+ __ForceSPD100M_FD(pSMap);
+#endif
 
  return 0;
 
@@ -875,6 +889,7 @@ static int PhyReset ( SMap* pSMap ) {
 
 }  /* end PhyReset */
 
+#ifndef FORCE_100M_FD
 static void
 PhySetSpecific(SMap* pSMap)
 {
@@ -927,7 +942,6 @@ AutoNegotiation(SMap* pSMap,int iEnableAutoNego)
 	return	-1;
 }
 
-
 static int
 ConfirmAutoNegotiation(SMap* pSMap)
 {
@@ -940,7 +954,6 @@ ConfirmAutoNegotiation(SMap* pSMap)
 
 	for	(iA=SMAP_AUTONEGO_TIMEOUT;iA!=0;--iA)
 	{
-
 		//Auto nego timeout is 3s.
 		iPhyVal = _smap_phy_read(DsPHYTER_BMSR);
 		if ((link_up_flag == 0) && (iPhyVal & PHY_BMSR_LINK))
@@ -981,7 +994,6 @@ ConfirmAutoNegotiation(SMap* pSMap)
 	if	(iA==0)
 	{
 		//Error.
-
 		dbgprintf("ConfirmAutoNegotiation: Auto-negotiation error?? (BMSR=%x, link_up_flag=%d)\n", iPhyVal, link_up_flag);			
 	}
 	else
@@ -994,13 +1006,11 @@ ConfirmAutoNegotiation(SMap* pSMap)
 		if (full_duplex_flag)
 		{
 			//Full duplex mode.
-
 			u32E3Val|=(E3_FDX_ENABLE|E3_FLOWCTRL_ENABLE|E3_ALLOW_PF);
 		}
 		else
 		{
 			//Half duplex mode.
-
 			u32E3Val&=~(E3_FDX_ENABLE|E3_FLOWCTRL_ENABLE|E3_ALLOW_PF);
 			if (speed_100m_flag == 0)
 			{
@@ -1105,7 +1115,47 @@ PhyGetDuplex(SMap* pSMap)
 {
 	return pSMap->phy_specific->get_duplex(pSMap);
 }
+#endif
 
+#ifdef FORCE_100M_FD
+static void __ForceSPD100M_FD(SMap* pSMap)
+{
+	int i;
+	int link_flag = 0;
+	
+	/* Confirm link status, wait 1s is needed. */
+	i = SMAP_FORCEMODE_TIMEOUT;
+	while (--i) {
+		int phy = _smap_phy_read(DsPHYTER_BMSR);
+		if (phy & PHY_BMSR_LINK)
+			break;
+		DelayThread(1000);
+	}
+	if (i > 0)
+		link_flag = 1;
+
+	_smap_phy_write(DsPHYTER_BMCR, PHY_BMCR_100M|PHY_BMCR_DUPM);
+	pSMap->u32Flags |= SMAP_F_CHECK_FORCE100M;
+
+	i = SMAP_FORCEMODE_WAIT;
+	while (--i)
+		DelayThread(1000);
+	
+	if (link_flag) {	
+		/* Force 100 Mbps full duplex mode */
+		u32 u32E3Val = EMAC3REG_READ(pSMap, SMAP_EMAC3_MODE1);		
+		u32E3Val |= (E3_FDX_ENABLE|E3_FLOWCTRL_ENABLE|E3_ALLOW_PF);
+		u32E3Val &= ~E3_MEDIA_MSK;
+		u32E3Val |= E3_MEDIA_100M;
+		EMAC3REG_WRITE(pSMap, SMAP_EMAC3_MODE1, u32E3Val);
+		pSMap->u32Flags &= ~(SMAP_F_CHECK_FORCE100M|SMAP_F_CHECK_FORCE10M);
+		pSMap->u32Flags |= SMAP_F_LINKESTABLISH;
+		PhySetDSP(pSMap);
+	}
+}
+#endif
+
+#ifndef FORCE_100M_FD
 static void ForceSPD100M ( SMap* apSMap ) {
 
  int i;
@@ -1119,7 +1169,6 @@ static void ForceSPD100M ( SMap* apSMap ) {
  ConfirmForceSPD ( apSMap );
 
 }  /* end ForceSPD100M */
-
 
 static void
 ForceSPD10M(SMap* pSMap)
@@ -1135,7 +1184,6 @@ ForceSPD10M(SMap* pSMap)
 	}
 	ConfirmForceSPD(pSMap);
 }
-
 
 static void
 ConfirmForceSPD(SMap* pSMap)
@@ -1201,7 +1249,7 @@ validlink:
 		}
 	}
 }
-
+#endif
 
 static void
 PhySetDSP(SMap* pSMap)
