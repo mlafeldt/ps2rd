@@ -21,6 +21,8 @@ SMS_MODULES = 1
 
 VARS=DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
 
+.SILENT:
+
 all: check
 	$(VARS) make -C iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
