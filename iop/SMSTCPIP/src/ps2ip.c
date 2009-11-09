@@ -184,7 +184,9 @@ static void TimerThread ( void* apArg ) {
 
   WaitEventFlag ( lTCPData.m_EventFlag, ALARM_MSK, WEF_CLEAR | WEF_OR, &lRes );
 
+#if LWIP_TCP
   if ( lRes & ALARM_TCP ) tcp_tmr    ();
+#endif  
   if ( lRes & ALARM_ARP ) etharp_tmr ();
 
  }  /* end while */
