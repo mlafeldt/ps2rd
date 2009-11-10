@@ -42,7 +42,7 @@ static int rpc_tidS_0A10;
 static SifRpcDataQueue_t rpc_qdS_0A10 __attribute__((aligned(64)));
 static SifRpcServerData_t rpc_sdS_0A10 __attribute__((aligned(64)));
 
-static u8 ntpbserver_rpc_buf[16384] __attribute__((aligned(64)));
+static u8 ntpbserver_rpc_buf[4096] __attribute__((aligned(64)));
 
 static struct {
 	int rpc_func_ret;
@@ -79,10 +79,10 @@ void *rpc_funcs_array[16] = {
     (void *)rpcNTPBEndReply
 };
 
-typedef struct g_sendDataParam { // size = 16384
-	u16 cmd;				 //	0
-	u8 buf[16378];		 	 // 2
-	int size;				 // 16380
+typedef struct g_sendDataParam { // size = 4096
+	u16 cmd;	// 0
+	u8 buf[4090];	// 2
+	int size;	// 4092
 } g_sendDataParam_t;
 
 typedef struct g_getRemoteCmdParam { // size = 64
@@ -92,7 +92,7 @@ typedef struct g_getRemoteCmdParam { // size = 64
 	u16 pad;			// 62
 } g_getRemoteCmdParam_t;
 
-static u8 ntpb_buf[16384];
+static u8 ntpb_buf[4096];
 
 
 //--------------------------------------------------------------

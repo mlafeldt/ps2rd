@@ -32,10 +32,10 @@
 static SifRpcClientData_t rpcclient 	__attribute__((aligned(64)));
 static int Rpc_Buffer[16] 		__attribute__((aligned(64)));
 
-static struct { 	// size = 16384
+static struct { 	// size = 4096
 	u16 cmd;	// 0
-	u8 buf[16378];	// 2
-	int size;	// 16380
+	u8 buf[4090];	// 2
+	int size;	// 4092
 } sendDataParam __attribute__((aligned(64)));
 
 static struct { 	// size = 64

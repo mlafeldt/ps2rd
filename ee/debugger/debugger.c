@@ -663,8 +663,8 @@ static int sendDump(u32 dump_start, u32 dump_end)
 		read_mem((void *)(dump_start + dpos), dumpSize, g_buf);
 
 		/* reducing send size for rpc if needed */
-		if (dumpSize > 8192)
-			sndSize = 8192;
+		if (dumpSize > 4096)
+			sndSize = 4096;
 		else
 			sndSize = dumpSize;
 
@@ -674,7 +674,7 @@ static int sendDump(u32 dump_start, u32 dump_end)
 			rpcNTPBsendData(NTPBCMD_SEND_DUMP, &g_buf[rpos], sndSize, g_debugger_opts.rpc_mode);
 			rpcNTPBSync(0, NULL, &r);
 			rpos += sndSize;
-			if ((dumpSize - rpos) < 8192)
+			if ((dumpSize - rpos) < 4096)
 				sndSize = dumpSize - rpos;
 		}
 
