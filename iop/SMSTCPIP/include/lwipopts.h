@@ -90,10 +90,10 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* TCP sender buffer space (pbufs). This must be at least = 2 *
    TCP_SND_BUF/TCP_MSS for things to work. */
-#define TCP_SND_QUEUELEN        (4*TCP_SND_BUF/TCP_MSS)
+#define TCP_SND_QUEUELEN        (2*TCP_SND_BUF/TCP_MSS)
 
 /* TCP receive window. */
-#define TCP_WND                 16384
+#define TCP_WND                 (8*1024)
 
 /* Maximum number of retransmissions of data segments. */
 #define TCP_MAXRTX              12
