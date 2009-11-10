@@ -1,9 +1,11 @@
 syntax: glob
 
+*.a
 *.o
 *.elf
 *.erl
 *.irx
+*.exe
 
 release/
 pc/skeleton/build/
