@@ -80,7 +80,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* Controls if TCP should queue segments that arrive out of
    order. Define to 0 if your device is low on memory. */
-#define TCP_QUEUE_OOSEQ         0
+#define TCP_QUEUE_OOSEQ         0 /* 1 */
 
 /* TCP Maximum segment size. */
 #define TCP_MSS                 1460
@@ -90,10 +90,10 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* TCP sender buffer space (pbufs). This must be at least = 2 *
    TCP_SND_BUF/TCP_MSS for things to work. */
-#define TCP_SND_QUEUELEN        (2*TCP_SND_BUF/TCP_MSS)
+#define TCP_SND_QUEUELEN        (2*TCP_SND_BUF/TCP_MSS) /* (4*TCP_SND_BUF/TCP_MSS) */
 
 /* TCP receive window. */
-#define TCP_WND                 (8*1024)
+#define TCP_WND                 (8*1024) /* (16384*2) */
 
 /* Maximum number of retransmissions of data segments. */
 #define TCP_MAXRTX              12
