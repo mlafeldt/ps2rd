@@ -35,7 +35,7 @@ include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
 
-IOP_CFLAGS  += -DLWIP_NOASSERT -Wall -fno-builtin-printf
+IOP_CFLAGS  += -DLWIP_NOASSERT -DLOW_MEM_FOOTPRINT -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s
 
 ifeq ($(NETLOG),1)
