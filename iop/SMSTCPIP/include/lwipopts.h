@@ -10,7 +10,11 @@
 
 /* MEM_SIZE: the size of the heap memory. If the application will send
 a lot of data that needs to be copied, this should be set high. */
+#ifdef LOW_MEM_FOOTPRINT
+#define MEM_SIZE 0x2000
+#else
 #define MEM_SIZE 0x3000
+#endif
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this
@@ -56,7 +60,11 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
+#ifdef LOW_MEM_FOOTPRINT
+#define PBUF_POOL_SIZE         5
+#else
 #define PBUF_POOL_SIZE         25
+#endif
 
 /* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
 //Boman666: Should be atleast 1518 to be compatible with ps2smap
