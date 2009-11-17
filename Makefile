@@ -33,7 +33,7 @@ all: check
 	bin2o iop/usb_mass/usb_mass.irx ee/loader/usb_mass_irx.o _usb_mass_irx
 	@if [ $(SMS_MODULES) = "1" ]; then \
 		bin2o iop/SMSMAP/SMSMAP.irx ee/loader/ps2smap_irx.o _ps2smap_irx; \
-		bin2o iop/SMSTCPIP/bin/SMSTCPIP.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \
+		bin2o iop/SMSTCPIP/SMSTCPIP.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \
 	else \
 		bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx; \
 		bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \

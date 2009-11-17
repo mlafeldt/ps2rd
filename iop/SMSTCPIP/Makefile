@@ -1,43 +1,28 @@
-IOP_BIN_DIR  = bin/
-IOP_INC_DIR  = include/
-IOP_OBJS_DIR = obj/
-IOP_SRC_DIR  = src/
+IOP_BIN = SMSTCPIP.irx
+IOP_OBJS = ps2ip.o inet.o ip.o ip_addr.o ip_frag.o etharp.o tcp_in.o tcp_out.o \
+	tcp.o tcpip.o mem.o api_lib.o api_msg.o sockets.o netif.o udp.o memp.o \
+	icmp.o pbuf.o exports.o imports.o
+IOP_LIBS =
 
-IOP_BIN  = bin/SMSTCPIP.irx
-IOP_OBJS = $(IOP_OBJS_DIR)ps2ip.o    \
-           $(IOP_OBJS_DIR)inet.o     \
-           $(IOP_OBJS_DIR)ip.o       \
-           $(IOP_OBJS_DIR)ip_addr.o  \
-           $(IOP_OBJS_DIR)ip_frag.o  \
-           $(IOP_OBJS_DIR)etharp.o   \
-           $(IOP_OBJS_DIR)tcp_in.o   \
-           $(IOP_OBJS_DIR)tcp_out.o  \
-           $(IOP_OBJS_DIR)tcp.o      \
-           $(IOP_OBJS_DIR)tcpip.o    \
-           $(IOP_OBJS_DIR)mem.o      \
-           $(IOP_OBJS_DIR)api_lib.o  \
-           $(IOP_OBJS_DIR)api_msg.o  \
-           $(IOP_OBJS_DIR)exports.o  \
-           $(IOP_OBJS_DIR)imports.o  \
-           $(IOP_OBJS_DIR)sockets.o  \
-           $(IOP_OBJS_DIR)netif.o    \
-           $(IOP_OBJS_DIR)udp.o      \
-           $(IOP_OBJS_DIR)memp.o     \
-           $(IOP_OBJS_DIR)icmp.o     \
-           $(IOP_OBJS_DIR)pbuf.o
-
-all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
-
-clean:
-	rm -rf $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
-
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/iop/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
-
-IOP_CFLAGS  += -DLWIP_NOASSERT -DLOW_MEM_FOOTPRINT -Wall -fno-builtin-printf
+IOP_INCS +=
+IOP_CFLAGS += -Wall -fno-builtin-printf -DLWIP_NOASSERT -DLOW_MEM_FOOTPRINT
+IOP_ASFLAGS +=
 IOP_LDFLAGS += -s
 
 ifeq ($(NETLOG),1)
 IOP_CFLAGS += -D_NETLOG
 endif
+
+all: $(IOP_BIN)
+
+clean:
+	rm -f $(IOP_BIN) $(IOP_OBJS)
+
+rebuild: clean all
+
+run:
+	ps2client -t 1 execiop host:$(IOP_BIN)
+
+
+include $(PS2SDK)/Defs.make
+include Rules.make
