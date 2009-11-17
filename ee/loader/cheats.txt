@@ -37,6 +37,12 @@ Mastercode
 
 //--------
 
+"Gran Turismo 3 A-spec PAL /ID SCES_502.94"
+Mastercode
+902733D4 0C09FAF2
+
+//--------
+
 "Gran Turismo 4 PAL /ID SCES_517.19"
 // needs patch_loadmodule
 Mastercode
