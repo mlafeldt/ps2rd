@@ -23,15 +23,27 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* MEMP_NUM_UDP_PCB: the number of UDP protocol control blocks. One
    per active UDP "connection". */
+#ifdef LOW_MEM_FOOTPRINT
+#define MEMP_NUM_UDP_PCB 1
+#else
 #define MEMP_NUM_UDP_PCB 15
+#endif
 
 /* MEMP_NUM_TCP_PCB: the number of simulatenously active TCP
    connections. */
-#define MEMP_NUM_TCP_PCB 15 
+#ifdef LOW_MEM_FOOTPRINT
+#define MEMP_NUM_TCP_PCB 1
+#else
+#define MEMP_NUM_TCP_PCB 15
+#endif
 
 /* MEMP_NUM_TCP_PCB_LISTEN: the number of listening TCP
    connections. */
+#ifdef LOW_MEM_FOOTPRINT
+#define MEMP_NUM_TCP_PCB_LISTEN 1
+#else
 #define MEMP_NUM_TCP_PCB_LISTEN 15
+#endif
 
 /* MEMP_NUM_TCP_SEG: the number of simultaneously queued TCP
    segments. */
