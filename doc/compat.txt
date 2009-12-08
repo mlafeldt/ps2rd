@@ -37,18 +37,18 @@ results by changing various settings of the debugger in the configuration file.
  * rpc_mode = 1
  * load_modules = true
 
-4) If it's still not working, try this (disable RPC):
- * auto_hook = true
- * patch_loadmodule = false
- * unhook_iop_reset = false
- * rpc_mode = -1
- * load_modules = true
-
-5) Still no luck? Then change settings to (use blocking RPC):
+4) Still no luck? Then change settings to (use blocking RPC):
  * auto_hook = true
  * patch_loadmodule = false
  * unhook_iop_reset = false
  * rpc_mode = 0
+ * load_modules = true
+
+5) If it's still not working, try this (disable RPC):
+ * auto_hook = true
+ * patch_loadmodule = false
+ * unhook_iop_reset = false
+ * rpc_mode = -1
  * load_modules = true
 
 6) Last but not least, try this (don't load additional IOP modules):

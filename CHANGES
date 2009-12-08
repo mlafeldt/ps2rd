@@ -1,4 +1,4 @@
-0.5 (Nov xx 2009)
+0.5 (Dec 8 2009)
 - Replaced existing network modules with EEUG's SMSMAP.irx and SMSTCPIP.irx, and
   optimized them for use in ps2rd (see below). This way, we almost doubled TCP
   transfer rates to about 1MB/s.
@@ -8,6 +8,18 @@
 - Reduced footprint of dev9.irx and added dev9x device driver to it.
 - Do not use syscall 251 to store original vector of SifSetReg().
 - Tweaked Makefiles (less verbose etc.)
+- Games now working:
+   Black
+   Castlevania: COD - Demo
+   Devil May Cry
+   ICO - Demo
+   Maximo VS AoZ - Demo
+   Silent Hill 4: The Room
+   Soul Calibur 2
+   Soul Calibur 3
+   TMNT - The Movie
+   Tomb Raider: Anniversary
+   Tomb Raider: Legend
 
 0.4.2 (Oct 27 2009)
 - This is an intermediate version created after renaming the project to "ps2rd".
