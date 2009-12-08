@@ -38,7 +38,7 @@
 #include <sys/stat.h>
 #include <pthread.h>
 
-#define PROGRAM_VER "0.3"
+#define PROGRAM_VER "0.3.1"
 
 #ifdef _WIN32
 WSADATA *WsaData;
@@ -275,7 +275,7 @@ static int receiveData(char *dumpfile, unsigned int dump_size, int flag)
 	int rcvSize, sndSize, packetSize, ntpbpktSize, ntpbCmd, recv_size, sizeWritten;
 	unsigned int dump_wpos = 0;
 	int endTransmit = 0;
-	FILE *fh_dump;
+	FILE *fh_dump = NULL;
 
 	if (flag) {
 		/* create the dump file */
