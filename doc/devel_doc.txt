@@ -1,4 +1,4 @@
-ps2rd Software Architecture
+Developer Documentation
 written by misfire <misfire@xploderfreax.de>
 
 NOTE: This document is far from being complete.

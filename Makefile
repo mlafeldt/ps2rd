@@ -55,7 +55,7 @@ release: all
 	cp ee/loader/ps2rd.conf release/ps2/
 	cp ee/loader/cheats.txt release/ps2/
 	cp pc/ntpbclient/bin/* release/pc/
-	cp BUGS CHANGES COMMIT COPYING* CREDITS INSTALL README TODO release/
+	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
 	cp -r doc/ release/
 
 check:
