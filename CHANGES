@@ -8,7 +8,7 @@
 - Reduced footprint of dev9.irx and added dev9x device driver to it.
 - Do not use syscall 251 to store original vector of SifSetReg().
 - Tweaked Makefiles (less verbose etc.)
-- Games now working:
+- Fixed games:
    Black
    Castlevania: COD - Demo
    Devil May Cry
