@@ -25,6 +25,11 @@ D: iop/memdisk/
 D: pc/ntpbclient/
 S: France
 
+N: Mark Lindner
+W: http://www.hyperrealm.com/libconfig/
+D: author of libconfig
+D: ee/libconfig/
+
 A: misfire
 N: Mathias Lafeldt
 E: misfire@xploderfreax.de
@@ -38,3 +43,8 @@ D: ee/loader/
 D: ee/videomod/
 D: iop/netlog/
 S: Germany
+
+A: mrbrown
+N: Marcus R. Brown
+D: author of original dev9 device driver
+D: iop/dev9/
