@@ -43,6 +43,9 @@ clean:
 
 rebuild: clean all
 
+run: all
+	$(MAKE) -C ee/loader run
+
 release: all
 	rm -rf release
 	mkdir -p release/ps2 release/pc
