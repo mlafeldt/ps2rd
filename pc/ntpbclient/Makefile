@@ -3,7 +3,7 @@ ifndef CC
 CC = gcc
 endif
 
-CFLAGS = -std=gnu99 -pedantic -Wall -O2 -s -m32 -I/usr/include -I/usr/local/include
+CFLAGS = -std=gnu99 -pedantic -Wall -O2 -s -I/usr/include -I/usr/local/include
 
 ifeq "x$(MSYSTEM)" "x"
 LIBS = -lpthread
