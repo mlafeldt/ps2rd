@@ -20,6 +20,9 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _PADREAD_PATTERNS_H_
+#define _PADREAD_PATTERNS_H_
+
 #include <tamtypes.h>
 
 /**************************************************************************
@@ -35,7 +38,7 @@
  * libpad	2.6.0.0
  * libpad	2.7.0.0
  */
-static u32 padReadpattern0[] = {
+static const u32 padReadpattern0[] = {
 	0x0080382d,		// daddu a3, a0, zero
 	0x24030070,		// li 	 v1, $00000070
 	0x2404001c,		// li  	 a0, $0000001c
@@ -56,7 +59,7 @@ static u32 padReadpattern0[] = {
 	0x00000000, 		// ...
 	0x0c000000		// jal   scePadGetDmaStr
 };
-static u32 padReadpattern0_mask[] = {
+static const u32 padReadpattern0_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -83,7 +86,7 @@ static u32 padReadpattern0_mask[] = {
  *
  * libpad	2.1.0.0
  */
-static u32 padReadpattern1[] = {
+static const u32 padReadpattern1[] = {
 	0x0080382d,		// daddu a3, a0, zero
 	0x24020060,		// li 	 v0, $00000060
 	0x24040180,		// li  	 a0, $00000180
@@ -104,7 +107,7 @@ static u32 padReadpattern1[] = {
 	0x00000000, 		// ...
 	0x0c000000		// jal   scePadGetDmaStr
 };
-static u32 padReadpattern1_mask[] = {
+static const u32 padReadpattern1_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -132,7 +135,7 @@ static u32 padReadpattern1_mask[] = {
  * libpad	2.7.1.0
  * libpad	2.8.0.0
  */
-static u32 padReadpattern2[] = {
+static const u32 padReadpattern2[] = {
 	0x27bdff00,		// addiu sp, sp, $ffXX
 	0x24030070,		// li 	 v1, $00000070
 	0xffb10000,		// sd 	 s1, $XXXX(sp)
@@ -157,7 +160,7 @@ static u32 padReadpattern2[] = {
 	0x00000000,		// ...
 	0x0c000000		// jal   DIntr
 };
-static u32 padReadpattern2_mask[] = {
+static const u32 padReadpattern2_mask[] = {
 	0xffffff00,
 	0xffffffff,
 	0xffff0000,
@@ -188,7 +191,7 @@ static u32 padReadpattern2_mask[] = {
  *
  * libpad      3.0.0.0
  */
-static u32 padReadpattern3[] = {
+static const u32 padReadpattern3[] = {
 	0x27bdff00,		// addiu sp, sp, $ffXX
 	0x24030070,		// li 	 v1, $00000070
 	0xffb10000,		// sd 	 s1, $XXXX(sp)
@@ -212,7 +215,7 @@ static u32 padReadpattern3[] = {
 	0x00000000,		// ...
 	0x0c000000		// jal   DIntr
 };
-static u32 padReadpattern3_mask[] = {
+static const u32 padReadpattern3_mask[] = {
 	0xffffff00,
 	0xffffffff,
 	0xffff0000,
@@ -248,7 +251,7 @@ static u32 padReadpattern3_mask[] = {
  * libpad2      3.0.0.0
  * libpad2      3.0.2.0
  */
-static u32 pad2Readpattern0[] = {
+static const u32 pad2Readpattern0[] = {
 	0x27bdffc0,		// addiu sp, sp, $ffc0
 	0x24020000, 		// li 	 v0, $XXXX
 	0xffb10010,		// sd 	 s1, $0010(sp)
@@ -270,7 +273,7 @@ static u32 pad2Readpattern0[] = {
 	0x00000000,		// ...
 	0x0c000000		// jal   scePad2LinkDriver
 };
-static u32 pad2Readpattern0_mask[] = {
+static const u32 pad2Readpattern0_mask[] = {
 	0xffffffff,
 	0xffff0000,
 	0xffffffff,
@@ -298,7 +301,7 @@ static u32 pad2Readpattern0_mask[] = {
  *
  * libpad	1.5.0.0
  */
-static u32 padReadpattern4[] = {
+static const u32 padReadpattern4[] = {
 	0x27bdffc0,		// addiu	sp, sp, $ffc0
 	0x00052900,		// sll		a1, a1, 4
 	0x000421c0,		// sll		a0, a0, 7
@@ -315,7 +318,7 @@ static u32 padReadpattern4[] = {
 	0x24050100,		// li		a1, $00000100
 	0x0c000000		// jal		sceSifWriteBackDCache
 };
-static u32 padReadpattern4_mask[] = {
+static const u32 padReadpattern4_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -339,7 +342,7 @@ static u32 padReadpattern4_mask[] = {
  * libpad	1.6.2.0
  * libpad	1.6.3.0
  */
-static u32 padReadpattern5[] = {
+static const u32 padReadpattern5[] = {
 	0x24020060,		// li		v0, $00000060
 	0x24070300,		// li		a3, $00000300
 	0x00a21818,		// mult		v1, a1, v0
@@ -358,7 +361,7 @@ static u32 padReadpattern5[] = {
 	0x24050100,		// li		a1, $00000100
 	0x0c000000,		// jal		sceSifWriteBackDCache
 };
-static u32 padReadpattern5_mask[] = {
+static const u32 padReadpattern5_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -384,7 +387,7 @@ static u32 padReadpattern5_mask[] = {
  * libpad	2.0.0.0
  * libpad	2.0.5.0
  */
-static u32 padReadpattern6[] = {
+static const u32 padReadpattern6[] = {
 	0x24020060,		// li		v0, $00000060
 	0x24030180,		// li		v1, $00000180
 	0x00a22818,		// mult		a1, a1, v0
@@ -400,7 +403,7 @@ static u32 padReadpattern6[] = {
 	0x0200202d,		// daddu	a0, s0, zero
 	0x0c000000,		// jal		SyncDCache
 };
-static u32 padReadpattern6_mask[] = {
+static const u32 padReadpattern6_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -423,7 +426,7 @@ static u32 padReadpattern6_mask[] = {
  * libpad          3.0.1.0
  * libpad          3.0.2.0
  */
-static u32 padReadpattern7[] = {
+static const u32 padReadpattern7[] = {
 	0x27bdffb0,		// addiu	sp, sp, $ffb0
 	0xffb20020,		// sd		s2, $0020(sp)
 	0xffb10010,		// sd		s1, $0010(sp)
@@ -447,7 +450,7 @@ static u32 padReadpattern7[] = {
 	0x00000000,		// ...
 	0x0c000000,		// jal		scePadGetDmaStr
 };
-static u32 padReadpattern7_mask[] = {
+static const u32 padReadpattern7_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -471,3 +474,5 @@ static u32 padReadpattern7_mask[] = {
 	0x00000000,
 	0xfc000000
 };
+
+#endif /* _PADREAD_PATTERNS_H_ */

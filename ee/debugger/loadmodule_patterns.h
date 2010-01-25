@@ -20,25 +20,28 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _LOADMODULE_PATTERNS_H_
+#define _LOADMODULE_PATTERNS_H_
+
 #include <tamtypes.h>
 
-static u32 loadModulepattern0[] = {
-	0x27bdff80,		// addiu sp, sp, $ff80
-	0xffb40050,		// sd 	 s4, $0050(sp)
-	0xffb30040,		// sd 	 s3, $0040(sp)
-	0x00e0a02d,		// daddu s4, a3, zero
-	0xffb20030,		// sd 	 s2, $0030(sp)
-	0x0100982d,		// daddu s3, t0, zero
-	0xffb10020,		// sd 	 s1, $0020(sp)
-	0x00a0902d,		// daddu s2, a1, zero
-	0xffb00010,		// sd 	 s0, $0010(sp)
-	0x0080882d,		// daddu s1, a0, zero
-	0xffbf0070,		// sd 	 ra, $0070(sp)
-	0x00c0802d, 	// daddu s0, a2, zero
-	0x0c000000, 	// jal	 _lf_bind
-	0xffb50060	 	// sd 	 s5, $0060(sp)
+static const u32 loadModulepattern0[] = {
+	0x27bdff80,	// addiu sp, sp, $ff80
+	0xffb40050,	// sd 	 s4, $0050(sp)
+	0xffb30040,	// sd 	 s3, $0040(sp)
+	0x00e0a02d,	// daddu s4, a3, zero
+	0xffb20030,	// sd 	 s2, $0030(sp)
+	0x0100982d,	// daddu s3, t0, zero
+	0xffb10020,	// sd 	 s1, $0020(sp)
+	0x00a0902d,	// daddu s2, a1, zero
+	0xffb00010,	// sd 	 s0, $0010(sp)
+	0x0080882d,	// daddu s1, a0, zero
+	0xffbf0070,	// sd 	 ra, $0070(sp)
+	0x00c0802d,	// daddu s0, a2, zero
+	0x0c000000,	// jal	 _lf_bind
+	0xffb50060	// sd 	 s5, $0060(sp)
 };
-static u32 loadModulepattern0_mask[] = {
+static const u32 loadModulepattern0_mask[] = {
 	0xffffffff,
 	0xffffffff,
 	0xffffffff,
@@ -54,3 +57,5 @@ static u32 loadModulepattern0_mask[] = {
 	0xfc000000,
 	0xffffffff
 };
+
+#endif /* _LOADMODULE_PATTERNS_H_ */
