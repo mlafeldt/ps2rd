@@ -25,7 +25,7 @@ ERL_FILES +=
 endif
 
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o \
-	debugger_irx.o memdisk_irx.o eesync_irx.o \
+	adb_irx.o debugger_irx.o memdisk_irx.o eesync_irx.o \
 	usbd_irx.o usb_mass_irx.o
 
 LDR_FILES = loader.o configman.o erlman.o irxman.o mycdvd.o mypad.o \

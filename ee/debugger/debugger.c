@@ -128,6 +128,7 @@ typedef struct {
 #define HASH_DEBUGGER	0x0b9bdb62
 #define HASH_MEMDISK	0x03c3b0eb
 #define HASH_EESYNC	0x06bcb043
+#define HASH_ADB	0x000067a2
 
 /* defines for communication with debugger module */
 #define NTPBCMD_SEND_DUMP 		0x300
@@ -517,7 +518,10 @@ int MySifRebootIop(char *ioprp_path)
 			while (1) ;
 		ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
 		if (ret < 0)
-		while (1) ;
+			while (1) ;
+		ret = load_module_from_kernel(HASH_ADB, 0, NULL);
+		if (ret < 0)
+			while (1) ;
 
 		GS_BGCOLOUR = 0xff00ff; /* magenta */
 
