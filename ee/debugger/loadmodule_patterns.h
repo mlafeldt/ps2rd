@@ -1,8 +1,8 @@
 /*
  * loadmodule_patterns.h - _sceSifLoadModule patterns
  *
- * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
- * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
+ * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *
@@ -24,6 +24,7 @@
 #define _LOADMODULE_PATTERNS_H_
 
 #include <tamtypes.h>
+#include "pattern.h"
 
 static const u32 loadModulepattern0[] = {
 	0x27bdff80,	// addiu sp, sp, $ff80
@@ -56,6 +57,12 @@ static const u32 loadModulepattern0_mask[] = {
 	0xffffffff,
 	0xfc000000,
 	0xffffffff
+};
+
+
+static const pattern_t _loadmodule_patterns[] = {
+        { loadModulepattern0, sizeof(loadModulepattern0), loadModulepattern0_mask, sizeof(loadModulepattern0_mask), 0 },
+        { NULL, 0, NULL, 0, 0 }
 };
 
 #endif /* _LOADMODULE_PATTERNS_H_ */
