@@ -61,8 +61,8 @@ static const u32 loadModulepattern0_mask[] = {
 
 
 static const pattern_t _loadmodule_patterns[] = {
-        { loadModulepattern0, sizeof(loadModulepattern0), loadModulepattern0_mask, sizeof(loadModulepattern0_mask), 0 },
-        { NULL, 0, NULL, 0, 0 }
+        { loadModulepattern0, loadModulepattern0_mask, sizeof(loadModulepattern0), 0 },
+        { NULL, NULL, 0, 0 }
 };
 
 #endif /* _LOADMODULE_PATTERNS_H_ */

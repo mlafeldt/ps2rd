@@ -1,8 +1,8 @@
 /*
  * padread_hooks.c - scePadRead hooking
  *
- * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
- * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
+ * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *
@@ -24,6 +24,7 @@
 #include <kernel.h>
 #include <string.h>
 
+#include "pattern.h"
 #include "padread_patterns.h"
 
 /* from debugger.c */
@@ -85,25 +86,6 @@ static int Hook_scePad2Read(int socket, struct pad2ButtonStat *data)
 }
 
 /*
- * this function retrieve a pattern in a buffer, using a mask
- */
-u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
-{
-	u32 i, j;
-
-	for (i = 0; i < bufsize - len; i++) {
-		for (j = 0; j < len; j++) {
-			if ((buf[i + j] & mask[j]) != bytes[j])
-				break;
-		}
-		if (j == len)
-			return &buf[i];
-	}
-
-	return NULL;
-}
-
-/*
  * clear_autohook_tab - clears hook adresses/opcode table
  */
 void clear_autohook_tab(void)
@@ -145,48 +127,31 @@ static int add_autohook(u32 hook_addr, u32 orig_opcode)
  */
 int patch_padRead(void)
 {
-	u8 *ptr;
+	u8 *ptr = NULL;
 	u32 memscope, inst, fncall;
 	u32 pattern[1], mask[1];
 	u32 start = 0x00100000;
 	int pattern_found = 0;
+	const pattern_t *pat;
 
 	GS_BGCOLOUR = 0x800080; /* Purple while padRead pattern search */
 
 	memscope = 0x01f00000 - start;
 
 	/* First try to locate the orginal libpad's scePadRead function */
-    	ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern0, (u8 *)padReadpattern0_mask, sizeof(padReadpattern0));
-    	if (!ptr) {
-		ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern1, (u8 *)padReadpattern1_mask, sizeof(padReadpattern1));
-		if (!ptr) {
-			ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern2, (u8 *)padReadpattern2_mask, sizeof(padReadpattern2));
-			if (!ptr) {
-				ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern3, (u8 *)padReadpattern3_mask, sizeof(padReadpattern3));
-				if (!ptr) {
-					ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)pad2Readpattern0, (u8 *)pad2Readpattern0_mask, sizeof(pad2Readpattern0));
-					if (!ptr) {
-						ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern4, (u8 *)padReadpattern4_mask, sizeof(padReadpattern4));
-						if (!ptr) {
-							ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern5, (u8 *)padReadpattern5_mask, sizeof(padReadpattern5));
-							if (!ptr) {
-								ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern6, (u8 *)padReadpattern6_mask, sizeof(padReadpattern6));
-								if (!ptr) {
-									ptr = find_pattern_with_mask((u8 *)start, memscope, (u8 *)padReadpattern7, (u8 *)padReadpattern7_mask, sizeof(padReadpattern7));
-									if (!ptr) {
-										//while(1) {;}
-										GS_BGCOLOUR = 0x808080; /* Gray, pattern not found */
-										return 0;
-									}
-								}
-							}
-						}
-					}
-					else /* If found scePad2Read pattern */
-						scePadRead_style = 2;
-				}
-			}
+	pat = _padread_patterns;
+	while (pat->seq) {
+		ptr = find_pattern((u8*)start, memscope, pat);
+		if (ptr) {
+			scePadRead_style = pat->tag; /* tag tells the version */
+			break;
 		}
+		pat++;
+	}
+
+	if (!ptr) {
+		GS_BGCOLOUR = 0x808080; /* Gray, pattern not found */
+		return 0;
 	}
 
  	GS_BGCOLOUR = 0x008000; /* Green while padRead patches */

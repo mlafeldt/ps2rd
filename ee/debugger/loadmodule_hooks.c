@@ -1,8 +1,8 @@
 /*
  * loadmodule_hooks.c - _sceSifLoadModule hooking
  *
- * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
- * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
+ * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *
@@ -24,6 +24,7 @@
 #include <kernel.h>
 #include <string.h>
 
+#include "pattern.h"
 #include "loadmodule_patterns.h"
 
 #define GS_BGCOLOUR	*((vu32*)0x120000e0)
@@ -87,41 +88,30 @@ static int Hook_SifLoadModule(const char *path, int arg_len, const char *args, i
 }
 
 /*
- * this function retrieve a pattern in a buffer, using a mask
- */
-u8 *_find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
-{
-	u32 i, j;
-
-	for (i = 0; i < bufsize - len; i++) {
-		for (j = 0; j < len; j++) {
-			if ((buf[i + j] & mask[j]) != bytes[j])
-				break;
-		}
-		if (j == len)
-			return &buf[i];
-	}
-
-	return NULL;
-}
-
-/*
  * This function patch the _sceSifLoadModule calls
  */
 int patch_loadModule(void)
 {
-	u8 *ptr;
+	u8 *ptr = NULL;
 	u32 memscope, inst, fncall;
 	u32 pattern[1], mask[1];
 	u32 start = 0x00100000;
 	int pattern_found = 0;
+	const pattern_t *pat;
 
 	GS_BGCOLOUR = 0x00a5ff; /* Orange while _sceSifLoadModule pattern search */
 
 	memscope = 0x01f00000 - start;
 
-	/* First try to locate the orginal libpad's scePadRead function */
-	ptr = _find_pattern_with_mask((u8 *)start, memscope, (u8 *)loadModulepattern0, (u8 *)loadModulepattern0_mask, sizeof(loadModulepattern0));
+	/* First try to locate the orginal _sceSifLoadModule function */
+	pat = _loadmodule_patterns;
+	while (pat->seq) {
+		ptr = find_pattern((u8*)start, memscope, pat);
+		if (ptr)
+			break;
+		pat++;
+	}
+
 	if (!ptr) {
 		GS_BGCOLOUR = 0x808080; /* Gray, pattern not found */
 		return 0;
@@ -149,7 +139,7 @@ int patch_loadModule(void)
 	while (ptr) {
 		memscope = 0x01f00000 - (u32)ptr;
 
-		ptr = _find_pattern_with_mask(ptr, memscope, (u8 *)pattern, (u8 *)mask, sizeof(pattern));
+		ptr = find_pattern_with_mask(ptr, memscope, (u8 *)pattern, (u8 *)mask, sizeof(pattern));
 		if (ptr) {
 			pattern_found = 1;
 

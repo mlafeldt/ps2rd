@@ -479,17 +479,17 @@ static const u32 padReadpattern7_mask[] = {
 
 static const pattern_t _padread_patterns[] = {
 	/* scePadRead */
-	{ padReadpattern0, sizeof(padReadpattern0), padReadpattern0_mask, sizeof(padReadpattern0_mask), 1 },
-	{ padReadpattern1, sizeof(padReadpattern1), padReadpattern1_mask, sizeof(padReadpattern1_mask), 1 },
-	{ padReadpattern2, sizeof(padReadpattern2), padReadpattern2_mask, sizeof(padReadpattern2_mask), 1 },
-	{ padReadpattern3, sizeof(padReadpattern3), padReadpattern3_mask, sizeof(padReadpattern3_mask), 1 },
-	{ padReadpattern4, sizeof(padReadpattern4), padReadpattern4_mask, sizeof(padReadpattern4_mask), 1 },
-	{ padReadpattern5, sizeof(padReadpattern5), padReadpattern5_mask, sizeof(padReadpattern5_mask), 1 },
-	{ padReadpattern6, sizeof(padReadpattern6), padReadpattern6_mask, sizeof(padReadpattern6_mask), 1 },
-	{ padReadpattern7, sizeof(padReadpattern7), padReadpattern7_mask, sizeof(padReadpattern7_mask), 1 },
+	{ padReadpattern0, padReadpattern0_mask, sizeof(padReadpattern0), 1 },
+	{ padReadpattern1, padReadpattern1_mask, sizeof(padReadpattern1), 1 },
+	{ padReadpattern2, padReadpattern2_mask, sizeof(padReadpattern2), 1 },
+	{ padReadpattern3, padReadpattern3_mask, sizeof(padReadpattern3), 1 },
+	{ padReadpattern4, padReadpattern4_mask, sizeof(padReadpattern4), 1 },
+	{ padReadpattern5, padReadpattern5_mask, sizeof(padReadpattern5), 1 },
+	{ padReadpattern6, padReadpattern6_mask, sizeof(padReadpattern6), 1 },
+	{ padReadpattern7, padReadpattern7_mask, sizeof(padReadpattern7), 1 },
 	/* scePad2Read */
-	{ pad2Readpattern0, sizeof(pad2Readpattern0), pad2Readpattern0_mask, sizeof(pad2Readpattern0_mask), 2 },
-	{ NULL, 0, NULL, 0, 0 }
+	{ pad2Readpattern0, pad2Readpattern0_mask, sizeof(pad2Readpattern0), 2 },
+	{ NULL, NULL, 0, 0 }
 };
 
 #endif /* _PADREAD_PATTERNS_H_ */

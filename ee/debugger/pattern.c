@@ -1,5 +1,5 @@
 /*
- * pattern.h - pattern search
+ * pattern.c - pattern search
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
@@ -20,19 +20,27 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PATTERN_H_
-#define _PATTERN_H_
-
 #include <tamtypes.h>
+#include "pattern.h"
 
-typedef struct _pattern {
-	const void *seq;
-	const void *mask;
-	int len;
-	int tag;	
-} pattern_t;
+/* XXX I'm sure this can be optimized. */
+u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
+{
+	u32 i, j;
 
-u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len);
-void *find_pattern(const void *buf, int size, const pattern_t *pat);
+	for (i = 0; i < bufsize - len; i++) {
+		for (j = 0; j < len; j++) {
+			if ((buf[i + j] & mask[j]) != bytes[j])
+				break;
+		}
+		if (j == len)
+			return &buf[i];
+	}
 
-#endif /* _PATTERN_H_ */
+	return NULL;
+}
+
+void *find_pattern(const void *buf, int size, const pattern_t *pat)
+{
+	return find_pattern_with_mask((u8*)buf, size, (u8*)pat->seq, (u8*)pat->mask, pat->len);
+}

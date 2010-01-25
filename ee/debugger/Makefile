@@ -1,7 +1,7 @@
 ##
 # Makefile for debugger
 #
-# Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+# Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
 ##
 
 ifeq ($(DEBUG),1)
@@ -14,7 +14,8 @@ EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = debugger.o debugger_rpc.o loadfile.o padread_hooks.o loadmodule_hooks.o syscall_hooks.S
+EE_OBJS = debugger.o debugger_rpc.o loadfile.o pattern.o padread_hooks.o \
+	loadmodule_hooks.o syscall_hooks.S
 
 
 all: debugger.erl
