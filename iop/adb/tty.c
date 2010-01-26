@@ -18,14 +18,21 @@
 
 #define DEVNAME "tty"
 
+static u32 g_ip_addr_dst;
+static u32 g_ip_addr_src;
+static u16 g_ip_port_log;
+static u16 g_ip_port_src;
+
 extern iop_device_t tty_device;
 static int tty_sema = -1;
 
 static u8 tty_sndbuf[1514] __attribute__((aligned(64))); /* 1 MTU */
 
 /* Init TTY */
-void ttyInit(void)
+void ttyInit(g_param_t *g_param)
 {
+	udp_pkt_t *udp_pkt;
+
 	close(0);
 	close(1);
 	DelDrv(DEVNAME);
@@ -35,6 +42,31 @@ void ttyInit(void)
 
 	open(DEVNAME "00:", 0x1000|O_RDWR);
 	open(DEVNAME "00:", O_WRONLY);
+
+	/* Initialize the static elements of our UDP packet */
+	udp_pkt = (udp_pkt_t *)tty_sndbuf;
+
+	memcpy(udp_pkt->eth.addr_dst, g_param->eth_addr_dst, 12);
+	udp_pkt->eth.type = 0x0008;	/* Network byte order: 0x800 */
+
+	udp_pkt->ip.hlen = 0x45;
+	udp_pkt->ip.tos = 0;
+	udp_pkt->ip.id = 0;
+	udp_pkt->ip.flags = 0;
+	udp_pkt->ip.frag_offset = 0;
+	udp_pkt->ip.ttl = 64;
+	udp_pkt->ip.proto = 0x11;
+	memcpy(&udp_pkt->ip.addr_src.addr, &g_param->ip_addr_src, 4);
+	memcpy(&udp_pkt->ip.addr_dst.addr, &g_param->ip_addr_dst, 4);
+
+	udp_pkt->udp_port_src = g_param->ip_port_src;
+	udp_pkt->udp_port_dst = g_param->ip_port_log;
+
+	/* these are stored in network byte order, careful later */
+	g_ip_addr_dst = g_param->ip_addr_dst;
+	g_ip_addr_src = g_param->ip_addr_src;
+	g_ip_port_log = g_param->ip_port_log;
+	g_ip_port_src = g_param->ip_port_src;	
 }
 
 /*
@@ -75,27 +107,6 @@ static int udptty_output(void *buf, int size)
 
 static int tty_init(iop_device_t *device)
 {
-	udp_pkt_t *udp_pkt;
-
-	/* Initialize the static elements of our UDP packet */
-	udp_pkt = (udp_pkt_t *)tty_sndbuf;
-
-	memcpy(udp_pkt->eth.addr_dst, g_param.eth_addr_dst, 12);
-	udp_pkt->eth.type = 0x0008;	/* Network byte order: 0x800 */
-
-	udp_pkt->ip.hlen = 0x45;
-	udp_pkt->ip.tos = 0;
-	udp_pkt->ip.id = 0;
-	udp_pkt->ip.flags = 0;
-	udp_pkt->ip.frag_offset = 0;
-	udp_pkt->ip.ttl = 64;
-	udp_pkt->ip.proto = 0x11;
-	memcpy(&udp_pkt->ip.addr_src.addr, &g_param.ip_addr_src, 4);
-	memcpy(&udp_pkt->ip.addr_dst.addr, &g_param.ip_addr_dst, 4);
-
-	udp_pkt->udp_port_src = g_param.ip_port_src;
-	udp_pkt->udp_port_dst = g_param.ip_port_log;
-
 	if ((tty_sema = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
 		return -1;
 

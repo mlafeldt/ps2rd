@@ -43,9 +43,26 @@ typedef struct {
 	ip_addr_t arp_target_ip_addr;	
 } arp_pkt_t __attribute__((packed));
 
+static u8 g_eth_addr_dst[6];
+static u8 g_eth_addr_src[6];
+static u32 g_ip_addr_src;
+static u32 g_ip_addr_dst;
+
 static int arp_mutex = -1;
 static int arp_reply_flag;
 static int wait_arp_reply = 0;
+
+/*
+ * arp_init: initialize ARP layer
+ */
+void arp_init(g_param_t *g_param)
+{
+	/* these are stored in network byte order, careful later */
+	memcpy(g_eth_addr_dst, g_param->eth_addr_dst, 6);
+	memcpy(g_eth_addr_src, g_param->eth_addr_src, 6);
+	g_ip_addr_dst = g_param->ip_addr_dst;
+	g_ip_addr_src = g_param->ip_addr_src;
+}
 
 /*
  * arp_output: send an ARP ethernet frame 
@@ -55,7 +72,8 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
 	arp_pkt_t arp_pkt;
 
 	memset(&arp_pkt, 0, sizeof(arp_pkt_t));
-	memcpy(arp_pkt.eth.addr_dst, g_param.eth_addr_dst, 12);
+	memcpy(arp_pkt.eth.addr_dst, g_eth_addr_dst, 6);
+	memcpy(arp_pkt.eth.addr_src, g_eth_addr_src, 6);
 	arp_pkt.eth.type = 0x0608;			/* Network byte order: 0x806 */
 
 	arp_pkt.arp_hwtype = 0x0100; 		/* Network byte order: 0x01  */
@@ -63,10 +81,10 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
 	arp_pkt.arp_hwsize = 6;
 	arp_pkt.arp_protocolsize = 4;
 	arp_pkt.arp_opcode = htons(opcode);
-	memcpy(arp_pkt.arp_sender_eth_addr, g_param.eth_addr_src, 6);
-	memcpy(&arp_pkt.arp_sender_ip_addr, &g_param.ip_addr_src, 4);
+	memcpy(arp_pkt.arp_sender_eth_addr, g_eth_addr_src, 6);
+	memcpy(&arp_pkt.arp_sender_ip_addr, &g_ip_addr_src, 4);
 	memcpy(arp_pkt.arp_target_eth_addr, target_eth_addr, 6);
-	memcpy(&arp_pkt.arp_target_ip_addr, &g_param.ip_addr_dst, 4);
+	memcpy(&arp_pkt.arp_target_ip_addr, &g_ip_addr_dst, 4);
 
 	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0);
 }
@@ -84,7 +102,7 @@ void arp_input(void *buf, int size)
 	if (arp_pkt->arp_opcode == 0x0200) {
 
 		if (wait_arp_reply) {
-			memcpy(g_param.eth_addr_dst, &arp_pkt->arp_sender_eth_addr[0], 6);
+			memcpy(g_eth_addr_dst, &arp_pkt->arp_sender_eth_addr[0], 6);
 
 			arp_reply_flag = 1;
 			iSignalSema(arp_mutex);
@@ -95,14 +113,14 @@ void arp_input(void *buf, int size)
 
 		/* Is that request for us ? */
 		for (i=0; i<4; i++) {
-			u8 *p = (u8 *)&g_param.ip_addr_src;
+			u8 *p = (u8 *)&g_ip_addr_src;
 			if (arp_pkt->arp_target_ip_addr.addr[i] != p[i])
 				break;	
 		}
 
 		/* yes ? we send an ARP reply with our ethernet addr */
 		if (i == 4)
-			arp_output(ARP_REPLY, g_param.eth_addr_dst);
+			arp_output(ARP_REPLY, g_eth_addr_dst);
 	}
 }
 
@@ -119,7 +137,7 @@ static unsigned int timer_intr_handler(void *args)
 /*
  * arp_request: send an ARP request, should be called 1st
  */
-void arp_request(void)
+void arp_request(u8 *eth_addr)
 {
 	iop_sys_clock_t sysclock;
 	int oldstate;
@@ -154,6 +172,7 @@ send_arp_request:
 		
 	wait_arp_reply = 0;
 	arp_reply_flag = 0;
+	memcpy(eth_addr, g_eth_addr_dst, 6);
 	CpuResumeIntr(oldstate);
 
 	/* delete the mutex */

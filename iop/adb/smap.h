@@ -35,9 +35,7 @@
 
 #include "adb.h"
 
-int smap_init(void);
+int smap_init(g_param_t *g_param);
 int smap_xmit(void *buf, int size);
-
-extern g_param_t g_param;
 
 #endif /* _IOP_SMAP_H_ */

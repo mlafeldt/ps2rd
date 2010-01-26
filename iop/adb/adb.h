@@ -53,6 +53,7 @@ typedef struct {
 	u16 ip_port_dst;
 	u16 ip_port_src;
 	u16 ip_port_log;
+	int rcv_mutex;
 } g_param_t;
 
 /* Ethernet header (14) */

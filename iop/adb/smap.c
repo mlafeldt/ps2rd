@@ -462,7 +462,7 @@ static int smap_intr_handler(int state)
 /*
  * smap_init: main SMAP init function
  */
-int smap_init(void)
+int smap_init(g_param_t *g_param)
 {
 	USE_SPD_REGS;
 	USE_DEV9_REGS;
@@ -493,7 +493,7 @@ int smap_init(void)
 		MACcsum += MAC[i];
 	if (MACcsum != MAC[3])
 		return 1;
-	memcpy(g_param.eth_addr_src, &MAC[0], 6);
+	memcpy(g_param->eth_addr_src, &MAC[0], 6);
 
 	/* Disable TX/RX */
 	val = SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE0);
@@ -566,7 +566,7 @@ int smap_init(void)
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, val);
 
 	/* Set HW MAC address */
-	memcpy(hwaddr, g_param.eth_addr_src, 6);
+	memcpy(hwaddr, g_param->eth_addr_src, 6);
 	val = (u16)((hwaddr[0] << 8)|hwaddr[1]);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, val);
 	val = ((hwaddr[2] << 24)|(hwaddr[3] << 16)|(hwaddr[4] << 8)|hwaddr[5]);

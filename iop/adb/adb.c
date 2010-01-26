@@ -23,6 +23,7 @@
 #include <tamtypes.h>
 #include "irx_imports.h"
 #include "adb.h"
+#include "inet.h"
 #include "arp.h"
 #include "udp.h"
 #include "tty.h"
@@ -42,8 +43,11 @@ g_param_t g_param = {
 	IP_ADDR(192, 168, 0, 10),				/* local IP addr						*/
 	IP_PORT(7410), 							/* remote port							*/
 	IP_PORT(8340),							/* local port							*/
-	IP_PORT(7411)							/* log port								*/
+	IP_PORT(7411),							/* log port								*/
+	-1
 };
+
+static u8 udp_rcvbuf[1474] __attribute__((aligned(64))); /* 1 MTU max(1514) - ETH/IP/UDP headers + 1 */
 
 static int _adb_init = 0;
 
@@ -52,14 +56,16 @@ int adb_init(int arg)
 	if (_adb_init)
 		return -1;
 
+	arp_init(&g_param);
+
 	/* Does ARP request to get PC ethernet addr */
-	arp_request();
+	arp_request(g_param.eth_addr_dst);
 
 	/* Init UDP layer */
-	udp_init();
+	udp_init(&g_param);
 
 #ifdef UDPTTY
-	ttyInit();
+	ttyInit(&g_param);
 #endif
 
 	_adb_init = 1;
@@ -150,10 +156,38 @@ static int __start_thread(void *func, u32 stacksize, u32 priority)
 	return tid;
 }
 
+/*
+ * main server thread
+ */
+void server_thread(void *args)
+{
+	int pktsize;
+
+	if (!adb_init(0)) {
+		while (1) {
+			WaitSema(g_param.rcv_mutex);
+
+			while (QueryIntrContext())
+				DelayThread(10000);
+
+			/* we got a valid UDP packet incoming */
+			udp_getpacket(udp_rcvbuf, &pktsize);
+
+			M_PRINTF("Got incoming UDP packet (%d bytes) at port %d\n", pktsize, ntohs(g_param.ip_port_src));
+
+			/* output the received datas */
+			udp_output(udp_rcvbuf, pktsize);
+			M_PRINTF("Forwarded packet (%d bytes) to port %d\n", pktsize, ntohs(g_param.ip_port_dst));
+		}
+	}
+
+	ExitDeleteThread();
+}
+
 int _start(int argc, char *argv[])
 {
 	/* Init SMAP driver */
-	if (smap_init() != 0)
+	if (smap_init(&g_param) != 0)
 		return MODULE_NO_RESIDENT_END;
 
 	if (RegisterLibraryEntries(&_exp_adb) != 0) {
@@ -166,7 +200,7 @@ int _start(int argc, char *argv[])
 	if (__start_thread(rpc_thread, 4*1024, 0x68) < 0)
 		goto error;
 #endif
-	if (__start_thread(udp_server_thread, 4*1024, 0x64) < 0)
+	if (__start_thread(server_thread, 4*1024, 0x64) < 0)
 		goto error;
 
 	M_PRINTF("Module started.\n");

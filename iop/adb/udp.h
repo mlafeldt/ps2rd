@@ -49,11 +49,9 @@ typedef struct {
 	/* Data goes here */
 } udp_pkt_t __attribute__((packed));
 
-void udp_init(void);
-void udp_server_thread(void *args);
+void udp_init(g_param_t *g_param);
 int udp_input(void *buf, int size);
 int udp_output(void *buf, int size);
-
-extern g_param_t g_param;
+void udp_getpacket(void *buf, int *size);
 
 #endif /* _IOP_UDP_H_ */

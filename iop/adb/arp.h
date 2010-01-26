@@ -32,9 +32,8 @@
 
 #include "adb.h"
 
+void arp_init(g_param_t *g_param);
 void arp_input(void *buf, int size);
-void arp_request(void);
-
-extern g_param_t g_param;
+void arp_request(u8 *eth_addr);
 
 #endif /* _IOP_ARP_H_ */

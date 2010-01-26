@@ -16,8 +16,6 @@
 .globl ntohs
 .globl htonl
 .globl ntohl
-.globl htona
-.globl ntoha
 
 .section ".bss"
 s_Str:  .space  16
@@ -47,27 +45,6 @@ ntohl :
     srl     $a0, $a0, 24
     jr      $ra
     or      $v0, $v0, $a0
-
-htona :
-_htona:
-ntoha :
-	lbu     $t0, 0($a0)
-	lbu     $t1, 1($a0)
-	lbu     $t2, 2($a0)
-	lbu     $t3, 3($a0)
-	move    $v0, $zero
-	andi    $t0, $t0, 0xFF
-	or		$v0, $v0, $t0
-	sll		$v0, $v0, 24
-	andi    $t1, $t1, 0xFF
-	sll		$t1, $t1, 16	
-	or		$v0, $v0, $t1
-	andi    $t2, $t2, 0xFF
-	sll		$t2, $t2, 8	
-	or		$v0, $v0, $t2
-	andi    $t3, $t3, 0xFF
-    jr      $ra
-	or		$v0, $v0, $t3
 
 ip_cksum :
 _ip_cksum:

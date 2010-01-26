@@ -525,11 +525,13 @@ int MySifRebootIop(char *ioprp_path)
 		if (ret < 0)
 			while (1) ;
 
+#if 0
 		GS_BGCOLOUR = 0xff00ff; /* magenta */
 
 		/* Binding debugger module RPC server */
 		rpcNTPBreset();
 		rpcNTPBinit();
+#endif
 	}
 
 	SifExitIopHeap();

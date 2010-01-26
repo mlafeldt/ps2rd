@@ -32,8 +32,6 @@
 
 #include "adb.h"
 
-void ttyInit(void);
-
-extern g_param_t g_param;
+void ttyInit(g_param_t *g_param);
 
 #endif /* _IOP_TTY_H_ */
