@@ -39,6 +39,7 @@ static const char *_modules[] = {
 extern u8  _ps2dev9_irx_start[];
 extern u8  _ps2dev9_irx_end[];
 extern int _ps2dev9_irx_size;
+#if 0
 extern u8  _ps2ip_irx_start[];
 extern u8  _ps2ip_irx_end[];
 extern int _ps2ip_irx_size;
@@ -48,6 +49,7 @@ extern int _ps2smap_irx_size;
 extern u8  _debugger_irx_start[];
 extern u8  _debugger_irx_end[];
 extern int _debugger_irx_size;
+#endif
 extern u8  _adb_irx_start[];
 extern u8  _adb_irx_end[];
 extern int _adb_irx_size;
@@ -68,7 +70,7 @@ extern int _usb_mass_irx_size;
 /* TODO: make it configurable */
 #define IRX_ADDR	0x80030000
 
-#define IRX_NUM		7
+#define IRX_NUM		4
 
 /* RAM file table entry */
 typedef struct {
@@ -127,9 +129,11 @@ static void copy_modules_to_kernel(const config_t *config)
 	 * build RAM file table
 	 */
 	ramfile_set(file_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
+#if 0
 	ramfile_set(file_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
 	ramfile_set(file_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
 	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
+#endif
 	ramfile_set(file_ptr++, "adb", _adb_irx_start, _adb_irx_size);
 	ramfile_set(file_ptr++, "memdisk", _memdisk_irx_start, _memdisk_irx_size);
 	ramfile_set(file_ptr++, "eesync", _eesync_irx_start, _eesync_irx_size);

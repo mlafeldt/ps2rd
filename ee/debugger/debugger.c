@@ -509,6 +509,7 @@ int MySifRebootIop(char *ioprp_path)
 		ret = load_module_from_kernel(HASH_PS2DEV9, 0, NULL);
 		if (ret < 0)
 			while (1) ;
+#if 0
 		ret = load_module_from_kernel(HASH_PS2IP, 0, NULL);
 		if (ret < 0)
 			while (1) ;
@@ -519,6 +520,7 @@ int MySifRebootIop(char *ioprp_path)
 		ret = load_module_from_kernel(HASH_DEBUGGER, 0, NULL);
 		if (ret < 0)
 			while (1) ;
+#endif
 		ret = load_module_from_kernel(HASH_ADB, 0, NULL);
 		if (ret < 0)
 			while (1) ;
