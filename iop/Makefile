@@ -1,12 +1,12 @@
 .SILENT:
 
-IOP_MODULES = adb debugger dev9 eesync memdisk usb_mass
+IOP_MODULES = adb dev9 eesync memdisk usb_mass #debugger
 
-ifeq ($(SMS_MODULES),1)
-IOP_MODULES += SMSMAP SMSTCPIP
-else
-IOP_MODULES += smap
-endif
+#ifeq ($(SMS_MODULES),1)
+#IOP_MODULES += SMSMAP SMSTCPIP
+#else
+#IOP_MODULES += smap
+#endif
 
 all:
 	@for m in $(IOP_MODULES); do \
