@@ -2,6 +2,7 @@
  * adb.c - Advanced debugger
  *
  * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *
@@ -22,7 +23,10 @@
 #include <tamtypes.h>
 #include "irx_imports.h"
 #include "adb.h"
-#include "udpcl.h"
+#include "arp.h"
+#include "udp.h"
+#include "tty.h"
+#include "smap.h"
 
 IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 
@@ -31,30 +35,32 @@ IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 
 struct irx_export_table _exp_adb;
 
-//static char *_local_addr  = "192.168.0.10";
-static char *_remote_addr = "192.168.0.2";
-static int _local_port  = 8340;
-static int _remote_port = 7410;
-//static int _log_port    = 7411;
+g_param_t g_param = {
+	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth remote addr needed for broadcast */
+	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth local addr 						*/
+	IP_ADDR(192, 168, 0, 2), 				/* remote IP addr						*/
+	IP_ADDR(192, 168, 0, 10),				/* local IP addr						*/
+	IP_PORT(7410), 							/* remote port							*/
+	IP_PORT(8340),							/* local port							*/
+	IP_PORT(7411)							/* log port								*/
+};
 
 static int _adb_init = 0;
-static udpcl_t _send_cl, _recv_cl;
-static u8 _msg_buf[1024] __attribute__((aligned(64)));
 
 int adb_init(int arg)
 {
 	if (_adb_init)
 		return -1;
 
-	if (udpcl_create(&_send_cl, _remote_addr, _remote_port, 0) < 0) {
-		M_PRINTF("Could not create send udp client\n");
-		return -1;
-	}
+	/* Does ARP request to get PC ethernet addr */
+	arp_request();
 
-	if (udpcl_create(&_recv_cl, NULL, _local_port, UDPCL_F_LISTEN) < 0) {
-		M_PRINTF("Could not create recv udp client\n");
-		return -1;
-	}
+	/* Init UDP layer */
+	udp_init();
+
+#ifdef UDPTTY
+	ttyInit();
+#endif
 
 	_adb_init = 1;
 	M_PRINTF("Ready.\n");
@@ -66,9 +72,6 @@ int adb_exit(void)
 {
 	if (!_adb_init)
 		return -1;
-
-	udpcl_destroy(&_send_cl);
-	udpcl_destroy(&_recv_cl);
 
 	_adb_init = 0;
 
@@ -120,33 +123,6 @@ static void rpc_thread(void *arg)
 #endif /* ADB_RPC */
 
 /*
- * Handle client requests to the debugger server.
- */
-static void server_thread(void *arg)
-{
-	int ret;
-
-	M_PRINTF("Server thread started.\n");
-
-	if (!adb_init(0)) {
-		while (1) {
-			ret = udpcl_wait(&_recv_cl, -1);
-			printf("\nwait: %i\n", ret);
-
-			ret = udpcl_receive(&_recv_cl, _msg_buf, sizeof(_msg_buf));
-			printf("receive: %i\n", ret);
-
-			if (ret > 0) {
-				ret = udpcl_send(&_send_cl, _msg_buf, ret);
-				printf("send: %i\n", ret);
-			}
-		}
-	}
-
-	ExitDeleteThread();
-}
-
-/*
  * Wrapper function to create and start threads.
  */
 static int __start_thread(void *func, u32 stacksize, u32 priority)
@@ -176,6 +152,10 @@ static int __start_thread(void *func, u32 stacksize, u32 priority)
 
 int _start(int argc, char *argv[])
 {
+	/* Init SMAP driver */
+	if (smap_init() != 0)
+		return MODULE_NO_RESIDENT_END;
+
 	if (RegisterLibraryEntries(&_exp_adb) != 0) {
 		M_PRINTF("Could not register exports.\n");
 		return MODULE_NO_RESIDENT_END;
@@ -186,7 +166,7 @@ int _start(int argc, char *argv[])
 	if (__start_thread(rpc_thread, 4*1024, 0x68) < 0)
 		goto error;
 #endif
-	if (__start_thread(server_thread, 4*1024, 0x64) < 0)
+	if (__start_thread(udp_server_thread, 4*1024, 0x64) < 0)
 		goto error;
 
 	M_PRINTF("Module started.\n");

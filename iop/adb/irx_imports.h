@@ -19,7 +19,6 @@
 #include "ioman.h"
 #include "loadcore.h"
 #include "modload.h"
-#include "ps2ip.h"
 #include "sifcmd.h"
 #include "sifman.h"
 #include "stdio.h"

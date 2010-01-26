@@ -1,9 +1,10 @@
 IOP_BIN = adb.irx
-IOP_OBJS = adb.o udpcl.o exports.o imports.o
+IOP_OBJS = adb.o smap.o arp.o inet.o udp.o exports.o imports.o
+IOP_OBJS += tty.o # should be configureable
 IOP_LIBS =
 
 IOP_INCS +=
-IOP_CFLAGS += -Wall -fno-builtin #-DADB_RPC
+IOP_CFLAGS += -Wall -fno-builtin -DUDPTTY #-DADB_RPC
 IOP_ASFLAGS +=
 IOP_LDFLAGS += -s
 
