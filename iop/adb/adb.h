@@ -56,13 +56,6 @@ typedef struct {
 	int rcv_mutex;
 } g_param_t;
 
-/* Ethernet header (14) */
-typedef struct {
-	u8	addr_dst[6];
-	u8	addr_src[6];
-	u16	type;
-} eth_hdr_t;
-
 /* IP header (20) */
 typedef struct {
 	u8	hlen;

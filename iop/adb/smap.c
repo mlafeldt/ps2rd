@@ -24,6 +24,7 @@
 #include "inet.h"
 #include "arp.h"
 #include "udp.h"
+#include "linux/if_ether.h"
 
 #define	SMAP_RX_BUFSIZE		16384
 #define SMAP_RX_BASE		0x4000
@@ -388,8 +389,8 @@ static int smap_rx_intr(int irq)
 			/* FIFO -> memory */
 			smap_CopyFromFIFO(rxrp, (u32 *)rcpt_buf, len);
 
-			eth_hdr_t *eth = (eth_hdr_t *)rcpt_buf;
-			if (eth->type == 0x0008) { /* the ethernet frame contains an IP packet */
+			struct ethhdr *eth = (struct ethhdr *)rcpt_buf;
+			if (eth->h_proto == 0x0008) { /* the ethernet frame contains an IP packet */
 
 				ip_hdr_t *ip = (ip_hdr_t *)&rcpt_buf[14];
 				if ((ip->hlen == 0x45) && (inet_chksum(ip, 20) == 0)) { 	/* Check IPv4 & IP checksum */
@@ -399,7 +400,7 @@ static int smap_rx_intr(int irq)
 					}
 				}
 			}
-			else if (eth->type == 0x0608) /* the ethernet frame contains an ARP packet */
+			else if (eth->h_proto == 0x0608) /* the ethernet frame contains an ARP packet */
 				arp_input(rcpt_buf, len);
 		}
 

@@ -31,11 +31,12 @@
 #include <sysclib.h>
 #include <stdio.h>
 
+#include "linux/if_ether.h"
 #include "adb.h"
 
 typedef struct {
 	/* Ethernet header (14) */
-	eth_hdr_t eth;
+	struct ethhdr eth;
 
 	/* IP header (20) */
 	ip_hdr_t ip;

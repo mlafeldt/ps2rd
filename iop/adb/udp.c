@@ -22,6 +22,7 @@
 #include "udp.h"
 #include "inet.h"
 #include "smap.h"
+#include "linux/if_ether.h"
 
 #define M_PRINTF(format, args...) \
 	printf(ADB_MODNAME ": " format, ## args)
@@ -65,8 +66,8 @@ void udp_init(g_param_t *g_param)
 	/* Initialize the static elements of our UDP packet */
 	udp_pkt = (udp_pkt_t *)udp_sndbuf;
 
-	memcpy(udp_pkt->eth.addr_dst, g_param->eth_addr_dst, 12);
-	udp_pkt->eth.type = 0x0008;	/* Network byte order: 0x800 */
+	memcpy(udp_pkt->eth.h_dest, g_param->eth_addr_dst, ETH_ALEN*2);
+	udp_pkt->eth.h_proto = 0x0008;	/* Network byte order: 0x800 */
 
 	udp_pkt->ip.hlen = 0x45;
 	udp_pkt->ip.tos = 0;

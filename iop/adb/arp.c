@@ -22,6 +22,7 @@
 #include "arp.h"
 #include "inet.h"
 #include "smap.h"
+#include "linux/if_ether.h"
 
 #define ARP_TIMEOUT (3000*1000)
 #define ARP_REQUEST 0x01
@@ -29,7 +30,7 @@
 
 typedef struct {
 	/* Ethernet header (14) */
-	eth_hdr_t eth;
+	struct ethhdr eth;
 
 	/* ARP header (28) */
 	u16	arp_hwtype;
@@ -37,14 +38,14 @@ typedef struct {
 	u8	arp_hwsize;
 	u8	arp_protocolsize;
 	u16 arp_opcode;
-	u8	arp_sender_eth_addr[6];
+	u8	arp_sender_eth_addr[ETH_ALEN];
 	ip_addr_t arp_sender_ip_addr;
-	u8	arp_target_eth_addr[6];
+	u8	arp_target_eth_addr[ETH_ALEN];
 	ip_addr_t arp_target_ip_addr;
 } arp_pkt_t __attribute__((packed));
 
-static u8 g_eth_addr_dst[6];
-static u8 g_eth_addr_src[6];
+static u8 g_eth_addr_dst[ETH_ALEN];
+static u8 g_eth_addr_src[ETH_ALEN];
 static u32 g_ip_addr_src;
 static u32 g_ip_addr_dst;
 
@@ -58,8 +59,8 @@ static int wait_arp_reply = 0;
 void arp_init(g_param_t *g_param)
 {
 	/* these are stored in network byte order, careful later */
-	memcpy(g_eth_addr_dst, g_param->eth_addr_dst, 6);
-	memcpy(g_eth_addr_src, g_param->eth_addr_src, 6);
+	memcpy(g_eth_addr_dst, g_param->eth_addr_dst, ETH_ALEN);
+	memcpy(g_eth_addr_src, g_param->eth_addr_src, ETH_ALEN);
 	g_ip_addr_dst = g_param->ip_addr_dst;
 	g_ip_addr_src = g_param->ip_addr_src;
 }
@@ -72,18 +73,18 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
 	arp_pkt_t arp_pkt;
 
 	memset(&arp_pkt, 0, sizeof(arp_pkt_t));
-	memcpy(arp_pkt.eth.addr_dst, g_eth_addr_dst, 6);
-	memcpy(arp_pkt.eth.addr_src, g_eth_addr_src, 6);
-	arp_pkt.eth.type = 0x0608;			/* Network byte order: 0x806 */
+	memcpy(arp_pkt.eth.h_dest, g_eth_addr_dst, ETH_ALEN);
+	memcpy(arp_pkt.eth.h_source, g_eth_addr_src, ETH_ALEN);
+	arp_pkt.eth.h_proto = 0x0608;			/* Network byte order: 0x806 */
 
 	arp_pkt.arp_hwtype = 0x0100; 		/* Network byte order: 0x01  */
 	arp_pkt.arp_protocoltype = 0x0008;	/* Network byte order: 0x800 */
 	arp_pkt.arp_hwsize = 6;
 	arp_pkt.arp_protocolsize = 4;
 	arp_pkt.arp_opcode = htons(opcode);
-	memcpy(arp_pkt.arp_sender_eth_addr, g_eth_addr_src, 6);
+	memcpy(arp_pkt.arp_sender_eth_addr, g_eth_addr_src, ETH_ALEN);
 	memcpy(&arp_pkt.arp_sender_ip_addr, &g_ip_addr_src, 4);
-	memcpy(arp_pkt.arp_target_eth_addr, target_eth_addr, 6);
+	memcpy(arp_pkt.arp_target_eth_addr, target_eth_addr, ETH_ALEN);
 	memcpy(&arp_pkt.arp_target_ip_addr, &g_ip_addr_dst, 4);
 
 	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0);
@@ -102,7 +103,7 @@ void arp_input(void *buf, int size)
 	if (arp_pkt->arp_opcode == 0x0200) {
 
 		if (wait_arp_reply) {
-			memcpy(g_eth_addr_dst, &arp_pkt->arp_sender_eth_addr[0], 6);
+			memcpy(g_eth_addr_dst, &arp_pkt->arp_sender_eth_addr[0], ETH_ALEN);
 
 			arp_reply_flag = 1;
 			iSignalSema(arp_mutex);
@@ -172,7 +173,7 @@ send_arp_request:
 
 	wait_arp_reply = 0;
 	arp_reply_flag = 0;
-	memcpy(eth_addr, g_eth_addr_dst, 6);
+	memcpy(eth_addr, g_eth_addr_dst, ETH_ALEN);
 	CpuResumeIntr(oldstate);
 
 	/* delete the mutex */
