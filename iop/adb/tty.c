@@ -27,7 +27,7 @@ static u16 g_ip_port_src;
 extern iop_device_t tty_device;
 static int tty_sema = -1;
 
-static u8 tty_sndbuf[1514] __attribute__((aligned(64))); /* 1 MTU */
+static u8 tty_sndbuf[ETH_FRAME_LEN] __attribute__((aligned(64))); /* 1 MTU */
 
 /* Init TTY */
 void ttyInit(g_param_t *g_param)
@@ -85,16 +85,16 @@ static int udptty_output(void *buf, int size)
 	udp_pkt = (udp_pkt_t *)tty_sndbuf;
 	pktsize = size + sizeof(udp_pkt_t);
 
-	udp_pkt->ip.len = htons(pktsize - 14);				/* Subtract the ethernet header size */
+	udp_pkt->ip.len = htons(pktsize - ETH_HLEN); /* Subtract the ethernet header size */
 
 	udp_pkt->ip.csum = 0;
-	udp_pkt->ip.csum = inet_chksum(&udp_pkt->ip, 20);	/* Checksum the IP header (20 bytes) */
+	udp_pkt->ip.csum = inet_chksum(&udp_pkt->ip, 20); /* Checksum the IP header (20 bytes) */
 
-	udpsize = htons(size + 8);							/* Size of the UDP header + data */
+	udpsize = htons(size + 8); /* Size of the UDP header + data */
 	udp_pkt->udp_len = udpsize;
 	memcpy(tty_sndbuf + sizeof(udp_pkt_t), buf, size);
 
-	udp_pkt->udp_csum = 0;								/* Don't care... */
+	udp_pkt->udp_csum = 0; /* Don't care... */
 
 	/* send the eth frame */
 	CpuSuspendIntr(&oldstate);
