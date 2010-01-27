@@ -40,7 +40,7 @@ typedef struct {
 	u8	arp_sender_eth_addr[6];
 	ip_addr_t arp_sender_ip_addr;
 	u8	arp_target_eth_addr[6];
-	ip_addr_t arp_target_ip_addr;	
+	ip_addr_t arp_target_ip_addr;
 } arp_pkt_t __attribute__((packed));
 
 static u8 g_eth_addr_dst[6];
@@ -65,7 +65,7 @@ void arp_init(g_param_t *g_param)
 }
 
 /*
- * arp_output: send an ARP ethernet frame 
+ * arp_output: send an ARP ethernet frame
  */
 static void arp_output(u16 opcode, u8 *target_eth_addr)
 {
@@ -115,7 +115,7 @@ void arp_input(void *buf, int size)
 		for (i=0; i<4; i++) {
 			u8 *p = (u8 *)&g_ip_addr_src;
 			if (arp_pkt->arp_target_ip_addr.addr[i] != p[i])
-				break;	
+				break;
 		}
 
 		/* yes ? we send an ARP reply with our ethernet addr */
@@ -169,7 +169,7 @@ send_arp_request:
 
 	if (arp_reply_flag == 0) 	/* It was a timeout ? */
 		goto send_arp_request; 	/* yes, so retry...   */
-		
+
 	wait_arp_reply = 0;
 	arp_reply_flag = 0;
 	memcpy(eth_addr, g_eth_addr_dst, 6);

@@ -36,14 +36,14 @@ IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 
 struct irx_export_table _exp_adb;
 
-g_param_t g_param = {
+static g_param_t g_param = {
 	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth remote addr needed for broadcast */
-	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth local addr 						*/
-	IP_ADDR(192, 168, 0, 2), 				/* remote IP addr						*/
-	IP_ADDR(192, 168, 0, 10),				/* local IP addr						*/
-	IP_PORT(7410), 							/* remote port							*/
-	IP_PORT(8340),							/* local port							*/
-	IP_PORT(7411),							/* log port								*/
+	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth local addr */
+	IP_ADDR(192, 168, 0, 2), 		/* remote IP addr */
+	IP_ADDR(192, 168, 0, 10),		/* local IP addr */
+	IP_PORT(7410), 				/* remote port */
+	IP_PORT(8340),				/* local port */
+	IP_PORT(7411),				/* log port */
 	-1
 };
 

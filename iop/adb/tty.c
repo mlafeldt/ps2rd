@@ -66,11 +66,11 @@ void ttyInit(g_param_t *g_param)
 	g_ip_addr_dst = g_param->ip_addr_dst;
 	g_ip_addr_src = g_param->ip_addr_src;
 	g_ip_port_log = g_param->ip_port_log;
-	g_ip_port_src = g_param->ip_port_src;	
+	g_ip_port_src = g_param->ip_port_src;
 }
 
 /*
- * udptty_output: send an UDP ethernet frame 
+ * udptty_output: send an UDP ethernet frame
  */
 static int udptty_output(void *buf, int size)
 {
@@ -134,8 +134,8 @@ static int tty_write(iop_file_t *file, void *buf, size_t size)
 
 static int tty_error(void) { return -EIO; }
 
-static iop_device_ops_t tty_ops = { tty_init, tty_deinit, (void *)tty_error, 
-	(void *)tty_stdout_fd, (void *)tty_stdout_fd, (void *)tty_error, 
+static iop_device_ops_t tty_ops = { tty_init, tty_deinit, (void *)tty_error,
+	(void *)tty_stdout_fd, (void *)tty_stdout_fd, (void *)tty_error,
 	(void *)tty_write, (void *)tty_error, (void *)tty_error,
 	(void *)tty_error, (void *)tty_error, (void *)tty_error,
 	(void *)tty_error, (void *)tty_error, (void *)tty_error,

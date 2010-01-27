@@ -227,7 +227,7 @@ static int smap_phy_init(void)
 		return 1;
 
 	/* Confirm link status */
-confirm_link:	
+confirm_link:
 	i = 100;
 	while (--i) {
 		smap_phy_read(SMAP_DsPHYTER_BMSR, &phydata);
@@ -318,7 +318,7 @@ int smap_xmit(void *buf, int size)
 }
 
 /*
- * TX interrupt handler 
+ * TX interrupt handler
  */
 static int smap_tx_intr(int irq)
 {
@@ -328,7 +328,7 @@ static int smap_tx_intr(int irq)
 	register int ret = 1;
 
 	/* clear irq */
-	SMAP_REG16(SMAP_R_INTR_CLR) = irq & SMAP_INTR_BITMSK;	
+	SMAP_REG16(SMAP_R_INTR_CLR) = irq & SMAP_INTR_BITMSK;
 
 	while (tx_stat.txbdi_start != tx_stat.txbdi_end) {
 
@@ -346,17 +346,17 @@ static int smap_tx_intr(int irq)
 
 		tx_bd[txbdi].ctrl_stat = 0;
 		tx_bd[txbdi].reserved = 0;
-		tx_bd[txbdi].length = 0;	
+		tx_bd[txbdi].length = 0;
 	}
 
 	tx_stat.txbdi_start = tx_stat.txbdi_end;
 
 out:
-	return ret;	
+	return ret;
 }
 
 /*
- * RX interrupt handler 
+ * RX interrupt handler
  */
 static int smap_rx_intr(int irq)
 {
@@ -379,7 +379,7 @@ static int smap_rx_intr(int irq)
 			break;
 
 		len = rx_bd[rxbdi].length;
-		
+
 		/* check for BD error and packet size doesn't exceed MTU */
 		if ((stat & SMAP_BD_RX_ERROR) || ((len < SMAP_RX_MINSIZE) || (len > SMAP_RX_MAXSIZE)))
 			ret = 0;
@@ -470,7 +470,7 @@ int smap_init(g_param_t *g_param)
 	USE_SMAP_EMAC3_REGS;
 	USE_SMAP_TX_BD; USE_SMAP_RX_BD;
 	u16 MAC[4];
-	u16 MACcsum = 0;	
+	u16 MACcsum = 0;
 	u8 hwaddr[6];
 	u32 val;
 	register int i;
@@ -542,7 +542,7 @@ int smap_init(g_param_t *g_param)
 			tx_bd->length    = 0;
 			tx_bd->pointer   = 0;
 	}
-	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++, rx_bd++) { 
+	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++, rx_bd++) {
 			rx_bd->ctrl_stat = SMAP_BD_RX_EMPTY;
 			rx_bd->reserved  = 0;
 			rx_bd->length    = 0;
@@ -604,5 +604,5 @@ int smap_init(g_param_t *g_param)
 
 	dev9IntrEnable(SMAP_INTR_BITMSK);
 
-	return 0;	
+	return 0;
 }

@@ -97,7 +97,7 @@ void udp_init(g_param_t *g_param)
 }
 
 /*
- * udp_output: send an UDP ethernet frame 
+ * udp_output: send an UDP ethernet frame
  */
 int udp_output(void *buf, int size)
 {
