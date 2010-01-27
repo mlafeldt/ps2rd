@@ -37,14 +37,14 @@ IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 struct irx_export_table _exp_adb;
 
 static g_param_t g_param = {
-	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth remote addr needed for broadcast */
-	{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth local addr */
-	IP_ADDR(192, 168, 0, 2), 		/* remote IP addr */
-	IP_ADDR(192, 168, 0, 10),		/* local IP addr */
-	IP_PORT(7410), 				/* remote port */
-	IP_PORT(8340),				/* local port */
-	IP_PORT(7411),				/* log port */
-	-1
+	.eth_addr_dst = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth remote addr needed for broadcast */
+	.eth_addr_src = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth local addr */
+	.ip_addr_dst = IP_ADDR(192, 168, 0, 2), 		/* remote IP addr */
+	.ip_addr_src = IP_ADDR(192, 168, 0, 10),		/* local IP addr */
+	.ip_port_dst = IP_PORT(7410), 				/* remote port */
+	.ip_port_src = IP_PORT(8340),				/* local port */
+	.ip_port_log = IP_PORT(7411),				/* log port */
+	.rcv_mutex = -1
 };
 
 static u8 udp_rcvbuf[1474] __attribute__((aligned(64))); /* 1 MTU max(1514) - ETH/IP/UDP headers + 1 */
@@ -56,7 +56,7 @@ int adb_init(int arg)
 	if (_adb_init)
 		return -1;
 
-	arp_init(&g_param);
+	arp_init(g_param.ip_addr_dst, g_param.ip_addr_src);
 
 	/* Does ARP request to get PC ethernet addr */
 	arp_request(g_param.eth_addr_dst);

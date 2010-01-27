@@ -30,9 +30,7 @@
 #include <thsemap.h>
 #include <sysclib.h>
 
-#include "adb.h"
-
-void arp_init(g_param_t *g_param);
+void arp_init(u32 dst_ip, u32 src_ip);
 void arp_input(void *buf, int size);
 void arp_request(u8 *eth_addr);
 

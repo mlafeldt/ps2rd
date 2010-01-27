@@ -24,9 +24,9 @@
 #include "smap.h"
 #include "linux/if_ether.h"
 
-#define ARP_TIMEOUT (3000*1000)
-#define ARP_REQUEST 0x01
-#define ARP_REPLY 	0x02
+#define ARP_TIMEOUT	(3000*1000)
+#define ARP_REQUEST	0x01
+#define ARP_REPLY	0x02
 
 typedef struct {
 	/* Ethernet header (14) */
@@ -37,7 +37,7 @@ typedef struct {
 	u16	arp_protocoltype;
 	u8	arp_hwsize;
 	u8	arp_protocolsize;
-	u16 arp_opcode;
+	u16	arp_opcode;
 	u8	arp_sender_eth_addr[ETH_ALEN];
 	ip_addr_t arp_sender_ip_addr;
 	u8	arp_target_eth_addr[ETH_ALEN];
@@ -56,13 +56,13 @@ static int wait_arp_reply = 0;
 /*
  * arp_init: initialize ARP layer
  */
-void arp_init(g_param_t *g_param)
+void arp_init(u32 dst_ip, u32 src_ip)
 {
 	/* these are stored in network byte order, careful later */
-	memcpy(g_eth_addr_dst, g_param->eth_addr_dst, ETH_ALEN);
-	memcpy(g_eth_addr_src, g_param->eth_addr_src, ETH_ALEN);
-	g_ip_addr_dst = g_param->ip_addr_dst;
-	g_ip_addr_src = g_param->ip_addr_src;
+	memset(g_eth_addr_dst, 0xff, ETH_ALEN);
+	memset(g_eth_addr_src, 0xff, ETH_ALEN);
+	g_ip_addr_dst = dst_ip;
+	g_ip_addr_src = src_ip;
 }
 
 /*
@@ -83,11 +83,12 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
 	arp_pkt.arp_protocolsize = 4;
 	arp_pkt.arp_opcode = htons(opcode);
 	memcpy(arp_pkt.arp_sender_eth_addr, g_eth_addr_src, ETH_ALEN);
-	memcpy(&arp_pkt.arp_sender_ip_addr, &g_ip_addr_src, 4);
+	arp_pkt.arp_sender_ip_addr = g_ip_addr_src;
 	memcpy(arp_pkt.arp_target_eth_addr, target_eth_addr, ETH_ALEN);
-	memcpy(&arp_pkt.arp_target_ip_addr, &g_ip_addr_dst, 4);
+	arp_pkt.arp_target_ip_addr = g_ip_addr_dst;
 
-	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0);
+	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0)
+		;
 }
 
 /*
