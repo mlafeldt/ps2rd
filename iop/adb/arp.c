@@ -1,5 +1,5 @@
 /*
- * arp.c - Advanced debugger
+ * arp.c - lightweight ARP implementation
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
@@ -18,6 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <tamtypes.h>
+#include <irx.h>
+#include <intrman.h>
+#include <thbase.h>
+#include <thsemap.h>
+#include <sysclib.h>
 
 #include "arp.h"
 #include "inet.h"
@@ -41,7 +48,7 @@ typedef struct {
 	/* ARP header (8) */
 	struct arphdr arp_hdr;
 
-	/* ARP datas (20) */
+	/* ARP data (20) */
 	struct arpdata arp;
 } arp_pkt_t __attribute__((packed));
 
@@ -69,20 +76,22 @@ void arp_init(u8 *sender_eth_addr, u32 dst_ip, u32 src_ip)
 /*
  * arp_output: send an ARP ethernet frame
  */
-static void arp_output(u16 opcode, u8 *target_eth_addr)
+static void arp_output(u16 opcode, const u8 *target_eth_addr)
 {
 	arp_pkt_t arp_pkt;
 
 	memset(&arp_pkt, 0, sizeof(arp_pkt_t));
+
 	memcpy(arp_pkt.eth.h_dest, g_eth_addr_dst, ETH_ALEN);
 	memcpy(arp_pkt.eth.h_source, g_eth_addr_src, ETH_ALEN);
 	arp_pkt.eth.h_proto = HTONS(ETH_P_ARP);
 
 	arp_pkt.arp_hdr.ar_hrd = HTONS(ETH_P_802_3);
 	arp_pkt.arp_hdr.ar_pro = HTONS(ETH_P_IP);
-	arp_pkt.arp_hdr.ar_hln = ETH_ALEN;		/* size of HW MAC adresses */
+	arp_pkt.arp_hdr.ar_hln = ETH_ALEN;
 	arp_pkt.arp_hdr.ar_pln = 4;
 	arp_pkt.arp_hdr.ar_op = htons(opcode);
+
 	memcpy(arp_pkt.arp.ar_sha, g_eth_addr_src, ETH_ALEN);
 	memcpy(&arp_pkt.arp.ar_sip, &g_ip_addr_src, 4);
 	memcpy(arp_pkt.arp.ar_tha, target_eth_addr, ETH_ALEN);
@@ -98,31 +107,17 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
  */
 void arp_input(void *buf, int size)
 {
-	register int i;
 	arp_pkt_t *arp_pkt = (arp_pkt_t *)buf;
 
-	/* check if it's an ARP reply */
-	if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REPLY)) {
-
+	if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REPLY)) { /* process ARP reply */
 		if (wait_arp_reply) {
 			memcpy(g_eth_addr_dst, &arp_pkt->arp.ar_sha, ETH_ALEN);
-
 			arp_reply_flag = 1;
 			iSignalSema(arp_mutex);
 		}
-	}
-	/* check if it's an ARP request */
-	else if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REQUEST)) {
-
-		/* Is that request for us ? */
-		for (i=0; i<4; i++) {
-			u8 *p = (u8 *)&g_ip_addr_src;
-			if (arp_pkt->arp.ar_tip[i] != p[i])
-				break;
-		}
-
-		/* yes ? we send an ARP reply with our ethernet addr */
-		if (i == 4)
+	} else if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REQUEST)) { /* process ARP request */
+		/* if request is for us, reply with our ethernet addr */
+		if (*(u32*)&arp_pkt->arp.ar_tip == g_ip_addr_src)
 			arp_output(ARPOP_REPLY, g_eth_addr_dst);
 	}
 }
@@ -152,8 +147,7 @@ void arp_request(u8 *eth_addr)
 	wait_arp_reply = 1;
 
 send_arp_request:
-
-	/* send an ARP resquest */
+	/* send an ARP request */
 	arp_output(ARPOP_REQUEST, "\x00\x00\x00\x00\x00\x00");
 	CpuResumeIntr(oldstate);
 
@@ -161,17 +155,18 @@ send_arp_request:
 	USec2SysClock(ARP_TIMEOUT, &sysclock);
 	SetAlarm(&sysclock, timer_intr_handler, NULL);
 
-	/* Wait for ARP reply or timeout */
+	/* wait for ARP reply or timeout */
 	WaitSema(arp_mutex);
-
-	/*while (QueryIntrContext())
-		DelayThread(10000);*/
-
+#if 0
+	while (QueryIntrContext())
+		DelayThread(10000);
+#endif
 	CpuSuspendIntr(&oldstate);
 	CancelAlarm(timer_intr_handler, NULL);
 
-	if (arp_reply_flag == 0) 	/* It was a timeout ? */
-		goto send_arp_request; 	/* yes, so retry...   */
+	/* retry on timeout */
+	if (arp_reply_flag == 0)
+		goto send_arp_request;
 
 	wait_arp_reply = 0;
 	arp_reply_flag = 0;

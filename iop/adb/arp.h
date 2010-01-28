@@ -1,5 +1,5 @@
 /*
- * arp.h - Advanced debugger
+ * arp.h - lightweight ARP implementation
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
@@ -23,12 +23,6 @@
 #define _IOP_ARP_H_
 
 #include <tamtypes.h>
-#include <irx.h>
-
-#include <intrman.h>
-#include <thbase.h>
-#include <thsemap.h>
-#include <sysclib.h>
 
 void arp_init(u8 *sender_eth_addr, u32 dst_ip, u32 src_ip);
 void arp_input(void *buf, int size);
