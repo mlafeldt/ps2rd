@@ -75,17 +75,17 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
 	memset(&arp_pkt, 0, sizeof(arp_pkt_t));
 	memcpy(arp_pkt.eth.h_dest, g_eth_addr_dst, ETH_ALEN);
 	memcpy(arp_pkt.eth.h_source, g_eth_addr_src, ETH_ALEN);
-	arp_pkt.eth.h_proto = 0x0608;			/* Network byte order: 0x806 */
+	arp_pkt.eth.h_proto = HTONS(ETH_P_ARP);
 
-	arp_pkt.arp_hwtype = 0x0100; 		/* Network byte order: 0x01  */
-	arp_pkt.arp_protocoltype = 0x0008;	/* Network byte order: 0x800 */
-	arp_pkt.arp_hwsize = 6;
+	arp_pkt.arp_hwtype = HTONS(ETH_P_802_3);
+	arp_pkt.arp_protocoltype = HTONS(ETH_P_IP);
+	arp_pkt.arp_hwsize = ETH_ALEN;		/* size of HW MAC adresses */
 	arp_pkt.arp_protocolsize = 4;
 	arp_pkt.arp_opcode = htons(opcode);
 	memcpy(arp_pkt.arp_sender_eth_addr, g_eth_addr_src, ETH_ALEN);
-	arp_pkt.arp_sender_ip_addr = g_ip_addr_src;
+	memcpy(&arp_pkt.arp_sender_ip_addr, &g_ip_addr_src, 4);
 	memcpy(arp_pkt.arp_target_eth_addr, target_eth_addr, ETH_ALEN);
-	arp_pkt.arp_target_ip_addr = g_ip_addr_dst;
+	memcpy(&arp_pkt.arp_target_ip_addr, &g_ip_addr_dst, 4);
 
 	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0)
 		;
@@ -100,8 +100,8 @@ void arp_input(void *buf, int size)
 	register int i;
 	arp_pkt_t *arp_pkt = (arp_pkt_t *)buf;
 
-	/* check if it's an ARP reply - network byte order */
-	if (arp_pkt->arp_opcode == 0x0200) {
+	/* check if it's an ARP reply */
+	if (arp_pkt->arp_opcode == NTOHS(ARP_REPLY)) {
 
 		if (wait_arp_reply) {
 			memcpy(g_eth_addr_dst, &arp_pkt->arp_sender_eth_addr[0], ETH_ALEN);
@@ -110,8 +110,8 @@ void arp_input(void *buf, int size)
 			iSignalSema(arp_mutex);
 		}
 	}
-	/* check if it's an ARP request - network byte order */
-	else if (arp_pkt->arp_opcode == 0x0100) {
+	/* check if it's an ARP request */
+	else if (arp_pkt->arp_opcode == NTOHS(ARP_REQUEST)) {
 
 		/* Is that request for us ? */
 		for (i=0; i<4; i++) {

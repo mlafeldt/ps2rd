@@ -48,7 +48,7 @@ void ttyInit(g_param_t *g_param)
 	udp_pkt = (udp_pkt_t *)tty_sndbuf;
 
 	memcpy(udp_pkt->eth.h_dest, g_param->eth_addr_dst, ETH_ALEN*2);
-	udp_pkt->eth.h_proto = 0x0008;	/* Network byte order: 0x800 */
+	udp_pkt->eth.h_proto = HTONS(ETH_P_IP);
 
 	udp_pkt->ip.hlen = 0x45;
 	udp_pkt->ip.tos = 0;

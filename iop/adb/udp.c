@@ -32,7 +32,7 @@ static u32 g_ip_addr_src;
 static u16 g_ip_port_dst;
 static u16 g_ip_port_src;
 
-static u8 udp_sndbuf[1520] __attribute__((aligned(64))); /* 1 MTU(1514) max */
+static u8 udp_sndbuf[ETH_FRAME_LEN+8] __attribute__((aligned(64))); /* 1 MTU(1514) max */
 static u8 *p_rcptbuf;
 static int rcptbuf_size;
 static int udp_mutex = -1;
@@ -67,7 +67,7 @@ void udp_init(g_param_t *g_param)
 	udp_pkt = (udp_pkt_t *)udp_sndbuf;
 
 	memcpy(udp_pkt->eth.h_dest, g_param->eth_addr_dst, ETH_ALEN*2);
-	udp_pkt->eth.h_proto = 0x0008;	/* Network byte order: 0x800 */
+	udp_pkt->eth.h_proto = HTONS(ETH_P_IP);
 
 	udp_pkt->ip.hlen = 0x45;
 	udp_pkt->ip.tos = 0;
@@ -112,7 +112,7 @@ int udp_output(void *buf, int size)
 	udp_pkt = (udp_pkt_t *)udp_sndbuf;
 	pktsize = size + sizeof(udp_pkt_t);
 
-	udp_pkt->ip.len = htons(pktsize - 14);				/* Subtract the ethernet header size */
+	udp_pkt->ip.len = htons(pktsize - ETH_HLEN);		/* Subtract the ethernet header size */
 
 	udp_pkt->ip.csum = 0;
 	udp_pkt->ip.csum = inet_chksum(&udp_pkt->ip, 20);	/* Checksum the IP header (20 bytes) */
@@ -124,7 +124,7 @@ int udp_output(void *buf, int size)
 	CpuSuspendIntr(&oldstate);
 
 	udp_pkt->udp_csum = 0;
-	udp_pkt->udp_csum = inet_chksum_pseudo(&udp_sndbuf[34], &g_ip_addr_src, &g_ip_addr_dst, 8+size);
+	udp_pkt->udp_csum = inet_chksum_pseudo(&udp_sndbuf[ETH_HLEN+20], &g_ip_addr_src, &g_ip_addr_dst, 8+size);
 
 	/* send the ethernet frame */
 	while (smap_xmit(udp_pkt, pktsize) != 0);
@@ -172,8 +172,8 @@ void udp_getpacket(void *buf, int *size)
 	udp_pkt_t *udp_pkt = (udp_pkt_t *)p_rcptbuf;
 	pktsize = ntohs(udp_pkt->udp_len) - 8; /* substract udp header */
 
-	p_rcptbuf[42+pktsize] = 0;
-	memcpy(buf, &p_rcptbuf[42], pktsize+1);
+	p_rcptbuf[ETH_HLEN+20+8+pktsize] = 0;
+	memcpy(buf, &p_rcptbuf[ETH_HLEN+20+8], pktsize+1);
 	*size = pktsize;
 
 	CpuResumeIntr(oldstate);

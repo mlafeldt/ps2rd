@@ -28,9 +28,6 @@
 
 #define	SMAP_RX_BUFSIZE		16384
 #define SMAP_RX_BASE		0x4000
-#define	SMAP_RX_MINSIZE		14		/* Ethernet header size */
-#define	SMAP_RX_MAXSIZE		(6+6+2+1500+4)
-#define	SMAP_TX_MAXSIZE		(6+6+2+1500)
 
 #define	SMAP_BD_NEXT(x)	(x)=(x)<(SMAP_BD_MAX_ENTRY-1) ? (x)+1:0
 
@@ -52,7 +49,7 @@ typedef struct {
 
 static smap_rx_stat_t rx_stat;
 
-static u8 rcpt_buf[SMAP_RX_MAXSIZE] __attribute__((aligned(64)));
+static u8 rcpt_buf[ETH_FRAME_LEN+ETH_FCS_LEN] __attribute__((aligned(64)));
 
 /*
  * smap_CopyToFIFO: copy datas from IOP mem to FIFO
@@ -283,12 +280,12 @@ int smap_xmit(void *buf, int size)
 	USE_SMAP_TX_BD;
 	int txlen;
 
-	/* check  the size doesn't exceed MTU */
-	if (size > SMAP_TX_MAXSIZE)
-		return 1;
-
 	/* get total length of the packet */
 	txlen = (size + 3) & 0xfffc;
+
+	/* check  the size doesn't exceed MTU */
+	if (txlen > ETH_FRAME_LEN)
+		return 1;
 
 	/* get/check free mem in TX buffer */
  	int txfree = ((tx_stat.txwp_start > tx_stat.txwp_end) ? (SMAP_TX_BUFSIZE + tx_stat.txwp_end - tx_stat.txwp_start) :
@@ -381,8 +378,8 @@ static int smap_rx_intr(int irq)
 
 		len = rx_bd[rxbdi].length;
 
-		/* check for BD error and packet size doesn't exceed MTU */
-		if ((stat & SMAP_BD_RX_ERROR) || ((len < SMAP_RX_MINSIZE) || (len > SMAP_RX_MAXSIZE)))
+		/* check for BD error and packet size doesn't exceed a ETH frame + CRC */
+		if ((stat & SMAP_BD_RX_ERROR) || ((len < ETH_HLEN) || (len > (ETH_FRAME_LEN+ETH_FCS_LEN))))
 			ret = 0;
 		else {
 			u16 rxrp = ((rx_bd[rxbdi].pointer - SMAP_RX_BASE) % SMAP_RX_BUFSIZE) & 0xfffc;
@@ -390,9 +387,9 @@ static int smap_rx_intr(int irq)
 			smap_CopyFromFIFO(rxrp, (u32 *)rcpt_buf, len);
 
 			struct ethhdr *eth = (struct ethhdr *)rcpt_buf;
-			if (eth->h_proto == 0x0008) { /* the ethernet frame contains an IP packet */
+			if (eth->h_proto == NTOHS(ETH_P_IP)) { /* the ethernet frame contains an IP packet */
 
-				ip_hdr_t *ip = (ip_hdr_t *)&rcpt_buf[14];
+				ip_hdr_t *ip = (ip_hdr_t *)&rcpt_buf[ETH_HLEN];
 				if ((ip->hlen == 0x45) && (inet_chksum(ip, 20) == 0)) { 	/* Check IPv4 & IP checksum */
 					if ((!(ip->flags & 0x3f)) && (ip->frag_offset == 0)) { 	/* Drop IP fragments		*/
 						if (ip->proto == 0x11) 								/* Check it's UDP packet	*/
@@ -400,7 +397,7 @@ static int smap_rx_intr(int irq)
 					}
 				}
 			}
-			else if (eth->h_proto == 0x0608) /* the ethernet frame contains an ARP packet */
+			else if (eth->h_proto == NTOHS(ETH_P_ARP)) /* the ethernet frame contains an ARP packet */
 				arp_input(rcpt_buf, len);
 		}
 
@@ -494,7 +491,7 @@ int smap_init(g_param_t *g_param)
 		MACcsum += MAC[i];
 	if (MACcsum != MAC[3])
 		return 1;
-	memcpy(g_param->eth_addr_src, &MAC[0], 6);
+	memcpy(g_param->eth_addr_src, &MAC[0], ETH_ALEN);
 
 	/* Disable TX/RX */
 	val = SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE0);
@@ -567,7 +564,7 @@ int smap_init(g_param_t *g_param)
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, val);
 
 	/* Set HW MAC address */
-	memcpy(hwaddr, g_param->eth_addr_src, 6);
+	memcpy(hwaddr, g_param->eth_addr_src, ETH_ALEN);
 	val = (u16)((hwaddr[0] << 8)|hwaddr[1]);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, val);
 	val = ((hwaddr[2] << 24)|(hwaddr[3] << 16)|(hwaddr[4] << 8)|hwaddr[5]);
