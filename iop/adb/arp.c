@@ -23,31 +23,32 @@
 #include "inet.h"
 #include "smap.h"
 #include "linux/if_ether.h"
+#include "linux/if_arp.h"
 
 #define ARP_TIMEOUT	(3000*1000)
-#define ARP_REQUEST	0x01
-#define ARP_REPLY	0x02
+
+struct arpdata {
+	u8 ar_sha[ETH_ALEN];       /* sender hardware address      */
+	u8 ar_sip[4];              /* sender IP address            */
+	u8 ar_tha[ETH_ALEN];       /* target hardware address      */
+	u8 ar_tip[4];              /* target IP address            */	
+};
 
 typedef struct {
 	/* Ethernet header (14) */
 	struct ethhdr eth;
 
-	/* ARP header (28) */
-	u16	arp_hwtype;
-	u16	arp_protocoltype;
-	u8	arp_hwsize;
-	u8	arp_protocolsize;
-	u16	arp_opcode;
-	u8	arp_sender_eth_addr[ETH_ALEN];
-	ip_addr_t arp_sender_ip_addr;
-	u8	arp_target_eth_addr[ETH_ALEN];
-	ip_addr_t arp_target_ip_addr;
+	/* ARP header (8) */
+	struct arphdr arp_hdr;
+
+	/* ARP datas (20) */
+	struct arpdata arp;
 } arp_pkt_t __attribute__((packed));
 
 static u8 g_eth_addr_dst[ETH_ALEN];
 static u8 g_eth_addr_src[ETH_ALEN];
-static u32 g_ip_addr_src;
 static u32 g_ip_addr_dst;
+static u32 g_ip_addr_src;
 
 static int arp_mutex = -1;
 static int arp_reply_flag;
@@ -56,11 +57,11 @@ static int wait_arp_reply = 0;
 /*
  * arp_init: initialize ARP layer
  */
-void arp_init(u32 dst_ip, u32 src_ip)
+void arp_init(u8 *sender_eth_addr, u32 dst_ip, u32 src_ip)
 {
 	/* these are stored in network byte order, careful later */
-	memset(g_eth_addr_dst, 0xff, ETH_ALEN);
-	memset(g_eth_addr_src, 0xff, ETH_ALEN);
+	memset(g_eth_addr_dst, 0xff, ETH_ALEN); /* broadcast first */
+	memcpy(g_eth_addr_src, sender_eth_addr, ETH_ALEN);
 	g_ip_addr_dst = dst_ip;
 	g_ip_addr_src = src_ip;
 }
@@ -77,15 +78,15 @@ static void arp_output(u16 opcode, u8 *target_eth_addr)
 	memcpy(arp_pkt.eth.h_source, g_eth_addr_src, ETH_ALEN);
 	arp_pkt.eth.h_proto = HTONS(ETH_P_ARP);
 
-	arp_pkt.arp_hwtype = HTONS(ETH_P_802_3);
-	arp_pkt.arp_protocoltype = HTONS(ETH_P_IP);
-	arp_pkt.arp_hwsize = ETH_ALEN;		/* size of HW MAC adresses */
-	arp_pkt.arp_protocolsize = 4;
-	arp_pkt.arp_opcode = htons(opcode);
-	memcpy(arp_pkt.arp_sender_eth_addr, g_eth_addr_src, ETH_ALEN);
-	memcpy(&arp_pkt.arp_sender_ip_addr, &g_ip_addr_src, 4);
-	memcpy(arp_pkt.arp_target_eth_addr, target_eth_addr, ETH_ALEN);
-	memcpy(&arp_pkt.arp_target_ip_addr, &g_ip_addr_dst, 4);
+	arp_pkt.arp_hdr.ar_hrd = HTONS(ETH_P_802_3);
+	arp_pkt.arp_hdr.ar_pro = HTONS(ETH_P_IP);
+	arp_pkt.arp_hdr.ar_hln = ETH_ALEN;		/* size of HW MAC adresses */
+	arp_pkt.arp_hdr.ar_pln = 4;
+	arp_pkt.arp_hdr.ar_op = htons(opcode);
+	memcpy(arp_pkt.arp.ar_sha, g_eth_addr_src, ETH_ALEN);
+	memcpy(&arp_pkt.arp.ar_sip, &g_ip_addr_src, 4);
+	memcpy(arp_pkt.arp.ar_tha, target_eth_addr, ETH_ALEN);
+	memcpy(&arp_pkt.arp.ar_tip, &g_ip_addr_dst, 4);
 
 	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0)
 		;
@@ -101,28 +102,28 @@ void arp_input(void *buf, int size)
 	arp_pkt_t *arp_pkt = (arp_pkt_t *)buf;
 
 	/* check if it's an ARP reply */
-	if (arp_pkt->arp_opcode == NTOHS(ARP_REPLY)) {
+	if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REPLY)) {
 
 		if (wait_arp_reply) {
-			memcpy(g_eth_addr_dst, &arp_pkt->arp_sender_eth_addr[0], ETH_ALEN);
+			memcpy(g_eth_addr_dst, &arp_pkt->arp.ar_sha, ETH_ALEN);
 
 			arp_reply_flag = 1;
 			iSignalSema(arp_mutex);
 		}
 	}
 	/* check if it's an ARP request */
-	else if (arp_pkt->arp_opcode == NTOHS(ARP_REQUEST)) {
+	else if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REQUEST)) {
 
 		/* Is that request for us ? */
 		for (i=0; i<4; i++) {
 			u8 *p = (u8 *)&g_ip_addr_src;
-			if (arp_pkt->arp_target_ip_addr.addr[i] != p[i])
+			if (arp_pkt->arp.ar_tip[i] != p[i])
 				break;
 		}
 
 		/* yes ? we send an ARP reply with our ethernet addr */
 		if (i == 4)
-			arp_output(ARP_REPLY, g_eth_addr_dst);
+			arp_output(ARPOP_REPLY, g_eth_addr_dst);
 	}
 }
 
@@ -153,7 +154,7 @@ void arp_request(u8 *eth_addr)
 send_arp_request:
 
 	/* send an ARP resquest */
-	arp_output(ARP_REQUEST, "\x00\x00\x00\x00\x00\x00");
+	arp_output(ARPOP_REQUEST, "\x00\x00\x00\x00\x00\x00");
 	CpuResumeIntr(oldstate);
 
 	/* set the reply timer */

@@ -56,7 +56,7 @@ int adb_init(int arg)
 	if (_adb_init)
 		return -1;
 
-	arp_init(g_param.ip_addr_dst, g_param.ip_addr_src);
+	arp_init(g_param.eth_addr_src, g_param.ip_addr_dst, g_param.ip_addr_src);
 
 	/* Does ARP request to get PC ethernet addr */
 	arp_request(g_param.eth_addr_dst);

@@ -30,7 +30,7 @@
 #include <thsemap.h>
 #include <sysclib.h>
 
-void arp_init(u32 dst_ip, u32 src_ip);
+void arp_init(u8 *sender_eth_addr, u32 dst_ip, u32 src_ip);
 void arp_input(void *buf, int size);
 void arp_request(u8 *eth_addr);
 
