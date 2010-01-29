@@ -1,5 +1,5 @@
 IOP_BIN = adb.irx
-IOP_OBJS = adb.o smap.o arp.o inet.o udp.o exports.o imports.o
+IOP_OBJS = adb.o smap.o arp.o inet.o ip.o udp.o exports.o imports.o
 IOP_OBJS += tty.o # should be configureable
 IOP_LIBS =
 

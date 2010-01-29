@@ -1,5 +1,5 @@
 /*
- * udp.h - Advanced debugger
+ * ip.c - lightweight IP implementation
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
@@ -19,21 +19,11 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _IOP_UDP_H_
-#define _IOP_UDP_H_
-
-#include <tamtypes.h>
-#include <irx.h>
-
-#include <intrman.h>
-#include <thbase.h>
-#include <thsemap.h>
-#include <sysclib.h>
-#include <stdio.h>
-
+#include "ip.h"
+#include "inet.h"
+#include "udp.h"
 #include "linux/if_ether.h"
 #include "linux/ip.h"
-#include "adb.h"
 
 typedef struct {
 	/* Ethernet header (14) */
@@ -41,19 +31,25 @@ typedef struct {
 
 	/* IP header (20) */
 	struct iphdr ip;
+} ip_pkt_t __attribute__((packed));
 
-	/* UDP header (8) */
-	u16	udp_port_src;
-	u16	udp_port_dst;
-	u16	udp_len;
-	u16	udp_csum;
+/*
+ * ip_input: Called from smap RX intr handler when a IP ethernet
+ * frame is received. (careful with Intr context)
+ */
+void ip_input(void *buf, int size)
+{
+	ip_pkt_t *ip_pkt = (ip_pkt_t *)buf;
 
-	/* Data goes here */
-} udp_pkt_t __attribute__((packed));
+	if ((ip_pkt->ip.version == IPVERSION) && (ip_pkt->ip.ihl == 5)) { /* ihl is 5 words */
 
-void udp_init(g_param_t *g_param);
-int udp_input(void *buf, int size);
-int udp_output(void *buf, int size);
-void udp_getpacket(void *buf, int *size);
+		if (ip_pkt->ip.frag_off == 0) { /* drop IP fragments */
 
-#endif /* _IOP_UDP_H_ */
+			if (inet_chksum(&ip_pkt->ip, 20) == 0) { /* check IP checksum */
+
+				if (ip_pkt->ip.protocol == 0x11) /* filter UDP packet */
+					udp_input(buf, size);
+			}
+		}
+	}
+}

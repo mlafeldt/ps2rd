@@ -23,6 +23,7 @@
 #include "inet.h"
 #include "smap.h"
 #include "linux/if_ether.h"
+#include "linux/ip.h"
 
 #define M_PRINTF(format, args...) \
 	printf(ADB_MODNAME ": " format, ## args)
@@ -69,15 +70,15 @@ void udp_init(g_param_t *g_param)
 	memcpy(udp_pkt->eth.h_dest, g_param->eth_addr_dst, ETH_ALEN*2);
 	udp_pkt->eth.h_proto = HTONS(ETH_P_IP);
 
-	udp_pkt->ip.hlen = 0x45;
+	udp_pkt->ip.version = IPVERSION;
+	udp_pkt->ip.ihl = 5;
 	udp_pkt->ip.tos = 0;
 	udp_pkt->ip.id = 0;
-	udp_pkt->ip.flags = 0;
-	udp_pkt->ip.frag_offset = 0;
-	udp_pkt->ip.ttl = 64;
-	udp_pkt->ip.proto = 0x11;
-	memcpy(&udp_pkt->ip.addr_src.addr, &g_param->ip_addr_src, 4);
-	memcpy(&udp_pkt->ip.addr_dst.addr, &g_param->ip_addr_dst, 4);
+	udp_pkt->ip.frag_off = 0;
+	udp_pkt->ip.ttl = IPDEFTTL;
+	udp_pkt->ip.protocol = 0x11;
+	memcpy(udp_pkt->ip.saddr, &g_param->ip_addr_src, 4);
+	memcpy(udp_pkt->ip.daddr, &g_param->ip_addr_dst, 4);
 
 	udp_pkt->udp_port_src = g_param->ip_port_src;
 	udp_pkt->udp_port_dst = g_param->ip_port_dst;
@@ -112,10 +113,10 @@ int udp_output(void *buf, int size)
 	udp_pkt = (udp_pkt_t *)udp_sndbuf;
 	pktsize = size + sizeof(udp_pkt_t);
 
-	udp_pkt->ip.len = htons(pktsize - ETH_HLEN);		/* Subtract the ethernet header size */
+	udp_pkt->ip.tot_len = htons(pktsize - ETH_HLEN);		/* Subtract the ethernet header size */
 
-	udp_pkt->ip.csum = 0;
-	udp_pkt->ip.csum = inet_chksum(&udp_pkt->ip, 20);	/* Checksum the IP header (20 bytes) */
+	udp_pkt->ip.check = 0;
+	udp_pkt->ip.check = inet_chksum(&udp_pkt->ip, 20);	/* Checksum the IP header (20 bytes) */
 
 	udpsize = htons(size + 8);							/* Size of the UDP header + data */
 	udp_pkt->udp_len = udpsize;
@@ -147,7 +148,7 @@ int udp_input(void *buf, int size)
 		if (udp_pkt->udp_port_dst == g_ip_port_src) {
 
 			/* check pseudo checksum */
-			if (inet_chksum_pseudo(&udp_pkt->udp_port_src, &g_ip_addr_dst, &g_ip_addr_src, (ntohs(udp_pkt->ip.len)-20)) == 0) {
+			if (inet_chksum_pseudo(&udp_pkt->udp_port_src, &g_ip_addr_dst, &g_ip_addr_src, (ntohs(udp_pkt->ip.tot_len)-20)) == 0) {
 				p_rcptbuf = buf;
 				rcptbuf_size = size;
 				iSignalSema(udp_mutex);

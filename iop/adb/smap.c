@@ -23,7 +23,7 @@
 #include "smap.h"
 #include "inet.h"
 #include "arp.h"
-#include "udp.h"
+#include "ip.h"
 #include "linux/if_ether.h"
 
 #define	SMAP_RX_BUFSIZE		16384
@@ -387,16 +387,10 @@ static int smap_rx_intr(int irq)
 			smap_CopyFromFIFO(rxrp, (u32 *)rcpt_buf, len);
 
 			struct ethhdr *eth = (struct ethhdr *)rcpt_buf;
-			if (eth->h_proto == NTOHS(ETH_P_IP)) { /* the ethernet frame contains an IP packet */
 
-				ip_hdr_t *ip = (ip_hdr_t *)&rcpt_buf[ETH_HLEN];
-				if ((ip->hlen == 0x45) && (inet_chksum(ip, 20) == 0)) { 	/* Check IPv4 & IP checksum */
-					if ((!(ip->flags & 0x3f)) && (ip->frag_offset == 0)) { 	/* Drop IP fragments		*/
-						if (ip->proto == 0x11) 								/* Check it's UDP packet	*/
-							udp_input(rcpt_buf, len);
-					}
-				}
-			}
+			if (eth->h_proto == NTOHS(ETH_P_IP)) /* the ethernet frame contains an IP packet */
+				ip_input(rcpt_buf, len);
+
 			else if (eth->h_proto == NTOHS(ETH_P_ARP)) /* the ethernet frame contains an ARP packet */
 				arp_input(rcpt_buf, len);
 		}

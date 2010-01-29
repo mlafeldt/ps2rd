@@ -23,15 +23,12 @@
 #define _IOP_INET_H_
 
 #include <tamtypes.h>
-#include <irx.h>
-
-#include "adb.h"
 
 u16 htons(u16);
 u16 ntohs(u16);
 u32 htonl(u32);
 u32 ntohl(u32);
-u16 inet_chksum(ip_hdr_t *, u16);
+u16 inet_chksum(void *, u16);
 u16 inet_chksum_pseudo(void *, u32 *, u32 *, u16);
 
 #endif /* _IOP_INET_H_ */

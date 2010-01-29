@@ -8,21 +8,7 @@
 				((b & 0xff) << 8) | ((a & 0xff)))
 #define IP_PORT(port)	(((port & 0xff00) >> 8) | ((port & 0xff) << 8))
 
-typedef struct { u8 addr[4]; } ip_addr_t __attribute__((packed));
 
-/* IP header (20) */
-typedef struct {
-	u8	hlen;
-	u8	tos;
-	u16	len;
-	u16	id;
-	u8	flags;
-	u8	frag_offset;
-	u8	ttl;
-	u8	proto;
-	u16	csum;
-	ip_addr_t addr_src;
-	ip_addr_t addr_dst;
-} ip_hdr_t;
+void ip_input(void *buf, int size);
 
 #endif /* _IOP_IP_H_ */

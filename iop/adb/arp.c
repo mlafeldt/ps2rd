@@ -117,7 +117,7 @@ void arp_input(void *buf, int size)
 		}
 	} else if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REQUEST)) { /* process ARP request */
 		/* if request is for us, reply with our ethernet addr */
-		if (*(u32*)&arp_pkt->arp.ar_tip == g_ip_addr_src)
+		if (!memcmp(arp_pkt->arp.ar_tip, &g_ip_addr_src, 4))
 			arp_output(ARPOP_REPLY, g_eth_addr_dst);
 	}
 }
