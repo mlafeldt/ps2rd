@@ -43,7 +43,8 @@ void ip_input(void *buf, int size)
 
 	if (ip_pkt->ip.version == IPVERSION &&
 			ip_pkt->ip.ihl == (sizeof(struct iphdr) / 4) &&
-			!ip_pkt->ip.frag_off && /* drop IP fragments */
+			!(ip_pkt->ip.frag_off & 0x3f) && 	/* drop IP fragments */
+			!(ip_pkt->ip.frag_off & 0xff00) && 	/* drop IP fragments */
 			!inet_chksum(&ip_pkt->ip, sizeof(struct iphdr)) && /* verify IP checksum */
 			ip_pkt->ip.protocol == 0x11) /* filter UDP packet */
 		udp_input(buf, size);
