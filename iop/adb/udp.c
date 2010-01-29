@@ -71,7 +71,7 @@ void udp_init(g_param_t *g_param)
 	udp_pkt->eth.h_proto = HTONS(ETH_P_IP);
 
 	udp_pkt->ip.version = IPVERSION;
-	udp_pkt->ip.ihl = 5;
+	udp_pkt->ip.ihl = sizeof(struct iphdr) / 4;
 	udp_pkt->ip.tos = 0;
 	udp_pkt->ip.id = 0;
 	udp_pkt->ip.frag_off = 0;

@@ -19,7 +19,7 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ip.h"
+#include <tamtypes.h>
 #include "inet.h"
 #include "udp.h"
 #include "linux/if_ether.h"
@@ -34,22 +34,17 @@ typedef struct {
 } ip_pkt_t __attribute__((packed));
 
 /*
- * ip_input: Called from smap RX intr handler when a IP ethernet
+ * ip_input: Called from smap RX intr handler when an IP ethernet
  * frame is received. (careful with Intr context)
  */
 void ip_input(void *buf, int size)
 {
 	ip_pkt_t *ip_pkt = (ip_pkt_t *)buf;
 
-	if ((ip_pkt->ip.version == IPVERSION) && (ip_pkt->ip.ihl == 5)) { /* ihl is 5 words */
-
-		if (ip_pkt->ip.frag_off == 0) { /* drop IP fragments */
-
-			if (inet_chksum(&ip_pkt->ip, 20) == 0) { /* check IP checksum */
-
-				if (ip_pkt->ip.protocol == 0x11) /* filter UDP packet */
-					udp_input(buf, size);
-			}
-		}
-	}
+	if (ip_pkt->ip.version == IPVERSION &&
+			ip_pkt->ip.ihl == (sizeof(struct iphdr) / 4) &&
+			!ip_pkt->ip.frag_off && /* drop IP fragments */
+			!inet_chksum(&ip_pkt->ip, sizeof(struct iphdr)) && /* verify IP checksum */
+			ip_pkt->ip.protocol == 0x11) /* filter UDP packet */
+		udp_input(buf, size);
 }
