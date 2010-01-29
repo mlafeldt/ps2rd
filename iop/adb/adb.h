@@ -39,9 +39,6 @@
 int adb_init(int arg);
 int adb_exit(void);
 
-#define HTONS(val)	(((val & 0xff00) >> 8) | ((val & 0xff) << 8))
-#define NTOHS(val)	HTONS(val)
-
 /* global parameters struct */
 typedef struct {
 	u8 eth_addr_dst[ETH_ALEN];

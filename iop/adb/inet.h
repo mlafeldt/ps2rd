@@ -24,6 +24,22 @@
 
 #include <tamtypes.h>
 
+#ifndef HTONL
+#define HTONL(x)	((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)&0xff0000)>>8)|(((x)&0xff000000)>>24))
+#endif
+
+#ifndef HTONS
+#define HTONS(x)	((((x)&0xff)<<8)|(((x)&0xff00)>>8))
+#endif
+
+#ifndef NTOHL
+#define NTOHL(x)	HTONL(x)
+#endif
+
+#ifndef NTOHS
+#define NTOHS(x)	HTONS(x)
+#endif
+
 u16 htons(u16);
 u16 ntohs(u16);
 u32 htonl(u32);
