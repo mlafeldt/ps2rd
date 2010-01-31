@@ -6,7 +6,7 @@ IOP_LIBS =
 IOP_INCS +=
 IOP_CFLAGS += -Wall -fno-builtin -DUDPTTY #-DADB_RPC
 IOP_ASFLAGS +=
-IOP_LDFLAGS += #-s
+IOP_LDFLAGS += -s
 
 
 all: $(IOP_BIN)
