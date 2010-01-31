@@ -11,30 +11,26 @@
 # TTY filesystem for UDPTTY.
 */
 
-#include "tty.h"
-#include "inet.h"
+#include <tamtypes.h>
+#include <ioman.h>
+#include <thsemap.h>
+#include <sysclib.h>
+#include <errno.h>
+
+#include "ip.h"
 #include "udp.h"
-#include "smap.h"
-#include "linux/if_ether.h"
-#include "linux/ip.h"
 
 #define DEVNAME "tty"
-
-static u32 g_ip_addr_dst;
-static u32 g_ip_addr_src;
-static u16 g_ip_port_log;
-static u16 g_ip_port_src;
+#define TTY_LOCAL_PORT			IP_PORT(18194)
 
 extern iop_device_t tty_device;
 static int tty_sema = -1;
 
-static u8 tty_sndbuf[ETH_FRAME_LEN] __attribute__((aligned(64))); /* 1 MTU */
+static u16 g_ip_port_log;
 
 /* Init TTY */
-void ttyInit(g_param_t *g_param)
+void udptty_init(u16 ip_port_log)
 {
-	udp_pkt_t *udp_pkt;
-
 	close(0);
 	close(1);
 	DelDrv(DEVNAME);
@@ -45,64 +41,7 @@ void ttyInit(g_param_t *g_param)
 	open(DEVNAME "00:", 0x1000|O_RDWR);
 	open(DEVNAME "00:", O_WRONLY);
 
-	/* Initialize the static elements of our UDP packet */
-	udp_pkt = (udp_pkt_t *)tty_sndbuf;
-
-	memcpy(udp_pkt->eth.h_dest, g_param->eth_addr_dst, ETH_ALEN*2);
-	udp_pkt->eth.h_proto = HTONS(ETH_P_IP);
-
-	udp_pkt->ip.version = IPVERSION;
-	udp_pkt->ip.ihl = sizeof(struct iphdr) / 4;
-	udp_pkt->ip.tos = 0;
-	udp_pkt->ip.id = 0;
-	udp_pkt->ip.frag_off = 0;
-	udp_pkt->ip.ttl = IPDEFTTL;
-	udp_pkt->ip.protocol = 0x11;
-	memcpy(udp_pkt->ip.saddr, &g_param->ip_addr_src, 4);
-	memcpy(udp_pkt->ip.daddr, &g_param->ip_addr_dst, 4);
-
-	udp_pkt->udp_port_src = g_param->ip_port_src;
-	udp_pkt->udp_port_dst = g_param->ip_port_log;
-
-	/* these are stored in network byte order, careful later */
-	g_ip_addr_dst = g_param->ip_addr_dst;
-	g_ip_addr_src = g_param->ip_addr_src;
-	g_ip_port_log = g_param->ip_port_log;
-	g_ip_port_src = g_param->ip_port_src;
-}
-
-/*
- * udptty_output: send an UDP ethernet frame
- */
-static int udptty_output(void *buf, int size)
-{
-	udp_pkt_t *udp_pkt;
-	int pktsize, udpsize;
-	int oldstate;
-
-	if ((size + sizeof(udp_pkt_t)) > sizeof(tty_sndbuf))
-		size = sizeof(tty_sndbuf) - sizeof(udp_pkt_t);
-
-	udp_pkt = (udp_pkt_t *)tty_sndbuf;
-	pktsize = size + sizeof(udp_pkt_t);
-
-	udp_pkt->ip.tot_len = htons(pktsize - ETH_HLEN); /* Subtract the ethernet header size */
-
-	udp_pkt->ip.check = 0;
-	udp_pkt->ip.check = inet_chksum(&udp_pkt->ip, 20); /* Checksum the IP header (20 bytes) */
-
-	udpsize = htons(size + 8); /* Size of the UDP header + data */
-	udp_pkt->udp_len = udpsize;
-	memcpy(tty_sndbuf + sizeof(udp_pkt_t), buf, size);
-
-	udp_pkt->udp_csum = 0; /* Don't care... */
-
-	/* send the eth frame */
-	CpuSuspendIntr(&oldstate);
-	while (smap_xmit(udp_pkt, pktsize) != 0);
-	CpuResumeIntr(oldstate);
-
-	return 0;
+	g_ip_port_log = ip_port_log;
 }
 
 /* TTY driver.  */
@@ -128,7 +67,7 @@ static int tty_write(iop_file_t *file, void *buf, size_t size)
 	int res = 0;
 
 	WaitSema(tty_sema);
-	res = udptty_output(buf, size);
+	res = udp_output(TTY_LOCAL_PORT, g_ip_port_log, buf, size);
 
 	SignalSema(tty_sema);
 	return res;

@@ -21,9 +21,8 @@
  */
 
 #include "smap.h"
+#include "eth.h"
 #include "inet.h"
-#include "arp.h"
-#include "ip.h"
 #include "linux/if_ether.h"
 
 #define	SMAP_RX_BUFSIZE		16384
@@ -386,13 +385,8 @@ static int smap_rx_intr(int irq)
 			/* FIFO -> memory */
 			smap_CopyFromFIFO(rxrp, (u32 *)rcpt_buf, len);
 
-			struct ethhdr *eth = (struct ethhdr *)rcpt_buf;
-
-			if (eth->h_proto == NTOHS(ETH_P_IP)) /* the ethernet frame contains an IP packet */
-				ip_input(rcpt_buf, len);
-
-			else if (eth->h_proto == NTOHS(ETH_P_ARP)) /* the ethernet frame contains an ARP packet */
-				arp_input(rcpt_buf, len);
+			/* we got the ethernet frame */
+			eth_input(rcpt_buf, len);
 		}
 
 		SMAP_REG8(SMAP_R_RXFIFO_FRAME_DEC) = 1;
@@ -454,7 +448,7 @@ static int smap_intr_handler(int state)
 /*
  * smap_init: main SMAP init function
  */
-int smap_init(g_param_t *g_param)
+int smap_init(u8 *eth_addr_src)
 {
 	USE_SPD_REGS;
 	USE_DEV9_REGS;
@@ -485,7 +479,7 @@ int smap_init(g_param_t *g_param)
 		MACcsum += MAC[i];
 	if (MACcsum != MAC[3])
 		return 1;
-	memcpy(g_param->eth_addr_src, &MAC[0], ETH_ALEN);
+	memcpy(eth_addr_src, &MAC[0], ETH_ALEN);
 
 	/* Disable TX/RX */
 	val = SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE0);
@@ -558,7 +552,7 @@ int smap_init(g_param_t *g_param)
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, val);
 
 	/* Set HW MAC address */
-	memcpy(hwaddr, g_param->eth_addr_src, ETH_ALEN);
+	memcpy(hwaddr, eth_addr_src, ETH_ALEN);
 	val = (u16)((hwaddr[0] << 8)|hwaddr[1]);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, val);
 	val = ((hwaddr[2] << 24)|(hwaddr[3] << 16)|(hwaddr[4] << 8)|hwaddr[5]);

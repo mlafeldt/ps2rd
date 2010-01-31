@@ -33,9 +33,7 @@
 #include <dev9regs.h>
 #include <smapregs.h>
 
-#include "adb.h"
-
-int smap_init(g_param_t *g_param);
+int smap_init(u8 *eth_addr_src);
 int smap_xmit(void *buf, int size);
 
 #endif /* _IOP_SMAP_H_ */

@@ -23,15 +23,7 @@
 #define _IOP_TTY_H_
 
 #include <tamtypes.h>
-#include <irx.h>
 
-#include <ioman.h>
-#include <thsemap.h>
-#include <sysclib.h>
-#include <errno.h>
-
-#include "adb.h"
-
-void ttyInit(g_param_t *g_param);
+void udptty_init(u16 ip_port_log);
 
 #endif /* _IOP_TTY_H_ */

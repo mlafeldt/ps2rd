@@ -1,5 +1,5 @@
 /*
- * arp.h - lightweight ARP implementation
+ * eth.h - lightweight Ethernet implementation
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
@@ -19,13 +19,15 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _IOP_ARP_H_
-#define _IOP_ARP_H_
+#ifndef _IOP_ETH_H_
+#define _IOP_ETH_H_
 
 #include <tamtypes.h>
 
-void arp_init(u8 *eth_addr_dst, u8 *eth_addr_src, u32 dst_ip, u32 src_ip);
-void arp_input(void *buf, int size);
+int eth_init(u32 ip_addr_dst, u32 ip_addr_src);
+void eth_input(void *buf, int size);
+int eth_output(void *buf, int size, int h_proto);
+
 void arp_request(u8 *eth_addr);
 
 #endif /* _IOP_ARP_H_ */

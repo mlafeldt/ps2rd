@@ -25,8 +25,6 @@
 
 #include <tamtypes.h>
 #include <irx.h>
-#include "linux/if_ether.h"
-#include "ip.h"
 
 /* Module name and version */
 #define ADB_MODNAME	"adb"
@@ -41,14 +39,10 @@ int adb_exit(void);
 
 /* global parameters struct */
 typedef struct {
-	u8 eth_addr_dst[ETH_ALEN];
-	u8 eth_addr_src[ETH_ALEN];
 	u32 ip_addr_dst;
 	u32 ip_addr_src;
-	u16 ip_port_dst;
-	u16 ip_port_src;
-	u16 ip_port_log;
-	int rcv_mutex;
+	u16 ip_port_remote;
+	u16 ip_port_local;
 } g_param_t;
 
 /* IRX import defines */

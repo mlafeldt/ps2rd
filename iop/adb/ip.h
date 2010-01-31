@@ -29,7 +29,8 @@
 				((b & 0xff) << 8) | ((a & 0xff)))
 #define IP_PORT(port)	(((port & 0xff00) >> 8) | ((port & 0xff) << 8))
 
-
+void ip_init(u32 ip_addr_dst, u32 ip_addr_src);
 void ip_input(void *buf, int size);
+int ip_output(void *buf, int size, u8 ip_protocol);
 
 #endif /* _IOP_IP_H_ */

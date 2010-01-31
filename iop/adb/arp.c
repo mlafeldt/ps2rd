@@ -20,7 +20,6 @@
  */
 
 #include <tamtypes.h>
-#include <irx.h>
 #include <intrman.h>
 #include <thbase.h>
 #include <thsemap.h>
@@ -28,7 +27,7 @@
 
 #include "arp.h"
 #include "inet.h"
-#include "smap.h"
+#include "eth.h"
 #include "linux/if_ether.h"
 #include "linux/if_arp.h"
 
@@ -52,8 +51,8 @@ typedef struct {
 	struct arpdata arp;
 } arp_pkt_t __attribute__((packed));
 
-static u8 g_eth_addr_dst[ETH_ALEN];
 static u8 g_eth_addr_src[ETH_ALEN];
+static u8 g_eth_addr_dst[ETH_ALEN];
 static u32 g_ip_addr_dst;
 static u32 g_ip_addr_src;
 
@@ -64,27 +63,26 @@ static int wait_arp_reply = 0;
 /*
  * arp_init: initialize ARP layer
  */
-void arp_init(u8 *sender_eth_addr, u32 dst_ip, u32 src_ip)
+void arp_init(u8 *eth_addr_dst, u8 *eth_addr_src, u32 dst_ip, u32 src_ip)
 {
 	/* these are stored in network byte order, careful later */
-	memset(g_eth_addr_dst, 0xff, ETH_ALEN); /* broadcast first */
-	memcpy(g_eth_addr_src, sender_eth_addr, ETH_ALEN);
+	memset(g_eth_addr_dst, 0, ETH_ALEN);	
+	memcpy(g_eth_addr_src, eth_addr_src, ETH_ALEN);	
 	g_ip_addr_dst = dst_ip;
 	g_ip_addr_src = src_ip;
+
+	/* Does ARP request to get PC ethernet addr */
+	arp_request(eth_addr_dst);
 }
 
 /*
  * arp_output: send an ARP ethernet frame
  */
-static void arp_output(u16 opcode, const u8 *target_eth_addr)
+static int arp_output(u16 opcode, const u8 *target_eth_addr)
 {
 	arp_pkt_t arp_pkt;
 
 	memset(&arp_pkt, 0, sizeof(arp_pkt_t));
-
-	memcpy(arp_pkt.eth.h_dest, g_eth_addr_dst, ETH_ALEN);
-	memcpy(arp_pkt.eth.h_source, g_eth_addr_src, ETH_ALEN);
-	arp_pkt.eth.h_proto = HTONS(ETH_P_ARP);
 
 	arp_pkt.arp_hdr.ar_hrd = HTONS(ETH_P_802_3);
 	arp_pkt.arp_hdr.ar_pro = HTONS(ETH_P_IP);
@@ -97,12 +95,11 @@ static void arp_output(u16 opcode, const u8 *target_eth_addr)
 	memcpy(arp_pkt.arp.ar_tha, target_eth_addr, ETH_ALEN);
 	memcpy(&arp_pkt.arp.ar_tip, &g_ip_addr_dst, 4);
 
-	while (smap_xmit(&arp_pkt, sizeof(arp_pkt_t)) != 0)
-		;
+	return eth_output(&arp_pkt, sizeof(arp_pkt_t), HTONS(ETH_P_ARP));
 }
 
 /*
- * arp_input: Called from smap RX intr handler when an ARP ethernet
+ * arp_input: Called from ethernet layer when an ARP ethernet
  * frame is received. (careful with Intr context)
  */
 void arp_input(void *buf, int size)
@@ -116,9 +113,9 @@ void arp_input(void *buf, int size)
 			iSignalSema(arp_mutex);
 		}
 	} else if (arp_pkt->arp_hdr.ar_op == NTOHS(ARPOP_REQUEST)) { /* process ARP request */
-		/* if request is for us, reply with our ethernet addr */
+		/* if request is for us, reply to the sender with our ethernet addr */
 		if (!memcmp(arp_pkt->arp.ar_tip, &g_ip_addr_src, 4))
-			arp_output(ARPOP_REPLY, g_eth_addr_dst);
+			arp_output(ARPOP_REPLY, arp_pkt->arp.ar_sha);
 	}
 }
 

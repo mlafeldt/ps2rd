@@ -24,10 +24,9 @@
 #include "irx_imports.h"
 #include "adb.h"
 #include "inet.h"
-#include "arp.h"
+#include "eth.h"
+#include "ip.h"
 #include "udp.h"
-#include "tty.h"
-#include "smap.h"
 
 IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 
@@ -37,17 +36,16 @@ IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 struct irx_export_table _exp_adb;
 
 static g_param_t g_param = {
-	.eth_addr_dst = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth remote addr needed for broadcast */
-	.eth_addr_src = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }, /* eth local addr */
-	.ip_addr_dst = IP_ADDR(192, 168, 0, 2), 		/* remote IP addr */
-	.ip_addr_src = IP_ADDR(192, 168, 0, 10),		/* local IP addr */
-	.ip_port_dst = IP_PORT(7410), 				/* remote port */
-	.ip_port_src = IP_PORT(8340),				/* local port */
-	.ip_port_log = IP_PORT(7411),				/* log port */
-	.rcv_mutex = -1
+	.ip_addr_dst = IP_ADDR(192, 168, 0, 2), 	/* remote IP addr */
+	.ip_addr_src = IP_ADDR(192, 168, 0, 10),	/* local IP addr */
+	.ip_port_remote = IP_PORT(7410), 			/* remote port */
+	.ip_port_local = IP_PORT(8340)				/* local port */
 };
 
 static u8 udp_rcvbuf[1474] __attribute__((aligned(64))); /* 1 MTU max(1514) - ETH/IP/UDP headers + 1 */
+
+static int _send_cl = -1;
+static int _recv_cl = -1;
 
 static int _adb_init = 0;
 
@@ -56,17 +54,15 @@ int adb_init(int arg)
 	if (_adb_init)
 		return -1;
 
-	arp_init(g_param.eth_addr_src, g_param.ip_addr_dst, g_param.ip_addr_src);
+	if (udp_connect(&_send_cl, g_param.ip_port_remote, UDP_ACTIVE_CONN) < 0) { 
+		M_PRINTF("Could not create send udp client\n"); 
+		return -1; 
+	}
 
-	/* Does ARP request to get PC ethernet addr */
-	arp_request(g_param.eth_addr_dst);
-
-	/* Init UDP layer */
-	udp_init(&g_param);
-
-#ifdef UDPTTY
-	ttyInit(&g_param);
-#endif
+	if (udp_connect(&_recv_cl, g_param.ip_port_local, UDP_PASSIVE_CONN) < 0) { 
+		M_PRINTF("Could not create recv udp client\n"); 
+		return -1; 
+	} 
 
 	_adb_init = 1;
 	M_PRINTF("Ready.\n");
@@ -78,6 +74,9 @@ int adb_exit(void)
 {
 	if (!_adb_init)
 		return -1;
+
+	udp_close(_send_cl);
+	udp_close(_recv_cl);
 
 	_adb_init = 0;
 
@@ -165,19 +164,12 @@ void server_thread(void *args)
 
 	if (!adb_init(0)) {
 		while (1) {
-			WaitSema(g_param.rcv_mutex);
-
-			while (QueryIntrContext())
-				DelayThread(10000);
-
-			/* we got a valid UDP packet incoming */
-			udp_getpacket(udp_rcvbuf, &pktsize);
-
-			M_PRINTF("Got incoming UDP packet (%d bytes) at port %d\n", pktsize, ntohs(g_param.ip_port_src));
+			pktsize = udp_recv(_recv_cl, udp_rcvbuf, sizeof(udp_rcvbuf));
+			M_PRINTF("Got incoming UDP packet (%d bytes) at port %d\n", pktsize, ntohs(g_param.ip_port_local));
 
 			/* output the received datas */
-			udp_output(udp_rcvbuf, pktsize);
-			M_PRINTF("Forwarded packet (%d bytes) to port %d\n", pktsize, ntohs(g_param.ip_port_dst));
+			udp_send(_send_cl, udp_rcvbuf, pktsize);
+			M_PRINTF("Forwarded packet (%d bytes) to port %d\n", pktsize, ntohs(g_param.ip_port_remote));
 		}
 	}
 
@@ -186,8 +178,8 @@ void server_thread(void *args)
 
 int _start(int argc, char *argv[])
 {
-	/* Init SMAP driver */
-	if (smap_init(&g_param) != 0)
+	/* Init Ethernet */
+	if (eth_init(g_param.ip_addr_dst, g_param.ip_addr_src) != 0)
 		return MODULE_NO_RESIDENT_END;
 
 	if (RegisterLibraryEntries(&_exp_adb) != 0) {

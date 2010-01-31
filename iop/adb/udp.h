@@ -35,25 +35,16 @@
 #include "linux/ip.h"
 #include "adb.h"
 
-typedef struct {
-	/* Ethernet header (14) */
-	struct ethhdr eth;
+/* flags for udp_connect */
+#define UDP_ACTIVE_CONN			1
+#define UDP_PASSIVE_CONN		2
 
-	/* IP header (20) */
-	struct iphdr ip;
-
-	/* UDP header (8) */
-	u16	udp_port_src;
-	u16	udp_port_dst;
-	u16	udp_len;
-	u16	udp_csum;
-
-	/* Data goes here */
-} udp_pkt_t __attribute__((packed));
-
-void udp_init(g_param_t *g_param);
+void udp_init(u32 ip_addr_dst, u32 ip_addr_src);
+int udp_output(u16 ip_port_src, u16 ip_port_dst, void *buf, int size);
 int udp_input(void *buf, int size);
-int udp_output(void *buf, int size);
-void udp_getpacket(void *buf, int *size);
+int udp_connect(int *s, u16 ip_port, int flags);
+int udp_close(int s);
+int udp_recv(int s, void *buf, int size);
+int udp_send(int s, void *buf, int size);
 
 #endif /* _IOP_UDP_H_ */
