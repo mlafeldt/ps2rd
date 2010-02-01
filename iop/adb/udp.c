@@ -1,5 +1,5 @@
 /*
- * udp.c - Advanced debugger
+ * udp.c - lightweight UDP implementation
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
@@ -50,47 +50,50 @@ static u8 *p_rcptbuf;
 static int rcptbuf_size;
 static int udp_rcv_mutex = -1;
 
-#define UDP_MAX_ACTIVE_CONN		4
+#define UDP_MAX_ACTIVE_CONN	4
 #define UDP_MAX_PASSIVE_CONN	2
-#define UDP_MAX_CONN			(UDP_MAX_ACTIVE_CONN+UDP_MAX_PASSIVE_CONN)
-#define UDP_LOCAL_PORT			IP_PORT(8341)
+#define UDP_MAX_CONN		(UDP_MAX_ACTIVE_CONN+UDP_MAX_PASSIVE_CONN)
+#define UDP_LOCAL_PORT		IP_PORT(8341)
 
 typedef struct {
 	u16 status;
-    u16 port;
-    int mutex;
+	u16 port;
+	int mutex;
 } udp_conn_t;
 
 static udp_conn_t udp_conn_slots[UDP_MAX_ACTIVE_CONN+UDP_MAX_PASSIVE_CONN];
 
-//#define	UDP_TIMEOUT	(3000*1000)
-//iop_sys_clock_t timeout_sysclock;
-//static int timeout_flag = 0;
+#if 0
+#define	UDP_TIMEOUT	(3000*1000)
+iop_sys_clock_t timeout_sysclock;
+static int timeout_flag = 0;
 
 /*
  * Timer Interrupt handler for UDP reply timeout (Intr context)
  * will be used later for aknowlegment of packets we send to the
  * PC, and retransmit packet if needed.
  */
-//static unsigned int timer_intr_handler(void *args)
-//{
-//	if (timeout_flag)
-//		iSignalSema(udp_rcv_mutex);
+static unsigned int timer_intr_handler(void *args)
+{
+	if (timeout_flag)
+		iSignalSema(udp_rcv_mutex);
 
-//	iSetAlarm(&timeout_sysclock, timer_intr_handler, NULL);
+	iSetAlarm(&timeout_sysclock, timer_intr_handler, NULL);
 
-//	return (unsigned int)args;
-//}
+	return (unsigned int)args;
+}
+#endif
 
 /*
  * udp_init: initialize UDP layer
  */
 void udp_init(u32 ip_addr_dst, u32 ip_addr_src)
 {
+#if 0
 	/* install a timer for UDP reply timeout */
-	//USec2SysClock(UDP_TIMEOUT, &timeout_sysclock);
-	//SetAlarm(&timeout_sysclock, timer_intr_handler, NULL);
-
+	USec2SysClock(UDP_TIMEOUT, &timeout_sysclock);
+	SetAlarm(&timeout_sysclock, timer_intr_handler, NULL);
+#endif
 	/* these are stored in network byte order, careful later */
 	g_ip_addr_dst = ip_addr_dst;
 	g_ip_addr_src = ip_addr_src;
@@ -158,7 +161,7 @@ int udp_connect(int *s, u16 ip_port, int flags)
 
 	for (i=0; i<UDP_MAX_CONN; i++) {
 		if (udp_conn_slots[i].port == ip_port) {
-			r = -1; /* already connect/binded */
+			r = -1; /* already connected/bound */
 			goto out;
 		}
 		if (udp_conn_slots[i].status == UDP_ACTIVE_CONN)
@@ -252,7 +255,7 @@ wait:
 	/* get packet data pointer and packet size */
 	udp_pkt_t *udp_pkt = (udp_pkt_t *)p_rcptbuf;
 
-	/* does it match our binded port ? */
+	/* does it match our bound port ? */
 	if (udp_pkt->udp.dest == udp_conn_slots[s].port) {
 
 		pktsize = ntohs(udp_pkt->udp.len) - sizeof(struct udphdr); /* substract udp header */
@@ -274,7 +277,7 @@ out:
 }
 
 /*
- * udp_send: send datas trought an active udp connection
+ * udp_send: send data over an active UDP connection
  */
 int udp_send(int s, void *buf, int size)
 {

@@ -1,5 +1,5 @@
 /*
- * udp.h - Advanced debugger
+ * udp.h - lightweight UDP implementation
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
@@ -36,8 +36,8 @@
 #include "adb.h"
 
 /* flags for udp_connect */
-#define UDP_ACTIVE_CONN			1
-#define UDP_PASSIVE_CONN		2
+#define UDP_ACTIVE_CONN		1
+#define UDP_PASSIVE_CONN	2
 
 void udp_init(u32 ip_addr_dst, u32 ip_addr_src);
 int udp_output(u16 ip_port_src, u16 ip_port_dst, void *buf, int size);
