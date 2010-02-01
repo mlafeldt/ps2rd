@@ -1,6 +1,7 @@
 /*
- * udp.h - lightweight UDP implementation
+ * net.c - lightweight network library
  *
+ * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
@@ -19,32 +20,36 @@
  * along with ps2rd.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _IOP_UDP_H_
-#define _IOP_UDP_H_
+#ifndef _IOP_NET_H_
+#define _IOP_NET_H_
 
 #include <tamtypes.h>
 #include <irx.h>
 
-#include <intrman.h>
-#include <thbase.h>
-#include <thsemap.h>
-#include <sysclib.h>
-#include <stdio.h>
+/* Module name and version */
+#define NET_MODNAME	"net"
+#define NET_VER_MAJ	1
+#define NET_VER_MIN	0
 
-#include "linux/if_ether.h"
-#include "linux/ip.h"
-#include "adb.h"
+/* RPC buffer size */
+#define NET_BUF_MAX	1024
 
-/* flags for udp_open */
-#define UDP_ACTIVE_CONN		1
-#define UDP_PASSIVE_CONN	2
+int net_init(int arg);
+int net_exit(void);
 
-void udp_init(u32 ip_addr_dst, u32 ip_addr_src);
-int udp_output(u16 ip_port_src, u16 ip_port_dst, void *buf, int size);
-int udp_input(void *buf, int size);
-int udp_open(int *s, u16 ip_port, int flags);
-int udp_close(int s);
-int udp_recv(int s, void *buf, int size);
-int udp_send(int s, void *buf, int size);
+/* global parameters struct */
+typedef struct {
+	u32 ip_addr_dst;
+	u32 ip_addr_src;
+	u16 ip_port_remote;
+	u16 ip_port_local;
+} g_param_t;
 
-#endif /* _IOP_UDP_H_ */
+/* IRX import defines */
+#define net_IMPORTS_start	DECLARE_IMPORT_TABLE(net, NET_VER_MAJ, NET_VER_MIN)
+#define net_IMPORTS_end		END_IMPORT_TABLE
+
+#define I_net_init		DECLARE_IMPORT(4, net_init)
+#define I_net_exit		DECLARE_IMPORT(5, net_exit)
+
+#endif /* _IOP_NET_H_ */

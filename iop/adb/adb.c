@@ -23,10 +23,9 @@
 #include <tamtypes.h>
 #include "irx_imports.h"
 #include "adb.h"
-#include "inet.h"
-#include "eth.h"
-#include "ip.h"
-#include "udp.h"
+#include "../net/ip.h"
+#include "../net/udp.h"
+#include "../net/inet.h"
 
 IRX_ID(ADB_MODNAME, ADB_VER_MAJ, ADB_VER_MIN);
 
@@ -178,10 +177,6 @@ void server_thread(void *args)
 
 int _start(int argc, char *argv[])
 {
-	/* Init Ethernet */
-	if (eth_init(g_param.ip_addr_dst, g_param.ip_addr_src) != 0)
-		return MODULE_NO_RESIDENT_END;
-
 	if (RegisterLibraryEntries(&_exp_adb) != 0) {
 		M_PRINTF("Could not register exports.\n");
 		return MODULE_NO_RESIDENT_END;

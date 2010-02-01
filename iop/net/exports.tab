@@ -1,0 +1,32 @@
+DECLARE_EXPORT_TABLE(net, 1, 0)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+
+	/* 4 */
+	DECLARE_EXPORT(net_init)
+	DECLARE_EXPORT(net_exit)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	/* 10 */
+	DECLARE_EXPORT(udp_init)
+	DECLARE_EXPORT(udp_output)
+	DECLARE_EXPORT(udp_input)
+	DECLARE_EXPORT(udp_open)
+	DECLARE_EXPORT(udp_close)
+	DECLARE_EXPORT(udp_recv)
+	DECLARE_EXPORT(udp_send)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	/* 20 */
+	DECLARE_EXPORT(htonl)
+	DECLARE_EXPORT(htons)
+	DECLARE_EXPORT(ntohl)
+	DECLARE_EXPORT(ntohs)
+END_EXPORT_TABLE
+
+void _retonly() {}

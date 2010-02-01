@@ -60,10 +60,13 @@ I_dev9RegisterIntrCb
 I_dev9GetEEPROM
 dev9_IMPORTS_end
 
-net_IMPORTS_start
-I_udp_open
-I_udp_close
-I_udp_recv
-I_udp_send
-I_ntohs
-net_IMPORTS_end
+#ifdef UDPTTY
+
+ioman_IMPORTS_start
+I_open
+I_close
+I_AddDrv
+I_DelDrv
+ioman_IMPORTS_end
+
+#endif /* UDPTTY */

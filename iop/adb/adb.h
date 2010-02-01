@@ -37,14 +37,6 @@
 int adb_init(int arg);
 int adb_exit(void);
 
-/* global parameters struct */
-typedef struct {
-	u32 ip_addr_dst;
-	u32 ip_addr_src;
-	u16 ip_port_remote;
-	u16 ip_port_local;
-} g_param_t;
-
 /* IRX import defines */
 #define adb_IMPORTS_start	DECLARE_IMPORT_TABLE(adb, ADB_VER_MAJ, ADB_VER_MIN)
 #define adb_IMPORTS_end		END_IMPORT_TABLE

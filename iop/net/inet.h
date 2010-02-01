@@ -47,4 +47,9 @@ u32 ntohl(u32);
 u16 inet_chksum(void *, u16);
 u16 inet_chksum_pseudo(void *, u32 *, u32 *, u16);
 
+#define I_htonl		DECLARE_IMPORT(20, htonl)
+#define I_htons		DECLARE_IMPORT(21, htons)
+#define I_ntohl		DECLARE_IMPORT(22, ntohl)
+#define I_ntohs		DECLARE_IMPORT(23, ntohs)
+
 #endif /* _IOP_INET_H_ */

@@ -11,6 +11,7 @@
 
 #include "irx.h"
 
+
 /* Please keep these in alphabetical order!  */
 #include "cdvdman.h"
 #include "dev9.h"
@@ -24,9 +25,5 @@
 #include "sysclib.h"
 #include "thbase.h"
 #include "thsemap.h"
-
-#include "../net/net.h"
-#include "../net/udp.h"
-#include "../net/inet.h"
 
 #endif /* IOP_IRX_IMPORTS_H */
