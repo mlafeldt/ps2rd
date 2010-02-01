@@ -1,6 +1,6 @@
 .SILENT:
 
-IOP_MODULES = adb dev9 eesync memdisk usb_mass #debugger
+IOP_MODULES = adb dev9 eesync memdisk net usb_mass #debugger
 
 #ifeq ($(SMS_MODULES),1)
 #IOP_MODULES += SMSMAP SMSTCPIP

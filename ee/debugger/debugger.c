@@ -129,6 +129,7 @@ typedef struct {
 #define HASH_MEMDISK	0x03c3b0eb
 #define HASH_EESYNC	0x06bcb043
 #define HASH_ADB	0x000067a2
+#define HASH_NET	0x00000000 /* TODO */
 
 /* defines for communication with debugger module */
 #define NTPBCMD_SEND_DUMP 		0x300
@@ -521,6 +522,9 @@ int MySifRebootIop(char *ioprp_path)
 		if (ret < 0)
 			while (1) ;
 #endif
+		ret = load_module_from_kernel(HASH_NET, 0, NULL);
+		if (ret < 0)
+			while (1) ;
 		ret = load_module_from_kernel(HASH_ADB, 0, NULL);
 		if (ret < 0)
 			while (1) ;

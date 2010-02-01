@@ -23,6 +23,7 @@ all: check
 	bin2o iop/dev9/ps2dev9.irx ee/loader/ps2dev9_irx.o _ps2dev9_irx
 	bin2o iop/eesync/eesync.irx ee/loader/eesync_irx.o _eesync_irx
 	bin2o iop/memdisk/memdisk.irx ee/loader/memdisk_irx.o _memdisk_irx
+	bin2o iop/net/net.irx ee/loader/net_irx.o _net_irx
 	bin2o $(PS2SDK)/iop/irx/usbd.irx ee/loader/usbd_irx.o _usbd_irx
 	bin2o iop/usb_mass/usb_mass.irx ee/loader/usb_mass_irx.o _usb_mass_irx
 #	@if [ $(SMS_MODULES) = "1" ]; then \
