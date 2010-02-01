@@ -126,7 +126,7 @@ int udp_output(u16 ip_port_src, u16 ip_port_dst, void *buf, int size)
 }
 
 /*
- * udp_input: Called IP layer when a UDP packet is 
+ * udp_input: Called IP layer when a UDP packet is
  * received. (careful with Intr context)
  */
 int udp_input(void *buf, int size)
@@ -162,7 +162,7 @@ int udp_connect(int *s, u16 ip_port, int flags)
 			goto out;
 		}
 		if (udp_conn_slots[i].status == UDP_ACTIVE_CONN)
-			act_cnt++;		
+			act_cnt++;
 		else if (udp_conn_slots[i].status == UDP_PASSIVE_CONN)
 			psv_cnt++;
 	}
@@ -181,7 +181,7 @@ int udp_connect(int *s, u16 ip_port, int flags)
 			if (flags == UDP_ACTIVE_CONN)
 				udp_conn_slots[i].mutex = CreateMutex(IOP_MUTEX_UNLOCKED);
 			else if (flags == UDP_PASSIVE_CONN)
-				udp_conn_slots[i].mutex = CreateMutex(IOP_MUTEX_LOCKED);			
+				udp_conn_slots[i].mutex = CreateMutex(IOP_MUTEX_LOCKED);
 			udp_conn_slots[i].port = ip_port;
 			udp_conn_slots[i].status = flags;
 			*s = i;
@@ -238,13 +238,13 @@ int udp_recv(int s, void *buf, int size)
 	}
 	udp_rcv_mutex = udp_conn_slots[s].mutex;
 	CpuResumeIntr(oldstate);
-	
+
 wait:
 	WaitSema(udp_conn_slots[s].mutex);
 
 #if 0
 	while (QueryIntrContext())
-		DelayThread(10000);	
+		DelayThread(10000);
 #endif
 
 	CpuSuspendIntr(&oldstate);

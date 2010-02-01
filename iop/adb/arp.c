@@ -37,7 +37,7 @@ struct arpdata {
 	u8 ar_sha[ETH_ALEN];       /* sender hardware address      */
 	u8 ar_sip[4];              /* sender IP address            */
 	u8 ar_tha[ETH_ALEN];       /* target hardware address      */
-	u8 ar_tip[4];              /* target IP address            */	
+	u8 ar_tip[4];              /* target IP address            */
 };
 
 typedef struct {
@@ -66,8 +66,8 @@ static int wait_arp_reply = 0;
 void arp_init(u8 *eth_addr_dst, u8 *eth_addr_src, u32 dst_ip, u32 src_ip)
 {
 	/* these are stored in network byte order, careful later */
-	memset(g_eth_addr_dst, 0, ETH_ALEN);	
-	memcpy(g_eth_addr_src, eth_addr_src, ETH_ALEN);	
+	memset(g_eth_addr_dst, 0, ETH_ALEN);
+	memcpy(g_eth_addr_src, eth_addr_src, ETH_ALEN);
 	g_ip_addr_dst = dst_ip;
 	g_ip_addr_src = src_ip;
 

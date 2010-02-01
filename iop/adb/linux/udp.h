@@ -17,7 +17,7 @@
 #ifndef _LINUX_UDP_H
 #define _LINUX_UDP_H
 
-#if 0 
+#if 0
 #include <linux/types.h>
 #endif
 
