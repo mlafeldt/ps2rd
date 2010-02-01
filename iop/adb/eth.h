@@ -28,6 +28,4 @@ int eth_init(u32 ip_addr_dst, u32 ip_addr_src);
 void eth_input(void *buf, int size);
 int eth_output(void *buf, int size, int h_proto);
 
-void arp_request(u8 *eth_addr);
-
-#endif /* _IOP_ARP_H_ */
+#endif /* _IOP_ETH_H_ */
