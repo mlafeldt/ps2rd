@@ -149,9 +149,9 @@ int udp_input(void *buf, int size)
 }
 
 /*
- * udp_conn: connect/bind to a port
+ * udp_open: connect/bind to a port
  */
-int udp_connect(int *s, u16 ip_port, int flags)
+int udp_open(int *s, u16 ip_port, int flags)
 {
 	int r, i, oldstate;
 	int act_cnt = 0;

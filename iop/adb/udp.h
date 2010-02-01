@@ -35,14 +35,14 @@
 #include "linux/ip.h"
 #include "adb.h"
 
-/* flags for udp_connect */
+/* flags for udp_open */
 #define UDP_ACTIVE_CONN		1
 #define UDP_PASSIVE_CONN	2
 
 void udp_init(u32 ip_addr_dst, u32 ip_addr_src);
 int udp_output(u16 ip_port_src, u16 ip_port_dst, void *buf, int size);
 int udp_input(void *buf, int size);
-int udp_connect(int *s, u16 ip_port, int flags);
+int udp_open(int *s, u16 ip_port, int flags);
 int udp_close(int s);
 int udp_recv(int s, void *buf, int size);
 int udp_send(int s, void *buf, int size);

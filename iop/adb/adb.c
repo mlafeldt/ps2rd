@@ -54,12 +54,12 @@ int adb_init(int arg)
 	if (_adb_init)
 		return -1;
 
-	if (udp_connect(&_send_cl, g_param.ip_port_remote, UDP_ACTIVE_CONN) < 0) {
+	if (udp_open(&_send_cl, g_param.ip_port_remote, UDP_ACTIVE_CONN) < 0) {
 		M_PRINTF("Could not create send udp client\n");
 		return -1;
 	}
 
-	if (udp_connect(&_recv_cl, g_param.ip_port_local, UDP_PASSIVE_CONN) < 0) {
+	if (udp_open(&_recv_cl, g_param.ip_port_local, UDP_PASSIVE_CONN) < 0) {
 		M_PRINTF("Could not create recv udp client\n");
 		return -1;
 	}
