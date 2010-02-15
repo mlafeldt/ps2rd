@@ -35,21 +35,19 @@ IRX_ID(NET_MODNAME, NET_VER_MAJ, NET_VER_MIN);
 
 struct irx_export_table _exp_net;
 
-static g_param_t g_param = {
-	.ip_addr_dst = IP_ADDR(192, 168, 0, 2), 	/* remote IP addr */
-	.ip_addr_src = IP_ADDR(192, 168, 0, 10),	/* local IP addr */
-	.ip_port_remote = IP_PORT(7410), 		/* remote port */
-	.ip_port_local = IP_PORT(8340)			/* local port */
-};
-
 static int _net_init = 0;
 
-int net_init(int arg)
+/*
+ * net_init: Initialize network interface
+ */
+int net_init(u32 remote_ip_addr, u32 local_ip_addr)
 {
 	if (_net_init)
 		return -1;
 
-	/* TODO */
+	/* init Ethernet */
+	if (eth_init(remote_ip_addr, local_ip_addr) != 0)
+		return -2;
 
 	_net_init = 1;
 	M_PRINTF("Ready.\n");
@@ -71,10 +69,6 @@ int net_exit(void)
 
 int _start(int argc, char *argv[])
 {
-	/* init Ethernet */
-	if (eth_init(g_param.ip_addr_dst, g_param.ip_addr_src) != 0)
-		return MODULE_NO_RESIDENT_END;
-
 	if (RegisterLibraryEntries(&_exp_net) != 0) {
 		M_PRINTF("Could not register exports.\n");
 		return MODULE_NO_RESIDENT_END;

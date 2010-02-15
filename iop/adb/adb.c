@@ -53,6 +53,11 @@ int adb_init(int arg)
 	if (_adb_init)
 		return -1;
 
+	if (net_init(g_param.ip_addr_dst, g_param.ip_addr_src) != 0) {
+		M_PRINTF("Could not initialize network interface.\n");
+		return -1;
+	}
+
 	if (udp_open(&_send_cl, g_param.ip_port_remote, UDP_ACTIVE_CONN) < 0) {
 		M_PRINTF("Could not create send udp client\n");
 		return -1;
@@ -76,6 +81,8 @@ int adb_exit(void)
 
 	udp_close(_send_cl);
 	udp_close(_recv_cl);
+
+	net_exit();
 
 	_adb_init = 0;
 

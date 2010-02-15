@@ -61,6 +61,8 @@ I_dev9GetEEPROM
 dev9_IMPORTS_end
 
 net_IMPORTS_start
+I_net_init
+I_net_exit
 I_udp_open
 I_udp_close
 I_udp_recv

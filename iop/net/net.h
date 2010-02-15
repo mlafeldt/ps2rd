@@ -34,16 +34,8 @@
 /* RPC buffer size */
 #define NET_BUF_MAX	1024
 
-int net_init(int arg);
+int net_init(u32 remote_ip_addr, u32 local_ip_addr);
 int net_exit(void);
-
-/* global parameters struct */
-typedef struct {
-	u32 ip_addr_dst;
-	u32 ip_addr_src;
-	u16 ip_port_remote;
-	u16 ip_port_local;
-} g_param_t;
 
 /* IRX import defines */
 #define net_IMPORTS_start	DECLARE_IMPORT_TABLE(net, NET_VER_MAJ, NET_VER_MIN)

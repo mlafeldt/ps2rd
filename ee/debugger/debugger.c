@@ -129,7 +129,7 @@ typedef struct {
 #define HASH_MEMDISK	0x03c3b0eb
 #define HASH_EESYNC	0x06bcb043
 #define HASH_ADB	0x000067a2
-#define HASH_NET	0x00000000 /* TODO */
+#define HASH_NET	0x000074c4
 
 /* defines for communication with debugger module */
 #define NTPBCMD_SEND_DUMP 		0x300

@@ -34,6 +34,14 @@
 /* RPC buffer size */
 #define ADB_BUF_MAX	1024
 
+/* global parameters struct */
+typedef struct {
+	u32 ip_addr_dst;
+	u32 ip_addr_src;
+	u16 ip_port_remote;
+	u16 ip_port_local;
+} g_param_t;
+
 int adb_init(int arg);
 int adb_exit(void);
 
