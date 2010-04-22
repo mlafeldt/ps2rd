@@ -24,7 +24,7 @@ a lot of data that needs to be copied, this should be set high. */
 /* MEMP_NUM_UDP_PCB: the number of UDP protocol control blocks. One
    per active UDP "connection". */
 #ifdef LOW_MEM_FOOTPRINT
-#define MEMP_NUM_UDP_PCB 3
+#define MEMP_NUM_UDP_PCB 1
 #else
 #define MEMP_NUM_UDP_PCB 15
 #endif
@@ -178,8 +178,11 @@ a lot of data that needs to be copied, this should be set high. */
 #endif
 
 /* ---------- UDP options ---------- */
+#ifdef _NETLOG
 #define LWIP_UDP                1
-
+#else
+#define LWIP_UDP                0
+#endif
 #define UDP_TTL                 255
 
 
