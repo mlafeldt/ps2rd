@@ -699,7 +699,7 @@ TXRXEnable(SMap* pSMap,int iEnable)
 				return;
 			}
 		}
-		dbgprintf("TXRXEnable: EMAC3 is still running(%x).\n",u32Val);
+		dbgprintf("TXRXEnable: EMAC3 is still running(%x).\n",(unsigned int)u32Val);
 	}
 }
 
@@ -776,7 +776,7 @@ ReadPhy(SMap* pSMap,u32 u32PhyAddr,u32 u32RegAddr)
 			return	EMAC3REG_READ(pSMap,SMAP_EMAC3_STA_CTRL)>>E3_PHY_DATA_BITSFT;
 		}
 	}
-	dbgprintf("ReadPhy: Write address busy, val = %x\n",EMAC3REG_READ(pSMap,SMAP_EMAC3_STA_CTRL));
+	dbgprintf("ReadPhy: Write address busy, val = %x\n",(unsigned int)EMAC3REG_READ(pSMap,SMAP_EMAC3_STA_CTRL));
 	return	-1;
 }
 
@@ -815,7 +815,7 @@ WritePhy(SMap* pSMap,u32 u32PhyAddr,u32 u32RegAddr,u16 u16Data)
 			return	0;
 		}
 	}
-	dbgprintf("WritePhy: Write data busy, val = %x\n",EMAC3REG_READ(pSMap,SMAP_EMAC3_STA_CTRL));
+	dbgprintf("WritePhy: Write data busy, val = %x\n",(unsigned int)EMAC3REG_READ(pSMap,SMAP_EMAC3_STA_CTRL));
 	return	-1;
 }
 
