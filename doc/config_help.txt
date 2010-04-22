@@ -94,6 +94,11 @@ Section "debugger"
   reboot. This is required to hack games, and should only be turned off for
   compatibility tests.
 
+* sms_modules [bool, true by default]
+
+  If this settings is true, the network modules from SMS are loaded instead of
+  the standard modules from PS2SDK.
+
 * ipaddr [IPv4 address in dotted decimal format, "192.168.0.10" by default]
 
   Configure the IP address for the PS2-side debugger. The PC client will connect
