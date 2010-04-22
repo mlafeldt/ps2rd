@@ -40,6 +40,7 @@ static const char *setting_paths[] = {
 	"debugger.unhook_iop_reset",
 	"debugger.rpc_mode",
 	"debugger.load_modules",
+	"debugger.sms_modules",
 	"debugger.ipaddr",
 	"debugger.netmask",
 	"debugger.gateway",
@@ -233,6 +234,10 @@ void _config_build(config_t *config)
 #ifdef DEBUGGER_LOAD_MODULES
 	config_setting_set_bool(set, DEBUGGER_LOAD_MODULES);
 #endif
+	set = config_setting_add(group, "sms_modules", CONFIG_TYPE_BOOL);
+#ifdef DEBUGGER_SMS_MODULES
+	config_setting_set_bool(set, DEBUGGER_SMS_MODULES);
+#endif
 	set = config_setting_add(group, "ipaddr", CONFIG_TYPE_STRING);
 #ifdef DEBUGGER_IPADDR
 	config_setting_set_string(set, DEBUGGER_IPADDR);
@@ -361,6 +366,7 @@ void _config_print(const config_t *config)
 	PRINT_BOOL(SET_DEBUGGER_UNHOOK_IOP_RESET);
 	PRINT_INT(SET_DEBUGGER_RPC_MODE);
 	PRINT_BOOL(SET_DEBUGGER_LOAD_MODULES);
+	PRINT_BOOL(SET_DEBUGGER_SMS_MODULES);
 	PRINT_STRING(SET_DEBUGGER_IPADDR);
 	PRINT_STRING(SET_DEBUGGER_NETMASK);
 	PRINT_STRING(SET_DEBUGGER_GATEWAY);
