@@ -131,15 +131,17 @@ static void copy_modules_to_kernel(const config_t *config)
 	/*
 	 * build RAM file table
 	 */
-	if (_config_get_bool(config, SET_DEBUGGER_SMS_MODULES)) {
 #ifdef _SMS_MODULES
+	if (_config_get_bool(config, SET_DEBUGGER_SMS_MODULES)) {
 		ramfile_set(file_ptr++, "ps2ip", _ps2ip_sms_irx_start, _ps2ip_sms_irx_size);
 		ramfile_set(file_ptr++, "ps2smap", _ps2smap_sms_irx_start, _ps2smap_sms_irx_size);
-#endif
 	} else {
+#endif
 		ramfile_set(file_ptr++, "ps2ip", _ps2ip_irx_start, _ps2ip_irx_size);
 		ramfile_set(file_ptr++, "ps2smap", _ps2smap_irx_start, _ps2smap_irx_size);
+#ifdef _SMS_MODULES
 	}
+#endif
 	ramfile_set(file_ptr++, "ps2dev9", _ps2dev9_irx_start, _ps2dev9_irx_size);
 	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
 	ramfile_set(file_ptr++, "memdisk", _memdisk_irx_start, _memdisk_irx_size);
