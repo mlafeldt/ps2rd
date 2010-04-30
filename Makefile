@@ -1,9 +1,11 @@
+#
 # This is the root makefile of ps2rd.
 #
-# The following variables can influence the build process:
+
+VERSION = "ps2rd-$(shell head -n1 CHANGES | cut -f1 -d " ")"
 
 # Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
-# messages will be printed to host: when using ps2link.
+# messages will be printed to "host:" when using ps2link.
 DEBUG = 1
 
 # Enable or disable netlog support (send log messages over UDP)
@@ -46,19 +48,24 @@ run: all
 	$(MAKE) -C ee/loader run
 
 release: all
+	echo "* Building $(VERSION) release packages ..."
 	rm -rf release
-	mkdir -p release/ps2 release/pc
+	mkdir -p release/$(VERSION)/{ps2,pc}
 	@if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
-		ps2-packer -v ee/loader/ps2rd.elf release/ps2/ps2rd.elf; \
-		chmod +x release/ps2/ps2rd.elf; \
+		ps2-packer -v ee/loader/ps2rd.elf release/$(VERSION)/ps2/ps2rd.elf; \
+		chmod +x release/$(VERSION)/ps2/ps2rd.elf; \
 	else \
-		cp ee/loader/ps2rd.elf release/ps2/ps2rd.elf; \
+		cp ee/loader/ps2rd.elf release/$(VERSION)/ps2/ps2rd.elf; \
 	fi
-	cp ee/loader/ps2rd.conf release/ps2/
-	cp ee/loader/cheats.txt release/ps2/
-	cp pc/ntpbclient/bin/* release/pc/
-	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/
-	cp -r doc/ release/
+	cp ee/loader/ps2rd.conf release/$(VERSION)/ps2/
+	cp ee/loader/cheats.txt release/$(VERSION)/ps2/
+	cp pc/ntpbclient/bin/* release/$(VERSION)/pc/
+	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(VERSION)/
+	cp -r doc/ release/$(VERSION)/
+	cd release && \
+		tar -czf $(VERSION).tar.gz $(VERSION)/; \
+		zip -qr $(VERSION).zip $(VERSION)/; \
+		sha1sum $(VERSION).* > $(VERSION).sha1
 
 check:
 	@if [ -z $(PS2SDK) ]; then \
