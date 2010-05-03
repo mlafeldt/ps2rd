@@ -1,9 +1,9 @@
-0.5.1 (Apr xx 2010)
+0.5.1 (May 3 2010)
 - Added setting debugger.sms_modules to specify whether network modules from SMS
   should be loaded. Users reporting routing issues with those modules can turn
   it off to use the standard PS2SDK modules instead.
-- Improve pattern searching (auto hook etc.)
-- Fix minor build issues.
+- Improved pattern searching (auto hook etc.)
+- Fixed minor build issues.
 
 0.5 (Dec 8 2009)
 - Replaced existing network modules with EEUG's SMSMAP.irx and SMSTCPIP.irx, and
