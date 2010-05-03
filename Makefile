@@ -50,7 +50,7 @@ run: all
 release: all
 	echo "* Building $(VERSION) release packages ..."
 	rm -rf release
-	mkdir -p release/$(VERSION)/{ps2,pc}
+	mkdir -p release/$(VERSION)/pc release/$(VERSION)/ps2
 	@if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
 		ps2-packer -v ee/loader/ps2rd.elf release/$(VERSION)/ps2/ps2rd.elf; \
 		chmod +x release/$(VERSION)/ps2/ps2rd.elf; \
