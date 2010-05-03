@@ -41,7 +41,7 @@ License. Please see file COPYING for further information.
 
 Besides the PS2SDK from ps2dev.org, ps2rd makes use of these libraries:
 - libconfig by Mark Lindner et al. (http://www.hyperrealm.com/libconfig/)
-- libcheats by misfire <misfire@xploderfreax.de>
+- libcheats by Mathias Lafeldt <misfire@debugon.org>
 
 Both libraries are covered by the GNU Lesser General Public License. Please see
 file COPYING.LESSER for further information.

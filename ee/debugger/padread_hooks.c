@@ -2,7 +2,7 @@
  * padread_hooks.c - scePadRead hooking
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
- * Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *

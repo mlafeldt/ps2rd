@@ -24,6 +24,6 @@ Please try to always create a patch against the latest revision. Use "hg in" to
 show new changesets found in the online repository, and "hg pull" to actually
 pull changes to your local repository.
 
-Finally, you can submit the patch files via email to misfire@xploderfreax.de
+Finally, you can submit the patch files via email to misfire@debugon.org
 
 Thanks in advance.

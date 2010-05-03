@@ -1,7 +1,7 @@
 ##
 # Makefile for debugger
 #
-# Copyright (C) 2009-2010 misfire <misfire@xploderfreax.de>
+# Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
 ##
 
 ifeq ($(DEBUG),1)

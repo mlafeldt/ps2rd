@@ -1,7 +1,7 @@
 ##
 # Makefile for boot loader
 #
-# Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+# Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
 ##
 
 ifeq ($(DEBUG),1)

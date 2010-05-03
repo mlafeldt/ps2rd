@@ -2,7 +2,7 @@
  * eesync.c
  *
  * Copyright (C) 2009 jimmikaelkael <jimmikaelkael@wanadoo.fr>
- * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *

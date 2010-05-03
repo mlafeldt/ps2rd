@@ -1,7 +1,7 @@
 ##
 # Makefile for cheat engine
 #
-# Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+# Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
 ##
 
 EE_INCS +=

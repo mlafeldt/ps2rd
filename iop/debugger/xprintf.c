@@ -1,7 +1,7 @@
 /*
  * xprintf.c from ps2sdk/ee/libc/src adapted to IOP
  *
- * Copyright (C) 2007-2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2007-2009 Mathias Lafeldt <misfire@debugon.org>
  *
  * Licensed under the Academic Free License version 2.0.  See file LICENSE.
  *

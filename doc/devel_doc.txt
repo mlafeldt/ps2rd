@@ -1,5 +1,5 @@
 Developer Documentation
-written by misfire <misfire@xploderfreax.de>
+written by Mathias Lafeldt <misfire@debugon.org>
 
 NOTE: This document is far from being complete.
 

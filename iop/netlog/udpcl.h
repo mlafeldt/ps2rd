@@ -1,7 +1,7 @@
 /*
  * udpcl.h - UDP client library
  *
- * Copyright (C) 2009 misfire <misfire@xploderfreax.de>
+ * Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
  *
  * Licensed under the Academic Free License version 2.0.  See file LICENSE.
  */
