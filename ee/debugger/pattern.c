@@ -23,24 +23,28 @@
 #include <tamtypes.h>
 #include "pattern.h"
 
-/* XXX I'm sure this can be optimized. */
-u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len)
+u32 *find_pattern_with_mask(const u32 *buf, int bufsize,
+	const u32 *seq, const u32 *mask, int len)
 {
-	u32 i, j;
+	int i, j;
+
+	len /= sizeof(u32);
+	bufsize /= sizeof(u32);
 
 	for (i = 0; i < bufsize - len; i++) {
 		for (j = 0; j < len; j++) {
-			if ((buf[i + j] & mask[j]) != bytes[j])
+			if ((buf[i + j] & mask[j]) != seq[j])
 				break;
 		}
 		if (j == len)
-			return &buf[i];
+			return (u32*)&buf[i];
 	}
 
 	return NULL;
 }
 
-void *find_pattern(const void *buf, int size, const pattern_t *pat)
+u32 *find_pattern(const u32 *buf, int bufsize, const pattern_t *pat)
 {
-	return find_pattern_with_mask((u8*)buf, size, (u8*)pat->seq, (u8*)pat->mask, pat->len);
+	return find_pattern_with_mask(buf, bufsize,
+		pat->seq, pat->mask, pat->len);
 }

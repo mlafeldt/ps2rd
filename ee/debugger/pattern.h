@@ -26,13 +26,14 @@
 #include <tamtypes.h>
 
 typedef struct _pattern {
-	const void *seq;
-	const void *mask;
+	const u32 *seq;
+	const u32 *mask;
 	int len;
 	int tag;	
 } pattern_t;
 
-u8 *find_pattern_with_mask(u8 *buf, u32 bufsize, u8 *bytes, u8 *mask, u32 len);
-void *find_pattern(const void *buf, int size, const pattern_t *pat);
+u32 *find_pattern_with_mask(const u32 *buf, int bufsize,
+        const u32 *seq, const u32 *mask, int len);
+u32 *find_pattern(const u32 *buf, int bufsize, const pattern_t *pat);
 
 #endif /* _PATTERN_H_ */

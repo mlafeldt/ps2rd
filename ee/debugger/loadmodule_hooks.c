@@ -92,7 +92,7 @@ static int Hook_SifLoadModule(const char *path, int arg_len, const char *args, i
  */
 int patch_loadModule(void)
 {
-	u8 *ptr = NULL;
+	u32 *ptr = NULL;
 	u32 memscope, inst, fncall;
 	u32 pattern[1], mask[1];
 	u32 start = 0x00100000;
@@ -106,7 +106,7 @@ int patch_loadModule(void)
 	/* First try to locate the orginal _sceSifLoadModule function */
 	pat = _loadmodule_patterns;
 	while (pat->seq) {
-		ptr = find_pattern((u8*)start, memscope, pat);
+		ptr = find_pattern((u32*)start, memscope, pat);
 		if (ptr)
 			break;
 		pat++;
@@ -135,18 +135,18 @@ int patch_loadModule(void)
 	inst |= 0x03ffffff & ((u32)Hook_SifLoadModule >> 2);
 
 	/* Search & patch for calls to _sceSifLoadModule */
-	ptr = (u8 *)start;
+	ptr = (u32*)start;
 	while (ptr) {
 		memscope = 0x01f00000 - (u32)ptr;
 
-		ptr = find_pattern_with_mask(ptr, memscope, (u8 *)pattern, (u8 *)mask, sizeof(pattern));
+		ptr = find_pattern_with_mask(ptr, memscope, pattern, mask, sizeof(pattern));
 		if (ptr) {
 			pattern_found = 1;
 
 			fncall = (u32)ptr;
 			_sw(inst, fncall); /* overwrite the original _sceSifLoadModule function call with our function call */
 
-			ptr += 8;
+			ptr += 2;
 		}
 	}
 
