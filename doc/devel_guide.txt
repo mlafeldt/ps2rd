@@ -1,8 +1,8 @@
 Developer Guidelines
 
 All development of ps2rd takes place at http://bitbucket.org/misfire/ps2rd/.
-The Mercurial repository is maintained by misfire. If you have anything to
-contribute, don't hesitate to contact him.
+The Mercurial repository is maintained by Mathias Lafeldt <misfire@debugon.org>.
+If you have anything to contribute, don't hesitate to contact him.
 
 Submitting patches is the favored way to contribute changes. For this, the first
 thing to do is to clone the repository:
