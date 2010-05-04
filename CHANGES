@@ -1,5 +1,7 @@
-0.5.2 (2010)
-WIP
+0.5.2-wip (2010)
+- Updated PS2 port of libconfig to version 1.4.4.
+- Incorporated libcheats and libconfig into normal build process. It is no more
+  required to install them manually to PS2SDK's "ports" folder.
 
 0.5.1 (May 3 2010)
 - Added setting debugger.sms_modules to specify whether network modules from SMS

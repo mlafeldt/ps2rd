@@ -1,19 +1,7 @@
 To build the PS2 part of ps2rd, you need a working PS2DEV toolchain with an
 up-to-date version of the PS2SDK.
 
-First, you have to install the PS2 ports of libconfig and libcheats to the SDK,
-most likely under /usr/local/ps2dev/ps2sdk/ports/. Both can be compiled and
-installed just by running two commands in the respective project folder:
-
-$ cd ee/libconfig/
-$ make -f Makefile.PS2
-# make -f Makefile.PS2 install
-
-$ cd common/libcheats/
-$ make -f Makefile.PS2
-# make -f Makefile.PS2 install
-
-Now, go to the project's root directory to finally build the ps2rd executable:
+Go to the project's root directory to build the ps2rd executable:
 
 $ make rebuild
 
@@ -22,7 +10,6 @@ This will create ee/loader/ps2rd.elf.
 Currently, it is recommended to run the ELF with ps2link (you need the high-
 loading version!) and ps2client:
 
-$ cd ee/loader/
 $ make run
 
 If you want to boot it from mass, memory card, etc., make sure that ps2rd.conf
