@@ -25,75 +25,41 @@
 #include "configman.h"
 #include "dbgprintf.h"
 
-/* Paths to settings in config file */
-static const char *setting_paths[] = {
-	"loader.iop_reset",
-	"loader.sbv_patches",
-	"loader.usb_support",
-	"loader.boot2",
-	"engine.install",
-	"engine.addr",
-	"debugger.install",
-	"debugger.addr",
-	"debugger.auto_hook",
-	"debugger.patch_loadmodule",
-	"debugger.unhook_iop_reset",
-	"debugger.rpc_mode",
-	"debugger.load_modules",
-	"debugger.sms_modules",
-	"debugger.ipaddr",
-	"debugger.netmask",
-	"debugger.gateway",
-	"sdklibs.install",
-	"sdklibs.addr",
-	"elfldr.install",
-	"elfldr.addr",
-	"videomod.install",
-	"videomod.addr",
-	"videomod.vmode",
-	"videomod.yfix",
-	"videomod.ydiff_lores",
-	"videomod.ydiff_hires",
-	"cheats.file",
-	NULL
-};
-
 /*
  * Some wrapper functions for libconfig.
  */
 #define CONFIG_LOOKUP(config, key, value, type) \
 { \
-	const char *path = setting_paths[key]; \
 	int ret; \
 	if (config == NULL || value == NULL) \
 		return CONFIG_FALSE; \
-	ret = config_lookup_##type(config, path, value); \
+	ret = config_lookup_##type(config, key, value); \
 	if (ret != CONFIG_TRUE) \
-		D_PRINTF("%s: setting %s not found\n", __FUNCTION__, path); \
+		D_PRINTF("%s: setting %s not found\n", __FUNCTION__, key); \
 	return ret; \
 }
 
-int _config_lookup_int(const config_t *config, enum setting_key key, int *value)
+int _config_lookup_int(const config_t *config, const char *key, int *value)
 CONFIG_LOOKUP(config, key, value, int)
 
-int _config_lookup_u32(const config_t *config, enum setting_key key, u32 *value)
+int _config_lookup_u32(const config_t *config, const char *key, u32 *value)
 CONFIG_LOOKUP(config, key, (int*)value, int)
 
 #if 0
-int _config_lookup_int64(const config_t *config, enum setting_key key, long long *value)
+int _config_lookup_int64(const config_t *config, const char *key, long long *value)
 CONFIG_LOOKUP(config, key, value, int64)
 #endif
 
-int _config_lookup_float(const config_t *config, enum setting_key key, double *value)
+int _config_lookup_float(const config_t *config, const char *key, double *value)
 CONFIG_LOOKUP(config, key, value, float)
 
-int _config_lookup_bool(const config_t *config, enum setting_key key, int *value)
+int _config_lookup_bool(const config_t *config, const char *key, int *value)
 CONFIG_LOOKUP(config, key, value, bool)
 
-int _config_lookup_string(const config_t *config, enum setting_key key, const char **value)
+int _config_lookup_string(const config_t *config, const char *key, const char **value)
 CONFIG_LOOKUP(config, key, value, string)
 
-int _config_get_int(const config_t *config, enum setting_key key)
+int _config_get_int(const config_t *config, const char *key)
 {
 	int value;
 
@@ -102,7 +68,7 @@ int _config_get_int(const config_t *config, enum setting_key key)
 	return value;
 }
 
-u32 _config_get_u32(const config_t *config, enum setting_key key)
+u32 _config_get_u32(const config_t *config, const char *key)
 {
 	u32 value;
 
@@ -111,7 +77,7 @@ u32 _config_get_u32(const config_t *config, enum setting_key key)
 	return value;
 }
 
-double _config_get_float(const config_t *config, enum setting_key key)
+double _config_get_float(const config_t *config, const char *key)
 {
 	double value;
 
@@ -120,7 +86,7 @@ double _config_get_float(const config_t *config, enum setting_key key)
 	return value;
 }
 
-int _config_get_bool(const config_t *config, enum setting_key key)
+int _config_get_bool(const config_t *config, const char *key)
 {
 	int value;
 
@@ -129,7 +95,7 @@ int _config_get_bool(const config_t *config, enum setting_key key)
 	return value;
 }
 
-const char *_config_get_string(const config_t *config, enum setting_key key)
+const char *_config_get_string(const config_t *config, const char *key)
 {
 	const char *s = NULL;
 
@@ -138,9 +104,9 @@ const char *_config_get_string(const config_t *config, enum setting_key key)
 	return s;
 }
 
-const char *_config_get_string_elem(const config_t *config, enum setting_key key, int index)
+const char *_config_get_string_elem(const config_t *config, const char *key, int index)
 {
-	config_setting_t *set = config_lookup(config, setting_paths[key]);
+	config_setting_t *set = config_lookup(config, key);
 
 	if (set == NULL)
 		return NULL;
@@ -148,9 +114,9 @@ const char *_config_get_string_elem(const config_t *config, enum setting_key key
 	return config_setting_get_string_elem(set, index);
 }
 
-int _config_setting_length(const config_t *config, enum setting_key key)
+int _config_setting_length(const config_t *config, const char *key)
 {
-	config_setting_t *set = config_lookup(config, setting_paths[key]);
+	config_setting_t *set = config_lookup(config, key);
 
 	if (set == NULL)
 		return -1;
@@ -330,21 +296,21 @@ void _config_print(const config_t *config)
 
 #define PRINT_BOOL(key) \
 	_config_lookup_bool(config, key, (int*)&value); \
-	printf("%s = %i\n", setting_paths[key], value)
+	printf("%s = %i\n", key, value)
 #define PRINT_INT(key) \
 	_config_lookup_int(config, key, (int*)&value); \
-	printf("%s = %i\n", setting_paths[key], value)
+	printf("%s = %i\n", key, value)
 #define PRINT_U32(key) \
 	_config_lookup_u32(config, key, &value); \
-	printf("%s = %08x\n", setting_paths[key], value)
+	printf("%s = %08x\n", key, value)
 #define PRINT_STRING(key) \
 	_config_lookup_string(config, key, &s); \
-	printf("%s = %s\n", setting_paths[key], s)
+	printf("%s = %s\n", key, s)
 #define PRINT_STRING_ARRAY(key) \
 	i = 0; \
 	do { \
 		s = _config_get_string_elem(config, key, i); \
-		printf("%s[%i] = %s\n", setting_paths[key], i, s); \
+		printf("%s[%i] = %s\n", key, i, s); \
 		i++; \
 	} while (s != NULL)
 

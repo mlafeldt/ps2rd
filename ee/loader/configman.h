@@ -106,58 +106,49 @@
 #endif
 
 /* Keys to access different settings in configuration */
-enum setting_key {
-	/* loader */
-	SET_IOP_RESET = 0,
-	SET_SBV_PATCHES,
-	SET_USB_SUPPORT,
-	SET_BOOT2,
-	/* engine */
-	SET_ENGINE_INSTALL,
-	SET_ENGINE_ADDR,
-	/* debugger */
-	SET_DEBUGGER_INSTALL,
-	SET_DEBUGGER_ADDR,
-	SET_DEBUGGER_AUTO_HOOK,
-	SET_DEBUGGER_PATCH_LOADMODULE,
-	SET_DEBUGGER_UNHOOK_IOP_RESET,
-	SET_DEBUGGER_RPC_MODE,
-	SET_DEBUGGER_LOAD_MODULES,
-	SET_DEBUGGER_SMS_MODULES,
-	SET_DEBUGGER_IPADDR,
-	SET_DEBUGGER_NETMASK,
-	SET_DEBUGGER_GATEWAY,
-	/* sdklibs */
-	SET_SDKLIBS_INSTALL,
-	SET_SDKLIBS_ADDR,
-	/* elfldr */
-	SET_ELFLDR_INSTALL,
-	SET_ELFLDR_ADDR,
-	/* videomod */
-	SET_VIDEOMOD_INSTALL,
-	SET_VIDEOMOD_ADDR,
-	SET_VIDEOMOD_VMODE,
-	SET_VIDEOMOD_YFIX,
-	SET_VIDEOMOD_YDIFF_LORES,
-	SET_VIDEOMOD_YDIFF_HIRES,
-	/* cheats */
-	SET_CHEATS_FILE
-};
+#define SET_IOP_RESET                   "loader.iop_reset"
+#define SET_SBV_PATCHES                 "loader.sbv_patches"
+#define SET_USB_SUPPORT                 "loader.usb_support"
+#define SET_BOOT2                       "loader.boot2"
+#define SET_ENGINE_INSTALL              "engine.install"
+#define SET_ENGINE_ADDR                 "engine.addr"
+#define SET_DEBUGGER_INSTALL            "debugger.install"
+#define SET_DEBUGGER_ADDR               "debugger.addr"
+#define SET_DEBUGGER_AUTO_HOOK          "debugger.auto_hook"
+#define SET_DEBUGGER_PATCH_LOADMODULE	"debugger.patch_loadmodule"
+#define SET_DEBUGGER_UNHOOK_IOP_RESET	"debugger.unhook_iop_reset"
+#define SET_DEBUGGER_RPC_MODE           "debugger.rpc_mode"
+#define SET_DEBUGGER_LOAD_MODULES	"debugger.load_modules"
+#define SET_DEBUGGER_SMS_MODULES	"debugger.sms_modules"
+#define SET_DEBUGGER_IPADDR             "debugger.ipaddr"
+#define SET_DEBUGGER_NETMASK            "debugger.netmask"
+#define SET_DEBUGGER_GATEWAY            "debugger.gateway"
+#define SET_SDKLIBS_INSTALL             "sdklibs.install"
+#define SET_SDKLIBS_ADDR                "sdklibs.addr"
+#define SET_ELFLDR_INSTALL              "elfldr.install"
+#define SET_ELFLDR_ADDR                 "elfldr.addr"
+#define SET_VIDEOMOD_INSTALL            "videomod.install"
+#define SET_VIDEOMOD_ADDR               "videomod.addr"
+#define SET_VIDEOMOD_VMODE              "videomod.vmode"
+#define SET_VIDEOMOD_YFIX               "videomod.yfix"
+#define SET_VIDEOMOD_YDIFF_LORES	"videomod.ydiff_lores"
+#define SET_VIDEOMOD_YDIFF_HIRES	"videomod.ydiff_hires"
+#define SET_CHEATS_FILE                 "cheats.file"
 
-int _config_lookup_int(const config_t *config, enum setting_key key, int *value);
-int _config_lookup_u32(const config_t *config, enum setting_key key, u32 *value);
-int _config_lookup_float(const config_t *config, enum setting_key key, double *value);
-int _config_lookup_bool(const config_t *config, enum setting_key key, int *value);
-int _config_lookup_string(const config_t *config, enum setting_key key, const char **value);
+int _config_lookup_int(const config_t *config, const char *key, int *value);
+int _config_lookup_u32(const config_t *config, const char *key, u32 *value);
+int _config_lookup_float(const config_t *config, const char *key, double *value);
+int _config_lookup_bool(const config_t *config, const char *key, int *value);
+int _config_lookup_string(const config_t *config, const char *key, const char **value);
 
-int _config_get_int(const config_t *config, enum setting_key key);
-u32 _config_get_u32(const config_t *config, enum setting_key key);
-double _config_get_float(const config_t *config, enum setting_key key);
-int _config_get_bool(const config_t *config, enum setting_key key);
-const char *_config_get_string(const config_t *config, enum setting_key key);
-const char *_config_get_string_elem(const config_t *config, enum setting_key key, int index);
+int _config_get_int(const config_t *config, const char *key);
+u32 _config_get_u32(const config_t *config, const char *key);
+double _config_get_float(const config_t *config, const char *key);
+int _config_get_bool(const config_t *config, const char *key);
+const char *_config_get_string(const config_t *config, const char *key);
+const char *_config_get_string_elem(const config_t *config, const char *key, int index);
 
-int _config_setting_length(const config_t *config, enum setting_key key);
+int _config_setting_length(const config_t *config, const char *key);
 
 void _config_build(config_t *config);
 void _config_print(const config_t *config);
