@@ -144,13 +144,13 @@ enum setting_key {
 	SET_CHEATS_FILE
 };
 
-int _config_lookup_int(const config_t *config, enum setting_key key, long *value);
+int _config_lookup_int(const config_t *config, enum setting_key key, int *value);
 int _config_lookup_u32(const config_t *config, enum setting_key key, u32 *value);
 int _config_lookup_float(const config_t *config, enum setting_key key, double *value);
 int _config_lookup_bool(const config_t *config, enum setting_key key, int *value);
 int _config_lookup_string(const config_t *config, enum setting_key key, const char **value);
 
-long _config_get_int(const config_t *config, enum setting_key key);
+int _config_get_int(const config_t *config, enum setting_key key);
 u32 _config_get_u32(const config_t *config, enum setting_key key);
 double _config_get_float(const config_t *config, enum setting_key key);
 int _config_get_bool(const config_t *config, enum setting_key key);

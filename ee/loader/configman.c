@@ -73,11 +73,11 @@ static const char *setting_paths[] = {
 	return ret; \
 }
 
-int _config_lookup_int(const config_t *config, enum setting_key key, long *value)
+int _config_lookup_int(const config_t *config, enum setting_key key, int *value)
 CONFIG_LOOKUP(config, key, value, int)
 
 int _config_lookup_u32(const config_t *config, enum setting_key key, u32 *value)
-CONFIG_LOOKUP(config, key, (long*)value, int)
+CONFIG_LOOKUP(config, key, (int*)value, int)
 
 #if 0
 int _config_lookup_int64(const config_t *config, enum setting_key key, long long *value)
@@ -93,9 +93,9 @@ CONFIG_LOOKUP(config, key, value, bool)
 int _config_lookup_string(const config_t *config, enum setting_key key, const char **value)
 CONFIG_LOOKUP(config, key, value, string)
 
-long _config_get_int(const config_t *config, enum setting_key key)
+int _config_get_int(const config_t *config, enum setting_key key)
 {
-	long value;
+	int value;
 
 	_config_lookup_int(config, key, &value);
 
@@ -332,7 +332,7 @@ void _config_print(const config_t *config)
 	_config_lookup_bool(config, key, (int*)&value); \
 	printf("%s = %i\n", setting_paths[key], value)
 #define PRINT_INT(key) \
-	_config_lookup_int(config, key, (long*)&value); \
+	_config_lookup_int(config, key, (int*)&value); \
 	printf("%s = %i\n", setting_paths[key], value)
 #define PRINT_U32(key) \
 	_config_lookup_u32(config, key, &value); \
