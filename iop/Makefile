@@ -7,15 +7,15 @@ IOP_MODULES += SMSMAP SMSTCPIP
 endif
 
 all:
-	@for m in $(IOP_MODULES); do \
-		echo "* [IOP] Building $$m ..."; \
-		$(MAKE) -C $$m; \
+	@for i in $(IOP_MODULES); do \
+		echo "* [IOP] Building irx $$i ..."; \
+		$(MAKE) -C $$i; \
 	done
 
 clean:
-	@for m in $(IOP_MODULES); do \
-		echo "* [IOP] Cleaning $$m ..."; \
-		$(MAKE) -C $$m clean; \
+	@for i in $(IOP_MODULES); do \
+		echo "* [IOP] Cleaning $$i ..."; \
+		$(MAKE) -C $$i clean; \
 	done
 
 rebuild: clean all

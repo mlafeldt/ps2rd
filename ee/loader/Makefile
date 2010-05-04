@@ -1,7 +1,7 @@
 ##
 # Makefile for boot loader
 #
-# Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
+# Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
 ##
 
 ifeq ($(DEBUG),1)
@@ -11,9 +11,9 @@ else
 EE_LDFLAGS += -s
 endif
 
-EE_INCS +=
+EE_INCS += -I$(LIBCHEATS)/include -I$(LIBCONFIG)/include
 EE_CFLAGS +=
-EE_LDFLAGS +=
+EE_LDFLAGS += -L$(LIBCHEATS)/lib -L$(LIBCONFIG)/lib
 EE_ASFLAGS +=
 
 EE_BIN = ps2rd.elf

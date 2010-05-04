@@ -1,11 +1,17 @@
 .SILENT:
 
+TOOLS = ntpbclient
+
 all:
-	echo "* [PC] Building ntpbclient ..."
-	$(MAKE) -C ntpbclient
+	@for i in $(TOOLS); do \
+		echo "* [PC] Building tool $$i ..."; \
+		$(MAKE) -C $$i; \
+	done
 
 clean:
-	echo "* [PC] Cleaning ntpbclient ..."
-	$(MAKE) -C ntpbclient clean
+	@for i in $(TOOLS); do \
+		echo "* [IOP] Cleaning $$i ..."; \
+		$(MAKE) -C $$i clean; \
+	done
 
 rebuild: clean all
