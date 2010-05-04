@@ -1,3 +1,6 @@
+0.5.2 (2010)
+WIP
+
 0.5.1 (May 3 2010)
 - Added setting debugger.sms_modules to specify whether network modules from SMS
   should be loaded. Users reporting routing issues with those modules can turn
