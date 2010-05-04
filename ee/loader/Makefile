@@ -11,9 +11,9 @@ else
 EE_LDFLAGS += -s
 endif
 
-EE_INCS += -I$(PS2SDK)/ports/include
+EE_INCS +=
 EE_CFLAGS +=
-EE_LDFLAGS += -L$(PS2SDK)/ports/lib
+EE_LDFLAGS +=
 EE_ASFLAGS +=
 
 EE_BIN = ps2rd.elf
