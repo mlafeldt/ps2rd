@@ -9,7 +9,7 @@ EE_CFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 
-EE_LIB = libcheats.a
+EE_LIB = lib/libcheats.a
 EE_OBJS = src/cheatlist.o src/libcheats.o src/mystring.o src/parser.o
 EE_LIBS =
 
@@ -20,7 +20,7 @@ install: all
 	mkdir -p $(PS2SDK)/ports/include
 	mkdir -p $(PS2SDK)/ports/lib
 	cp -f $(EE_LIB) $(PS2SDK)/ports/lib
-	cp -f include/* $(PS2SDK)/ports/include
+	cp -f include/*.h $(PS2SDK)/ports/include
 
 clean:
 	rm -f $(EE_LIB) $(EE_OBJS)
