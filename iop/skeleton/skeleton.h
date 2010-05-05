@@ -1,7 +1,7 @@
 /*
  * skeleton.h - skeleton for IOP module
  *
- * Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
+ * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
  */
 
 #ifndef _IOP_SKELETON_H_

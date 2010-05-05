@@ -1,7 +1,7 @@
 /*
  * netlog.h - send log messages to remote host
  *
- * Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
+ * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
  *
  * Licensed under the Academic Free License version 2.0.  See file LICENSE.
  */

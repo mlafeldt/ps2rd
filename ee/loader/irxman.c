@@ -1,7 +1,7 @@
 /*
  * irxman.c - IRX file manager
  *
- * Copyright (C) 2009 Mathias Lafeldt <misfire@debugon.org>
+ * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
  *
  * This file is part of ps2rd, the PS2 remote debugger.
  *
