@@ -12,7 +12,7 @@
 
 0.5 (Dec 8 2009)
 - Replaced existing network modules with EEUG's SMSMAP.irx and SMSTCPIP.irx, and
-  optimized them for use in ps2rd (see below). This way, we almost doubled TCP
+  optimized them for use in PS2rd (see below). This way, we almost doubled TCP
   transfer rates to about 1MB/s.
 - SMSMAP: try to force 100Mb/s full duplex mode.
 - SMSTCPIP: modify lwIP TCP/IP stack to save as much IOP RAM as possible.
@@ -35,7 +35,7 @@
    Tomb Raider: Legend
 
 0.4.2 (Oct 27 2009)
-- This is an intermediate version created after renaming the project to "ps2rd".
+- This is an intermediate version created after renaming the project to "PS2rd".
   It doesn't include any bug fixes or new features.
 
 0.4.1 (Oct 20 2009)
@@ -71,7 +71,7 @@
 - IP settings for PS2-side debugger are now configurable.
 - Added setting debugger.load_modules and removed engine.file.
 - Fixed handling of absolute paths for devices mass and mc0.
-- Load IOP modules for USB access (ps2rd must be compiled with USB=1).
+- Load IOP modules for USB access (PS2rd must be compiled with USB=1).
 - Added updated version of ntpbclient.
 
 0.2 (Aug 19 2009)

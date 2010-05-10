@@ -1,8 +1,8 @@
 ---========================---
-   ps2rd - PS2 remote debugger
+   PS2rd - PS2 remote debugger
 ---===========================---
 
-ps2rd is a collection of open source tools to debug commercial PS2 games
+PS2rd is a collection of open source tools to debug commercial PS2 games
 remotely over Ethernet.
 
 Features:
@@ -24,7 +24,7 @@ Requirements:
    Documentation
 ---=============---
 
-Instructions on how to compile and install ps2rd can be found in the INSTALL
+Instructions on how to compile and install PS2rd can be found in the INSTALL
 file. The directory doc/ is generally the first place to look for further
 documentation.
 
@@ -36,10 +36,10 @@ documentation.
 PS2RD IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER ENTERTAINMENT,
 INC. ALL TRADEMARKS ARE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
-ps2rd comes with ABSOLUTELY NO WARRANTY. It is covered by the GNU General Public
+PS2rd comes with ABSOLUTELY NO WARRANTY. It is covered by the GNU General Public
 License. Please see file COPYING for further information.
 
-Besides the PS2SDK from ps2dev.org, ps2rd makes use of these libraries:
+Besides the PS2SDK from ps2dev.org, PS2rd makes use of these libraries:
 - libconfig by Mark Lindner et al. (http://www.hyperrealm.com/libconfig/)
 - libcheats by Mathias Lafeldt <misfire@debugon.org>
 
@@ -51,10 +51,10 @@ file COPYING.LESSER for further information.
    Contact
 ---=======---
 
-ps2rd project site:
+PS2rd project site:
 http://bitbucket.org/misfire/ps2rd/
 
-Official ps2rd forum at PSX-Scene:
+Official PS2rd forum at PSX-Scene:
 http://psx-scene.com/forums/forumdisplay.php?f=173
 
 
