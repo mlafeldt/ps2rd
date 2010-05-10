@@ -176,7 +176,7 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install SDK libraries
 	 */
 	if (_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-		addr = _config_get_u32(config, SET_SDKLIBS_ADDR);
+		addr = _config_get_int(config, SET_SDKLIBS_ADDR);
 		file = &_erl_files[ERL_FILE_LIBKERNEL];
 		if (__install_erl(file, addr) < 0)
 			return -1;
@@ -205,7 +205,7 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install cheat engine
 	 */
 	if (_config_get_bool(config, SET_ENGINE_INSTALL)) {
-		addr = _config_get_u32(config, SET_ENGINE_ADDR);
+		addr = _config_get_int(config, SET_ENGINE_ADDR);
 		file = &_erl_files[ERL_FILE_ENGINE];
 
 		if (__install_erl(file, addr) < 0)
@@ -227,7 +227,7 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install videomod
 	 */
 	if (_config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
-		addr = _config_get_u32(config, SET_VIDEOMOD_ADDR);
+		addr = _config_get_int(config, SET_VIDEOMOD_ADDR);
 		file = &_erl_files[ERL_FILE_VIDEOMOD];
 
 		if (__install_erl(file, addr) < 0)
@@ -259,7 +259,7 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install debugger
 	 */
 	if (_config_get_bool(config, SET_DEBUGGER_INSTALL)) {
-		addr = _config_get_u32(config, SET_DEBUGGER_ADDR);
+		addr = _config_get_int(config, SET_DEBUGGER_ADDR);
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
 		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
@@ -299,7 +299,7 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install ELF loader
 	 */
 	if (_config_get_bool(config, SET_ELFLDR_INSTALL)) {
-		addr = _config_get_u32(config, SET_ELFLDR_ADDR);
+		addr = _config_get_int(config, SET_ELFLDR_ADDR);
 		file = &_erl_files[ERL_FILE_ELFLDR];
 
 		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {

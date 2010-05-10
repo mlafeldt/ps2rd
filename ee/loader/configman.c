@@ -25,105 +25,6 @@
 #include "configman.h"
 #include "dbgprintf.h"
 
-/*
- * Some wrapper functions for libconfig.
- */
-#define CONFIG_LOOKUP(config, key, value, type) \
-{ \
-	int ret; \
-	if (config == NULL || value == NULL) \
-		return CONFIG_FALSE; \
-	ret = config_lookup_##type(config, key, value); \
-	if (ret != CONFIG_TRUE) \
-		D_PRINTF("%s: setting %s not found\n", __FUNCTION__, key); \
-	return ret; \
-}
-
-int _config_lookup_int(const config_t *config, const char *key, int *value)
-CONFIG_LOOKUP(config, key, value, int)
-
-int _config_lookup_u32(const config_t *config, const char *key, u32 *value)
-CONFIG_LOOKUP(config, key, (int*)value, int)
-
-#if 0
-int _config_lookup_int64(const config_t *config, const char *key, long long *value)
-CONFIG_LOOKUP(config, key, value, int64)
-#endif
-
-int _config_lookup_float(const config_t *config, const char *key, double *value)
-CONFIG_LOOKUP(config, key, value, float)
-
-int _config_lookup_bool(const config_t *config, const char *key, int *value)
-CONFIG_LOOKUP(config, key, value, bool)
-
-int _config_lookup_string(const config_t *config, const char *key, const char **value)
-CONFIG_LOOKUP(config, key, value, string)
-
-int _config_get_int(const config_t *config, const char *key)
-{
-	int value;
-
-	_config_lookup_int(config, key, &value);
-
-	return value;
-}
-
-u32 _config_get_u32(const config_t *config, const char *key)
-{
-	u32 value;
-
-	_config_lookup_u32(config, key, &value);
-
-	return value;
-}
-
-double _config_get_float(const config_t *config, const char *key)
-{
-	double value;
-
-	_config_lookup_float(config, key, &value);
-
-	return value;
-}
-
-int _config_get_bool(const config_t *config, const char *key)
-{
-	int value;
-
-	_config_lookup_bool(config, key, &value);
-
-	return value;
-}
-
-const char *_config_get_string(const config_t *config, const char *key)
-{
-	const char *s = NULL;
-
-	_config_lookup_string(config, key, &s);
-
-	return s;
-}
-
-const char *_config_get_string_elem(const config_t *config, const char *key, int index)
-{
-	config_setting_t *set = config_lookup(config, key);
-
-	if (set == NULL)
-		return NULL;
-
-	return config_setting_get_string_elem(set, index);
-}
-
-int _config_setting_length(const config_t *config, const char *key)
-{
-	config_setting_t *set = config_lookup(config, key);
-
-	if (set == NULL)
-		return -1;
-
-	return config_setting_length(set);
-}
-
 /**
  * _config_build - Build configuration with all required settings.
  * @config: ptr to config
@@ -288,24 +189,19 @@ void _config_build(config_t *config)
  */
 void _config_print(const config_t *config)
 {
-	u32 value;
 	const char *s = NULL;
 	int i;
 
 	printf("config settings:\n");
 
 #define PRINT_BOOL(key) \
-	_config_lookup_bool(config, key, (int*)&value); \
-	printf("%s = %i\n", key, value)
+	printf("%s = %i\n", key, _config_get_bool(config, key))
 #define PRINT_INT(key) \
-	_config_lookup_int(config, key, (int*)&value); \
-	printf("%s = %i\n", key, value)
+	printf("%s = %i\n", key, _config_get_int(config, key))
 #define PRINT_U32(key) \
-	_config_lookup_u32(config, key, &value); \
-	printf("%s = %08x\n", key, value)
+	printf("%s = %08x\n", key, _config_get_int(config, key))
 #define PRINT_STRING(key) \
-	_config_lookup_string(config, key, &s); \
-	printf("%s = %s\n", key, s)
+	printf("%s = %s\n", key, _config_get_string(config, key))
 #define PRINT_STRING_ARRAY(key) \
 	i = 0; \
 	do { \
