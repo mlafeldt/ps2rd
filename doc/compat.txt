@@ -1,4 +1,4 @@
-There're still games you can't hack with ps2rd, but we're working hard on
+There're still games you can't hack with PS2rd, but we're working hard on
 improving compatibility.
 
 A list of working games can be found here:
@@ -8,7 +8,7 @@ By definition, a game is compatible and deserves the status "Working" when you
 can dump memory at pretty much any point. There're also games that are only
 partially compatible (status "Incomplete") or don't work at all ("Nothing").
 
-ps2rd changes the background color to keep you informed about certain events
+PS2rd changes the background color to keep you informed about certain events
 and errors - see doc/colors.html for an overview. Please always name this color
 when reporting a non-working game.
 

@@ -1,5 +1,5 @@
 #
-# This is the root makefile of ps2rd.
+# This is the root makefile of PS2rd.
 #
 
 VERSION = "ps2rd-$(shell head -n1 CHANGES | cut -f1 -d " ")"
@@ -11,7 +11,7 @@ DEBUG = 1
 # Enable or disable netlog support (send log messages over UDP)
 NETLOG = 0
 
-# Set SMS_MODULES to 1 to build ps2rd with the network modules from SMS.
+# Set SMS_MODULES to 1 to build PS2rd with the network modules from SMS.
 SMS_MODULES = 1
 
 VARS = DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)

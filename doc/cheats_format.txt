@@ -1,4 +1,4 @@
-ps2rd makes use of the libcheats library to read cheat codes in text format.
+PS2rd makes use of the libcheats library to read cheat codes in text format.
 
 The format of the text file is quite simple:
 

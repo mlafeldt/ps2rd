@@ -1,7 +1,7 @@
-To build the PS2 part of ps2rd, you need a working PS2DEV toolchain with an
+To build the PS2 part of PS2rd, you need a working PS2DEV toolchain with an
 up-to-date version of the PS2SDK.
 
-Go to the project's root directory to build the ps2rd executable:
+Go to the project's root directory to build the PS2rd executable:
 
 $ make rebuild
 

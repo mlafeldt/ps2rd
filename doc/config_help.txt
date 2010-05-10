@@ -1,7 +1,7 @@
-ps2rd uses libconfig to read and store its configuration:
+PS2rd uses libconfig to read and store its configuration:
 http://www.hyperrealm.com/libconfig/libconfig_manual.html
 
-The config file is named ps2rd.conf and must be in ps2rd's root folder.
+The config file is named ps2rd.conf and must be in PS2rd's root folder.
 
 Here is a list of the available settings:
 

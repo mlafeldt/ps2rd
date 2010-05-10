@@ -11,7 +11,7 @@ libconfig
 
 ee/libconfig/
 
-The current version of ps2rd uses a PS2 port of libconfig - a simple library for
+The current version of PS2rd uses a PS2 port of libconfig - a simple library for
 manipulating structured configuration files - to read and store its
 configuration (see config_help.txt for details).
 
@@ -24,7 +24,7 @@ libcheats
 
 common/libcheats/
 
-Furthermore, ps2rd makes use of the libcheats library to read, manipulate, and
+Furthermore, PS2rd makes use of the libcheats library to read, manipulate, and
 write cheat codes in text format - see cheats_format.txt.
 
 

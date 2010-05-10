@@ -1,4 +1,4 @@
-Code Types supported by ps2rd
+Code Types supported by PS2rd
 written by Mathias Lafeldt <misfire@debugon.org>
 
 

@@ -1,7 +1,7 @@
 Overview
 --------
 
-The main goal of ps2rd is to provide means to debug commercial PS2 games
+The main goal of PS2rd is to provide means to debug commercial PS2 games
 remotely over Ethernet. The system deploys a client-server architecture, where
 the PS2 serves requests from a debugger client run on a PC.
 
