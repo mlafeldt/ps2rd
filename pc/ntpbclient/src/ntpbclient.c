@@ -36,9 +36,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <pthread.h>
 
-#define PROGRAM_VER "0.3.1"
+#define PROGRAM_VER "0.3.2"
 
 #ifdef _WIN32
 WSADATA *WsaData;
@@ -52,7 +51,6 @@ WSADATA *WsaData;
 
 static char g_server_ip[16] = "192.168.0.10";
 static unsigned char pktbuffer[65536];
-static char netlogbuffer[1024];
 
 /* NTPB header magic */
 #define ntpb_MagicSize  		6
@@ -70,8 +68,6 @@ static int main_socket = -1;
 /* commands sent in return by server */
 #define NTPBCMD_SEND_DUMP 		0x300
 #define NTPBCMD_END_TRANSMIT		0xffff
-
-static pthread_t netlog_thread_id;
 
 /*
  * printVer - print program version
@@ -93,8 +89,6 @@ static void printUsage(void)
 	printf("\t \t Dump PS2 memory to a file\n");
 	printf("\t --halt, -H\t\t\t Halt game execution\n");
 	printf("\t --resume, -R\t\t\t Resume game execution\n");
-	printf("\t --log, --printlog, -L\t\t Show log file\n");
-	printf("\t --clearlog, -C\t\t\t Clears the log file\n");
 	printf("\t --help, -h\t\t\t Print this help\n");
 	printf("\t --version, -v\t\t\t Print program version\n");
 	printf("Supported options:\n");
@@ -356,99 +350,6 @@ static int receiveData(char *dumpfile, unsigned int dump_size, int flag)
 }
 
 /*
- * netlogThread - thread to log netlog messages to a text file
- */
-static void *netlogThread(void *thread_id)
-{
-	int udp_socket;
-	struct sockaddr_in peer;
-	int r;
-	fd_set fd;
-	FILE *fh_log;
-
-	fh_log = fopen("netlog.log", "a");
-	if (fh_log) {
-		fclose(fh_log);
-	}
-
-	peer.sin_family = AF_INET;
-	peer.sin_port = htons(SERVER_UDP_PORT);
-	peer.sin_addr.s_addr = htonl(INADDR_ANY);
-
-	udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
-	if (udp_socket < 0)
-		goto error;
-
-  	if (bind(udp_socket, (struct sockaddr *)&peer, sizeof(struct sockaddr)) < 0)
-		goto error;
-
-	FD_ZERO(&fd);
-
-	while (1) {
-		FD_SET(udp_socket, &fd);
-
-  		select(FD_SETSIZE, &fd, NULL, NULL, NULL);
-
-		memset(netlogbuffer, 0, sizeof(netlogbuffer));
-
-		r = recvfrom(udp_socket, (void*)netlogbuffer, sizeof(netlogbuffer), 0, NULL, NULL);
-
-		fh_log = fopen("netlog.log", "a");
-		if (fh_log) {
-			fwrite(netlogbuffer, 1, r, fh_log);
-			fclose(fh_log);
-		}
-	}
-
-error:
-	_closesocket(udp_socket);
-	pthread_exit(thread_id);
-
-	return 0;
-}
-
-/*
- * printLog - print log file to screen
- */
-static int printLog(void)
-{
-	FILE *fh_log;
-	int logsize, r;
-	char *buf;
-
-	fh_log = fopen("netlog.log", "r");
-	if (fh_log) {
-		fseek(fh_log, 0, SEEK_END);
-		logsize = ftell(fh_log);
-		fseek(fh_log, 0, SEEK_SET);
-		if (logsize) {
-			buf = malloc(logsize);
-			r = fread(buf, 1, logsize, fh_log);
-			printf("%s\n", buf);
-			free(buf);
-		}
-		fclose(fh_log);
-	}
-
-	return 0;
-}
-
-/*
- * clearLog - clear log file
- */
-static int clearLog(void)
-{
-	FILE *fh_log;
-
-	fh_log = fopen("netlog.log", "w");
-	if (fh_log) {
-		fclose(fh_log);
-	}
-
-	return 0;
-}
-
-/*
  * execCmdHalt - send remote cmd HALT to server
  */
 static int execCmdHalt(void)
@@ -602,19 +503,12 @@ int main(int argc, char **argv, char **env)
 		return 0;
 #endif
 
-	/* Create netlog thread */
-	pthread_create(&netlog_thread_id, NULL, netlogThread, (void *)&netlog_thread_id);
-
 	/* parse args */
 	if (argc == 2) {
 		if (!strcmp(argv[1], "--halt") || !strcmp(argv[1], "-H"))
 			execCmdHalt();
 		else if (!strcmp(argv[1], "--resume") || !strcmp(argv[1], "-R"))
 			execCmdResume();
-		else if (!strcmp(argv[1], "--log") || !strcmp(argv[1], "--printlog") || !strcmp(argv[1], "-L"))
-			printLog();
-		else if (!strcmp(argv[1], "--clearlog") || !strcmp(argv[1], "-C"))
-			clearLog();
 		else if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-v"))
 			printVer();
 		else

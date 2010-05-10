@@ -5,10 +5,8 @@ endif
 
 CFLAGS = -std=gnu99 -pedantic -Wall -O2 -fno-strict-aliasing -s -I/usr/include -I/usr/local/include
 
-ifeq "x$(MSYSTEM)" "x"
-LIBS = -lpthread
-else
-LIBS = -lwsock32 -lpthreadGC2
+ifneq "x$(MSYSTEM)" "x"
+LIBS = -lwsock32
 endif
   
 all: bin/ntpbclient
