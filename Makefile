@@ -77,7 +77,7 @@ release: all
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(VERSION)/
 	cp -r doc/ release/$(VERSION)/
 	cd release && \
-		tar -czf $(VERSION).tar.gz $(VERSION)/; \
+		tar -cjf $(VERSION).tar.bz2 $(VERSION)/; \
 		zip -qr $(VERSION).zip $(VERSION)/; \
 		sha1sum $(VERSION).* > $(VERSION).sha1
 
