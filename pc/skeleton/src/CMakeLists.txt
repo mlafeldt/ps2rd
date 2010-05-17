@@ -1,8 +1,0 @@
-PROJECT("skeleton" C)
-
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-
-SET(CMAKE_C_FLAGS "-Wall -O2")
-
-ADD_EXECUTABLE(skeleton skeleton.c)
-INSTALL(TARGETS skeleton DESTINATION bin)
