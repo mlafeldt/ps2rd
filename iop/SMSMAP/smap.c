@@ -8,12 +8,12 @@
    Copyright (c)2003 adresd
    License: GPL
 
-   $Id: smap.c 1105 2005-05-21 12:43:39Z pixel $
+   $Id$
 */
 
 /* Pulled from the eCos port */
 
-// $Id: smap.c 1105 2005-05-21 12:43:39Z pixel $
+// $Id$
 // many routines are taken from drivers/ps2/smap.c of PS2 Linux kernel (GPL).
 
 
