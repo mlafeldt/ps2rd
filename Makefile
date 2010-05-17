@@ -91,5 +91,6 @@ help:
 	@echo "The build targets are:"
 	@echo " all     - compile project (default)"
 	@echo " clean   - clean project"
+	@echo " run     - launch executable with ps2client"
 	@echo " check   - check for environment variables (invoked by all)"
 	@echo " release - create release package"
