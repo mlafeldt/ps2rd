@@ -45,8 +45,6 @@ all: loader
 clean:
 	rm -f $(EE_BIN) $(LDR_FILES)
 
-rebuild: clean all
-
 loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)

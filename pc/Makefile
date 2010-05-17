@@ -13,5 +13,3 @@ clean:
 		echo "* [IOP] Cleaning $$i ..."; \
 		$(MAKE) -C $$i clean; \
 	done
-
-rebuild: clean all

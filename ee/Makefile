@@ -33,5 +33,3 @@ clean:
 		$(MAKE) -C $$i clean; \
 	done
 	rm -f loader/*_erl.o
-
-rebuild: clean all

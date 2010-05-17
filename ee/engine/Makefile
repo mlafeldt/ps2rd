@@ -18,8 +18,6 @@ all: engine.erl
 clean:
 	rm -f *.o *.elf *.erl
 
-rebuild: clean all
-
 engine.erl: $(EE_OBJS)
 	$(EE_CC) -mno-crt0 -nostartfiles -o $@ $(EE_OBJS) $(EE_CFLAGS) \
 		$(EE_INCS) $(EE_LDFLAGS) -Wl,-r -Wl,-d

@@ -16,8 +16,6 @@ all: elfldr.erl
 clean:
 	rm -f *.o *.erl
 
-rebuild: clean all
-
 elfldr.erl: $(EE_OBJS)
 	$(EE_CC) -mno-crt0 -nostartfiles -o $@ $(EE_OBJS) $(EE_CFLAGS) \
 		$(EE_INCS) $(EE_LDFLAGS) -Wl,-r -Wl,-d

@@ -58,8 +58,6 @@ clean:
 	rm -rf release/
 	rm -f *-stamp
 
-rebuild: clean all
-
 run: all
 	$(MAKE) -C ee/loader run
 
@@ -93,6 +91,5 @@ help:
 	@echo "The build targets are:"
 	@echo " all     - compile project (default)"
 	@echo " clean   - clean project"
-	@echo " rebuild - rebuild project (clean + all)"
 	@echo " check   - check for environment variables (invoked by all)"
 	@echo " release - create release package"
