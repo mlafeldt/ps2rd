@@ -10,3 +10,4 @@ syntax: glob
 release/
 pc/skeleton/build/
 pc/ntpbclient/bin/ntpbclient
+./*-stamp
