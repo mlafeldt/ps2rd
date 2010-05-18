@@ -23,32 +23,84 @@
 #define _MYCDVD_H_
 
 #include <tamtypes.h>
+#include <kernel.h>
+#include <stdio.h>
+#include <string.h>
 #include <libcdvd.h>
+#include "dbgprintf.h"
 
 #define CDVD_BLOCK	0
 #define CDVD_NOBLOCK	1
 
-#if 0
-int cdOpenTray(void);
-int cdCloseTray(void);
-void cdToggleTray(void);
-int cdIsPS2Game(void);
-#endif
-void _cdStandby(int mode);
-void _cdStop(int mode);
+static inline void _cdStandby(int mode)
+{
+	cdDiskReady(mode);
+	cdStandby();
+	cdSync(mode);
+}
+
+static inline void _cdStop(int mode)
+{
+	cdDiskReady(mode);
+	cdStop();
+	cdSync(mode);
+}
 
 /**
  * cdGetElf - Parse "cdrom0:\\SYSTEM.CNF;1" for ELF filename.
  * @elfname: ptr to where filename is written to
  * @return: 0: success, <0: error
  */
-int cdGetElf(char *elfname);
+static inline int cdGetElf(char *elfname)
+{
+	const char *sep = "\n";
+	const char *entry = "BOOT2";
+	char buf[256];
+	char *ptr, *tok;
+	int fd, n, found = 0;
 
-/**
- * cdRunElf - Run a PS2 game from CD/DVD.
- * @return: does not return on success, -1: error
- */
+	if (elfname == NULL)
+		return -1;
 
-int cdRunElf(void);
+	fd = open("cdrom0:\\SYSTEM.CNF;1", O_TEXT | O_RDONLY);
+	if (fd < 0) {
+		fprintf(stderr, "%s: Can't open 'SYSTEM.CNF'\n", __FUNCTION__);
+		return -2;
+	}
+
+	n = read(fd, buf, sizeof(buf) - 1);
+	close(fd);
+	if (!n) {
+		fprintf(stderr, "%s: File size = 0\n", __FUNCTION__);
+		return -3;
+	}
+
+	buf[n] = '\0';
+	tok = strtok(buf, sep);
+
+	while (tok != NULL) {
+		D_PRINTF("%s: %s\n", __FUNCTION__, tok);
+
+		if (!found) {
+			ptr = strstr(tok, entry);
+			if (ptr != NULL) {
+				ptr += strlen(entry);
+				while (isspace(*ptr) || (*ptr == '='))
+					ptr++;
+				strcpy(elfname, ptr);
+				found = 1;
+			}
+		}
+
+		tok = strtok(NULL, sep);
+	}
+
+	if (!found) {
+		fprintf(stderr, "%s: Can't find %s entry\n", __FUNCTION__, entry);
+		return -4;
+	}
+
+	return 0;
+}
 
 #endif /* _MYCDVD_H_ */

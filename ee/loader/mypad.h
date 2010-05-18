@@ -24,7 +24,28 @@
 
 #include <tamtypes.h>
 #include <libpad.h>
+#include "dbgprintf.h"
 
-void padWaitReady(int port, int slot);
+static inline void padWaitReady(int port, int slot)
+{
+	int state, last_state;
+	char str[16];
+
+	state = padGetState(port, slot);
+	last_state = -1;
+	while ((state != PAD_STATE_STABLE) && (state != PAD_STATE_FINDCTP1)) {
+		if (state != last_state) {
+			padStateInt2String(state, str);
+			D_PRINTF("Please wait, pad (%d/%d) is in state %s.\n",
+				port+1, slot+1, str);
+		}
+		last_state = state;
+		state = padGetState(port, slot);
+	}
+
+	/* Pad ever 'out of sync'? */
+	if (last_state != -1)
+		D_PRINTF("Pad (%d/%d) OK!\n", port+1, slot+1);
+}
 
 #endif /* _MYPAD_H_ */
