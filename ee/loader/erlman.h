@@ -24,37 +24,9 @@
 
 #include <tamtypes.h>
 #include "configman.h"
-
-/**
- * engine_t - cheat engine context
- * @info: engine info
- * @maxhooks: max number of allowed hooks
- * @numhooks: number of hooks in hook list
- * @hooklist: hook list
- * @maxcodes: max number of allowed codes
- * @numcodes: number of codes in code list
- * @codelist: code list
- * @maxcallbacks: max number of callbacks
- * @callbacks: callback list
- */
-typedef struct {
-	u32	*info;
-	u32	*maxhooks;
-	u32	*numhooks;
-	u32	*hooklist;
-	u32	*maxcodes;
-	u32	*numcodes;
-	u32	*codelist;
-	u32	*maxcallbacks;
-	u32	*callbacks;
-} engine_t;
+#include "engine.h"
 
 int install_erls(const config_t *config, engine_t *engine);
 void uninstall_erls(void);
-
-int engine_add_hook(engine_t *engine, u32 addr, u32 val);
-int engine_add_code(engine_t *engine, u32 addr, u32 val);
-void engine_clear_hooks(engine_t *engine);
-void engine_clear_codes(engine_t *engine);
 
 #endif /* _ERLMAN_H_ */
