@@ -25,8 +25,8 @@
 #include <iopcontrol.h>
 #include <iopheap.h>
 #include <sifrpc.h>
+#include <string.h>
 #include "mycdvd.h"
-#include "mystring.h"
 #include "myutil.h"
 #include "dbgprintf.h"
 
@@ -116,51 +116,6 @@ int load_modules(const char **modv)
 
 	D_PRINTF("%s: All modules loaded.\n", __FUNCTION__);
 	return 0;
-}
-
-int set_dir_name(char *filename)
-{
-	int i;
-
-	if (filename == NULL)
-		return -1;
-
-	i = last_chr_idx(filename, '/');
-	if (i < 0) {
-		i = last_chr_idx(filename, '\\');
-		if (i < 0) {
-			i = chr_idx(filename, ':');
-			if (i < 0)
-				return -2;
-		}
-	}
-
-	filename[i+1] = '\0';
-	return 0;
-}
-
-char *get_base_name(const char *full, char *base)
-{
-	const char *p;
-	int i, len;
-
-	if (full == NULL || base == NULL)
-		return NULL;
-
-	i = last_chr_idx(full, '/');
-	if (i < 0) {
-		i = last_chr_idx(full, '\\');
-		if (i < 0)
-			i = chr_idx(full, ':');
-	}
-	p = &full[++i];
-	len = last_chr_idx(p, ';');
-	if (len < 0)
-		len = strlen(p);
-	memmove(base, p, len);
-	base[len] = '\0';
-
-	return base;
 }
 
 enum dev get_dev(const char *path)

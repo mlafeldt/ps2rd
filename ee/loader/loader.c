@@ -33,7 +33,6 @@
 #include "irxman.h"
 #include "mycdvd.h"
 #include "mypad.h"
-#include "mystring.h"
 #include "myutil.h"
 
 #define APP_NAME	"PS2rd"
@@ -62,6 +61,51 @@ static enum dev g_bootdev = DEV_UNKN;
 static u8 g_padbuf[256] __attribute__((aligned(64)));
 
 /*
+ * TODO use dirname() from libgen.h
+ */
+
+static inline size_t chr_idx(const char *s, char c)
+{
+	size_t i = 0;
+
+	while (s[i] && (s[i] != c))
+		i++;
+
+	return (s[i] == c) ? i : -1;
+}
+
+static inline size_t last_chr_idx(const char *s, char c)
+{
+	size_t i = strlen(s);
+
+	while (i && s[--i] != c)
+		;
+
+	return (s[i] == c) ? i : -1;
+}
+
+static int __dirname(char *filename)
+{
+	int i;
+
+	if (filename == NULL)
+		return -1;
+
+	i = last_chr_idx(filename, '/');
+	if (i < 0) {
+		i = last_chr_idx(filename, '\\');
+		if (i < 0) {
+			i = chr_idx(filename, ':');
+			if (i < 0)
+				return -2;
+		}
+	}
+
+	filename[i+1] = '\0';
+	return 0;
+}
+
+/*
  * Build pathname based on boot device and filename.
  */
 static char *__pathname(const char *name)
@@ -79,7 +123,7 @@ static char *__pathname(const char *name)
 	strcat(filename, name);
 
 	if (dev == DEV_CD) {
-		to_upper_str(filename);
+		strupr(filename);
 		strcat(filename, ";1");
 	}
 
@@ -271,7 +315,7 @@ int main(int argc, char *argv[])
 	D_PRINTF("Build date: "APP_BUILD_DATE"\n");
 
 	strcpy(g_bootpath, argv[0]);
-	set_dir_name(g_bootpath);
+	__dirname(g_bootpath);
 	g_bootdev = get_dev(g_bootpath);
 	A_PRINTF("Booting from: %s\n", g_bootpath);
 	A_PRINTF("Initializing...\n");

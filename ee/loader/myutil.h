@@ -87,23 +87,6 @@ void reset_iop(const char *img);
 int load_modules(const char **modv);
 
 /**
- * set_dir_name - Strips non-directory suffix from a filename.
- * @filename: full file path
- * @return: 0: success, <0: error
- */
-int set_dir_name(char *filename);
-
-/**
- * get_base_name - Strips directory and suffix ";1" from a filename.
- * @full: full file path
- * @base: ptr to where stripped filename is written to
- * @return: ptr to stripped filename, or NULL on error
- *
- * NOTE: @full and @base may be identical.
- */
-char *get_base_name(const char *full, char *base);
-
-/**
  * get_dev - Get device from path.
  * @path: path information
  * @return: boot device

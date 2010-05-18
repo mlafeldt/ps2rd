@@ -21,9 +21,9 @@
 
 #include <tamtypes.h>
 #include <libcheats.h>
+#include <string.h>
 #include "dbgprintf.h"
 #include "gameid.h"
-#include "mystring.h"
 
 int gameid_set(gameid_t *id, const char *name, size_t size)
 {
@@ -63,6 +63,40 @@ int gameid_generate(const char *filename, gameid_t *id)
 	gameid_set(id, filename, size);
 
 	return 0;
+}
+
+static int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
+{
+	unsigned char a, b;
+
+	while (n-- > 0) {
+		a = (unsigned char)*s1++;
+		b = (unsigned char)*s2++;
+		if (a != b && a != wc && b != wc)
+			return a - b;
+		if (!a)
+			return 0;
+	}
+
+	return 0;
+}
+
+static char *strstr_wc(const char *haystack, const char *needle, int wc)
+{
+	char *pos;
+
+	if (!strlen(needle))
+		return (char*)haystack;
+
+	pos = (char*)haystack;
+
+	while (*pos) {
+		if (!strncmp_wc(pos, needle, strlen(needle), wc))
+			return pos;
+		pos++;
+	}
+
+	return NULL;
 }
 
 int gameid_compare(const gameid_t *id1, const gameid_t *id2)
@@ -114,8 +148,6 @@ int gameid_parse(const char *s, gameid_t *id)
 				break;
 
 			case 1: /* size */
-				if (!is_dec_str(p))
-					return -1;
 				if (!sscanf(p, "%i", &id->size))
 					return -1;
 				id->set |= GID_F_SIZE;
