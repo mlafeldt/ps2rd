@@ -91,7 +91,7 @@ static char *__pathname(const char *name)
  */
 static int load_cheats(const config_t *config, cheats_t *cheats)
 {
-	const char *cheatfile = _config_get_string(config, SET_CHEATS_FILE);
+	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
 	char *buf = NULL;
 	int ret;
 
@@ -277,15 +277,15 @@ int main(int argc, char *argv[])
 	A_PRINTF("Initializing...\n");
 
 	D_PRINTF("* Reading config...\n");
-	_config_build(&config);
+	config_build(&config);
 	if (config_read_file(&config, __pathname(CONFIG_FILE)) != CONFIG_TRUE)
 		D_PRINTF("config: %s\n", config_error_text(&config));
-	_config_print(&config);
+	config_print(&config);
 
-	if (g_bootdev != DEV_HOST && _config_get_bool(&config, SET_IOP_RESET))
+	if (g_bootdev != DEV_HOST && config_get_bool(&config, SET_IOP_RESET))
 		reset_iop("rom0:UDNL rom0:EELOADCNF");
 
-	if (_config_get_bool(&config, SET_SBV_PATCHES)) {
+	if (config_get_bool(&config, SET_SBV_PATCHES)) {
 		D_PRINTF("* Applying SBV patches...\n");
 		sbv_patch_enable_lmb();
 		sbv_patch_disable_prefix_check();
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
 		if ((new_pad & PAD_START) || (new_pad & PAD_CROSS)) {
 			start_game(boot2);
 		} else if (new_pad & PAD_SELECT) {
-			boot2 = _config_get_string_elem(&config, SET_BOOT2, select++);
+			boot2 = config_get_string_elem(&config, SET_BOOT2, select++);
 			if (boot2 != NULL) {
 				A_PRINTF("Boot ELF is %s\n", boot2);
 			} else {
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
 				select = 0;
 			}
 		} else if (new_pad & PAD_CIRCLE) {
-			if (!_config_get_bool(&config, SET_ENGINE_INSTALL))
+			if (!config_get_bool(&config, SET_ENGINE_INSTALL))
 				A_PRINTF("Error: could not activate cheats - "
 					"engine not installed\n");
 			else

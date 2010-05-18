@@ -175,8 +175,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install SDK libraries
 	 */
-	if (_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-		addr = _config_get_int(config, SET_SDKLIBS_ADDR);
+	if (config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+		addr = config_get_int(config, SET_SDKLIBS_ADDR);
 		file = &_erl_files[ERL_FILE_LIBKERNEL];
 		if (__install_erl(file, addr) < 0)
 			return -1;
@@ -204,8 +204,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install cheat engine
 	 */
-	if (_config_get_bool(config, SET_ENGINE_INSTALL)) {
-		addr = _config_get_int(config, SET_ENGINE_ADDR);
+	if (config_get_bool(config, SET_ENGINE_INSTALL)) {
+		addr = config_get_int(config, SET_ENGINE_ADDR);
 		file = &_erl_files[ERL_FILE_ENGINE];
 
 		if (__install_erl(file, addr) < 0)
@@ -226,8 +226,8 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install videomod
 	 */
-	if (_config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
-		addr = _config_get_int(config, SET_VIDEOMOD_ADDR);
+	if (config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
+		addr = config_get_int(config, SET_VIDEOMOD_ADDR);
 		file = &_erl_files[ERL_FILE_VIDEOMOD];
 
 		if (__install_erl(file, addr) < 0)
@@ -235,16 +235,16 @@ int install_erls(const config_t *config, engine_t *engine)
 
 		int *vmode;
 		GET_SYMBOL(vmode, "vmode");
-		*vmode = _config_get_int(config, SET_VIDEOMOD_VMODE);
+		*vmode = config_get_int(config, SET_VIDEOMOD_VMODE);
 
-		if (_config_get_bool(config, SET_VIDEOMOD_YFIX)) {
+		if (config_get_bool(config, SET_VIDEOMOD_YFIX)) {
 			int *ydiff;
 			void (*YPosHandler)(void) = NULL;
 
 			GET_SYMBOL(ydiff, "ydiff_lores");
-			*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
+			*ydiff = config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
 			GET_SYMBOL(ydiff, "ydiff_hires");
-			*ydiff = _config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
+			*ydiff = config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
 
 			/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
 			GET_SYMBOL(YPosHandler, "YPosHandler");
@@ -258,11 +258,11 @@ int install_erls(const config_t *config, engine_t *engine)
 	/*
 	 * install debugger
 	 */
-	if (_config_get_bool(config, SET_DEBUGGER_INSTALL)) {
-		addr = _config_get_int(config, SET_DEBUGGER_ADDR);
+	if (config_get_bool(config, SET_DEBUGGER_INSTALL)) {
+		addr = config_get_int(config, SET_DEBUGGER_ADDR);
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
-		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+		if (!config_get_bool(config, SET_SDKLIBS_INSTALL)) {
 			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
 				__FUNCTION__, file->name);
 			return -1;
@@ -272,7 +272,7 @@ int install_erls(const config_t *config, engine_t *engine)
 			return -1;
 
 		/* add debugger_loop() callback to engine */
-		if (_config_get_bool(config, SET_ENGINE_INSTALL)) {
+		if (config_get_bool(config, SET_ENGINE_INSTALL)) {
 			int (*debugger_loop)(void) = NULL;
 			GET_SYMBOL(debugger_loop, "debugger_loop");
 			engine->callbacks[0] = (u32)debugger_loop;
@@ -284,25 +284,25 @@ int install_erls(const config_t *config, engine_t *engine)
 
 		GET_SYMBOL(set_debugger_opts, "set_debugger_opts");
 		memset(&opts, 0, sizeof(opts));
-		opts.auto_hook = _config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
-		opts.patch_loadmodule = _config_get_bool(config, SET_DEBUGGER_PATCH_LOADMODULE);
-		opts.unhook_iop_reset = _config_get_bool(config, SET_DEBUGGER_UNHOOK_IOP_RESET);
-		opts.rpc_mode = _config_get_int(config, SET_DEBUGGER_RPC_MODE);
-		opts.load_modules = _config_get_bool(config, SET_DEBUGGER_LOAD_MODULES);
-		strncpy(opts.ip_config.ipaddr, _config_get_string(config, SET_DEBUGGER_IPADDR), 15);
-		strncpy(opts.ip_config.netmask, _config_get_string(config, SET_DEBUGGER_NETMASK), 15);
-		strncpy(opts.ip_config.gateway, _config_get_string(config, SET_DEBUGGER_GATEWAY), 15);
+		opts.auto_hook = config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
+		opts.patch_loadmodule = config_get_bool(config, SET_DEBUGGER_PATCH_LOADMODULE);
+		opts.unhook_iop_reset = config_get_bool(config, SET_DEBUGGER_UNHOOK_IOP_RESET);
+		opts.rpc_mode = config_get_int(config, SET_DEBUGGER_RPC_MODE);
+		opts.load_modules = config_get_bool(config, SET_DEBUGGER_LOAD_MODULES);
+		strncpy(opts.ip_config.ipaddr, config_get_string(config, SET_DEBUGGER_IPADDR), 15);
+		strncpy(opts.ip_config.netmask, config_get_string(config, SET_DEBUGGER_NETMASK), 15);
+		strncpy(opts.ip_config.gateway, config_get_string(config, SET_DEBUGGER_GATEWAY), 15);
 		set_debugger_opts(&opts);
 	}
 
 	/*
 	 * install ELF loader
 	 */
-	if (_config_get_bool(config, SET_ELFLDR_INSTALL)) {
-		addr = _config_get_int(config, SET_ELFLDR_ADDR);
+	if (config_get_bool(config, SET_ELFLDR_INSTALL)) {
+		addr = config_get_int(config, SET_ELFLDR_ADDR);
 		file = &_erl_files[ERL_FILE_ELFLDR];
 
-		if (!_config_get_bool(config, SET_SDKLIBS_INSTALL)) {
+		if (!config_get_bool(config, SET_SDKLIBS_INSTALL)) {
 			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
 				__FUNCTION__, file->name);
 			return -1;

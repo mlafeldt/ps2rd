@@ -136,39 +136,39 @@
 #define SET_CHEATS_FILE                 "cheats.file"
 
 
-void _config_build(config_t *config);
-void _config_print(const config_t *config);
+void config_build(config_t *config);
+void config_print(const config_t *config);
 
 /*
  * libconfig wrapper functions for lazy people.
  */
 
-static inline int _config_get_int(const config_t *config, const char *path)
+static inline int config_get_int(const config_t *config, const char *path)
 {
 	return config_setting_get_int(config_lookup(config, path));
 }
 
-static inline long long _config_get_int64(const config_t *config, const char *path)
+static inline long long config_get_int64(const config_t *config, const char *path)
 {
 	return config_setting_get_int64(config_lookup(config, path));
 }
 
-static inline double _config_get_float(const config_t *config, const char *path)
+static inline double config_get_float(const config_t *config, const char *path)
 {
 	return config_setting_get_float(config_lookup(config, path));
 }
 
-static inline int _config_get_bool(const config_t *config, const char *path)
+static inline int config_get_bool(const config_t *config, const char *path)
 {
 	return config_setting_get_bool(config_lookup(config, path));
 }
 
-static inline const char *_config_get_string(const config_t *config, const char *path)
+static inline const char *config_get_string(const config_t *config, const char *path)
 {
 	return config_setting_get_string(config_lookup(config, path));
 }
 
-static inline const char *_config_get_string_elem(const config_t *config, const char *path, int index)
+static inline const char *config_get_string_elem(const config_t *config, const char *path, int index)
 {
 	return config_setting_get_string_elem(config_lookup(config, path), index);
 }

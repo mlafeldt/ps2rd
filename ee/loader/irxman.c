@@ -132,7 +132,7 @@ static void copy_modules_to_kernel(const config_t *config)
 	 * build RAM file table
 	 */
 #ifdef _SMS_MODULES
-	if (_config_get_bool(config, SET_DEBUGGER_SMS_MODULES)) {
+	if (config_get_bool(config, SET_DEBUGGER_SMS_MODULES)) {
 		ramfile_set(file_ptr++, "ps2ip", _ps2ip_sms_irx_start, _ps2ip_sms_irx_size);
 		ramfile_set(file_ptr++, "ps2smap", _ps2smap_sms_irx_start, _ps2smap_sms_irx_size);
 	} else {
@@ -194,7 +194,7 @@ int init_irx_modules(const config_t *config)
 		i++;
 	}
 
-	if (_config_get_bool(config, SET_USB_SUPPORT)) {
+	if (config_get_bool(config, SET_USB_SUPPORT)) {
 		SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
 		if (ret < 0) {
 			D_PRINTF("%s: failed to load module usbd.irx (%i)\n",

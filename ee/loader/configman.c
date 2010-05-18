@@ -26,10 +26,10 @@
 #include "dbgprintf.h"
 
 /**
- * _config_build - Build configuration with all required settings.
+ * config_build - Build configuration with all required settings.
  * @config: ptr to config
  */
-void _config_build(config_t *config)
+void config_build(config_t *config)
 {
 	config_setting_t *root, *group, *set;
 
@@ -184,10 +184,10 @@ void _config_build(config_t *config)
 }
 
 /**
- * _config_print - Print out all config settings.
+ * config_print - Print out all config settings.
  * @config: ptr to config
  */
-void _config_print(const config_t *config)
+void config_print(const config_t *config)
 {
 	const char *s = NULL;
 	int i;
@@ -195,17 +195,17 @@ void _config_print(const config_t *config)
 	printf("config settings:\n");
 
 #define PRINT_BOOL(key) \
-	printf("%s = %i\n", key, _config_get_bool(config, key))
+	printf("%s = %i\n", key, config_get_bool(config, key))
 #define PRINT_INT(key) \
-	printf("%s = %i\n", key, _config_get_int(config, key))
+	printf("%s = %i\n", key, config_get_int(config, key))
 #define PRINT_HEX(key) \
-	printf("%s = %08x\n", key, _config_get_int(config, key))
+	printf("%s = %08x\n", key, config_get_int(config, key))
 #define PRINT_STRING(key) \
-	printf("%s = %s\n", key, _config_get_string(config, key))
+	printf("%s = %s\n", key, config_get_string(config, key))
 #define PRINT_STRING_ARRAY(key) \
 	i = 0; \
 	do { \
-		s = _config_get_string_elem(config, key, i); \
+		s = config_get_string_elem(config, key, i); \
 		printf("%s[%i] = %s\n", key, i, s); \
 		i++; \
 	} while (s != NULL)
