@@ -233,7 +233,7 @@ static inline char *read_text_file(const char *filename, int maxsize)
 		goto end;
 	}
 
-	buf = (char*)malloc(filesize + 1);
+	buf = malloc(filesize + 1);
 	if (buf == NULL) {
 		fprintf(stderr, "%s: Unable to allocate %i bytes\n",
 			__FUNCTION__, filesize + 1);
@@ -245,6 +245,8 @@ static inline char *read_text_file(const char *filename, int maxsize)
 		if (read(fd, buf, filesize) != filesize) {
 			fprintf(stderr, "%s: Can't read from text file %s\n",
 				__FUNCTION__, filename);
+			free(buf);
+			buf = NULL;
 			goto end;
 		}
 	}
