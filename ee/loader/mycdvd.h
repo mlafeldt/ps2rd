@@ -36,7 +36,19 @@ int cdIsPS2Game(void);
 #endif
 void _cdStandby(int mode);
 void _cdStop(int mode);
+
+/**
+ * cdGetElf - Parse "cdrom0:\\SYSTEM.CNF;1" for ELF filename.
+ * @elfname: ptr to where filename is written to
+ * @return: 0: success, <0: error
+ */
 int cdGetElf(char *elfname);
+
+/**
+ * cdRunElf - Run a PS2 game from CD/DVD.
+ * @return: does not return on success, -1: error
+ */
+
 int cdRunElf(void);
 
 #endif /* _MYCDVD_H_ */

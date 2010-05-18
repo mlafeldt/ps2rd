@@ -23,9 +23,6 @@
 #include <stdio.h>
 #include "mystring.h"
 
-/*
- * add_str - Appends @s2 to @s1 and returns a pointer to the new string.
- */
 char *add_str(const char *s1, const char *s2)
 {
 	char *s = (char*)malloc(strlen(s1) + strlen(s2) + 1);
@@ -38,9 +35,6 @@ char *add_str(const char *s1, const char *s2)
 	return s;
 }
 
-/*
- * add_fmt_str - Appends a formatted string @f to @s.
- */
 int add_fmt_str(char *s, const char *f, ...)
 {
 	va_list ap;
@@ -53,10 +47,6 @@ int add_fmt_str(char *s, const char *f, ...)
 	return ret;
 }
 
-/*
- * chr_idx - Returns the index within @s of the first occurrence of the
- * specified char @c.  If no such char occurs in @s, then (-1) is returned.
- */
 size_t chr_idx(const char *s, char c)
 {
 	size_t i = 0;
@@ -67,10 +57,6 @@ size_t chr_idx(const char *s, char c)
 	return (s[i] == c) ? i : -1;
 }
 
-/*
- * last_chr_idx - Returns the index within @s of the last occurrence of the
- * specified char @c.  If the char does not occur in @s, then (-1) is returned.
- */
 size_t last_chr_idx(const char *s, char c)
 {
 	size_t i = strlen(s);
@@ -81,9 +67,6 @@ size_t last_chr_idx(const char *s, char c)
 	return (s[i] == c) ? i : -1;
 }
 
-/*
- * to_lower_str - Converts @s to an lowercase string.
- */
 char *to_lower_str(char *s)
 {
 	while (*s) {
@@ -94,9 +77,6 @@ char *to_lower_str(char *s)
 	return s;
 }
 
-/*
- * to_upper_str - Converts @s to an uppercase string.
- */
 char *to_upper_str(char *s)
 {
 	while (*s) {
@@ -107,9 +87,6 @@ char *to_upper_str(char *s)
 	return s;
 }
 
-/*
- * to_print_str - Replaces all non-printable chars in @s with printable char @c.
- */
 size_t to_print_str(char *s, char c)
 {
 	size_t i = 0;
@@ -125,9 +102,6 @@ size_t to_print_str(char *s, char c)
 	return i;
 }
 
-/*
- * xstr_to_bytes - Converts a hex string to a byte array.
- */
 void xstr_to_bytes(const char *s, size_t count, unsigned char *buf)
 {
 	unsigned int v;
@@ -139,9 +113,6 @@ void xstr_to_bytes(const char *s, size_t count, unsigned char *buf)
 	}
 }
 
-/*
- * bytes_to_xstr - Converts a byte array to a hey string.
- */
 void bytes_to_xstr(const unsigned char *buf, size_t count, char *s)
 {
 	size_t i = 0;
@@ -152,10 +123,6 @@ void bytes_to_xstr(const unsigned char *buf, size_t count, char *s)
 	}
 }
 
-/*
- * set_strlen - Sets the maximum length of the string @s.  If @s is longer, it
- * will be shortened to @max chars.
- */
 int set_strlen(char *s, size_t max)
 {
 	if (strlen(s) <= max)
@@ -165,9 +132,6 @@ int set_strlen(char *s, size_t max)
 	return 1;
 }
 
-/*
- * term_str - Terminate string @s where the callback functions returns 1.
- */
 char *term_str(char *s, int(*callback)(const char *))
 {
 	if (callback != NULL) {
@@ -183,9 +147,6 @@ char *term_str(char *s, int(*callback)(const char *))
 	return s;
 }
 
-/*
- * trim_str - Removes white space from both ends of the string @s.
- */
 int trim_str(char *s)
 {
 	size_t first = 0;
@@ -215,9 +176,6 @@ int trim_str(char *s)
 	return slen;
 }
 
-/*
- * strncmp_wc - Compare two strings. Wildcard character @wc is ignored.
- */
 int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
 {
 	unsigned char a, b;
@@ -234,9 +192,6 @@ int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
 	return 0;
 }
 
-/*
- * strstr_wc - Locate a substring. Wildcard character @wc is ignored.
- */
 char *strstr_wc(const char *haystack, const char *needle, int wc)
 {
 	char *pos;
@@ -255,18 +210,11 @@ char *strstr_wc(const char *haystack, const char *needle, int wc)
 	return NULL;
 }
 
-/*
- * _isascii - Returns 1 if @c is an ASCII character (in the range 0x00 - 0x7F).
- */
 int _isascii(int c)
 {
 	return (c >= 0 && c <= 127);
 }
 
-/*
- * is_empty_str - Returns 1 if @s contains no printable chars other than white
- * space.  Otherwise, 0 is returned.
- */
 int is_empty_str(const char *s)
 {
 	size_t slen = strlen(s);
@@ -279,10 +227,6 @@ int is_empty_str(const char *s)
 	return 1;
 }
 
-/*
- * is_empty_substr - Returns 1 if the first @count chars of @s are not printable
- * (apart from white space).  Otherwise, 0 is returned.
- */
 int is_empty_substr(const char *s, size_t count)
 {
 	while (count--) {
@@ -293,10 +237,6 @@ int is_empty_substr(const char *s, size_t count)
 	return 1;
 }
 
-/*
- * is_dec_str - Returns 1 if all chars of @s are decimal.
- * Otherwise, 0 is returned.
- */
 int is_dec_str(const char *s)
 {
 	while (*s) {
@@ -307,10 +247,6 @@ int is_dec_str(const char *s)
 	return 1;
 }
 
-/*
- * is_hex_str - Returns 1 if all chars of @s are hexadecimal.
- * Otherwise, 0 is returned.
- */
 int is_hex_str(const char *s)
 {
 	while (*s) {
@@ -321,10 +257,6 @@ int is_hex_str(const char *s)
 	return 1;
 }
 
-/*
- * is_print_str - Returns 1 if all chars of @s are printable.
- * Otherwise, 0 is returned.
- */
 int is_print_str(const char *s)
 {
 	while (*s) {

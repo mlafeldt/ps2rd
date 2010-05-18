@@ -50,10 +50,45 @@ typedef struct _game_id {
 	int	set;
 } gameid_t;
 
+/**
+ * gameid_set - Set up the members of a game id.
+ * @id: ptr to game id
+ * @name: filename
+ * @size: file size (greater than 0)
+ * @return: GID_F_* flags showing which of the members were set
+ */
 int gameid_set(gameid_t *id, const char *name, size_t size);
+
+/**
+ * gameid_generate - Generate the game id from a file.
+ * @filename: full path to the file
+ * @id: ptr to where the game id will be written to
+ * @return: 0: success, <0: error
+ */
 int gameid_generate(const char *filename, gameid_t *id);
+
+/**
+ * gameid_compare - Compare two game ids.
+ * @id1: ptr to 1st game id
+ * @id2: ptr to 2nd game id
+ * @return: 0: equal, -1: unequal
+ */
 int gameid_compare(const gameid_t *id1, const gameid_t *id2);
+
+/**
+ * gameid_parse - Parse a string for a game ID.
+ * @s: string to be parsed
+ * @id: ptr to game id
+ * @return: 0: success, -1: error
+ */
 int gameid_parse(const char *s, gameid_t *id);
+
+/**
+ * gameid_find - Find cheats for a game by its game ID.
+ * @id: ptr to game id
+ * @list: game list to be searched
+ * @return: ptr to game, or NULL if it could not be found
+ */
 game_t *gameid_find(const gameid_t *id, const gamelist_t *list);
 
 #endif /* _GAMEID_H_ */

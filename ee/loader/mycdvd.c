@@ -88,11 +88,6 @@ void _cdStop(int mode)
 	cdSync(mode);
 }
 
-/**
- * cdGetElf - Parse "cdrom0:\\SYSTEM.CNF;1" for ELF filename.
- * @elfname: ptr to where filename is written to
- * @return: 0: success, <0: error
- */
 int cdGetElf(char *elfname)
 {
 	const char *sep = "\n";
@@ -145,10 +140,6 @@ int cdGetElf(char *elfname)
 	return 0;
 }
 
-/**
- * cdRunElf - Run a PS2 game from CD/DVD.
- * @return: does not return on success, -1: error
- */
 int cdRunElf(void)
 {
 	char elfname[FIO_PATH_MAX];
