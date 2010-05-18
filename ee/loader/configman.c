@@ -198,7 +198,7 @@ void _config_print(const config_t *config)
 	printf("%s = %i\n", key, _config_get_bool(config, key))
 #define PRINT_INT(key) \
 	printf("%s = %i\n", key, _config_get_int(config, key))
-#define PRINT_U32(key) \
+#define PRINT_HEX(key) \
 	printf("%s = %08x\n", key, _config_get_int(config, key))
 #define PRINT_STRING(key) \
 	printf("%s = %s\n", key, _config_get_string(config, key))
@@ -218,11 +218,11 @@ void _config_print(const config_t *config)
 
 	/* engine */
 	PRINT_BOOL(SET_ENGINE_INSTALL);
-	PRINT_U32(SET_ENGINE_ADDR);
+	PRINT_HEX(SET_ENGINE_ADDR);
 
 	/* debugger */
 	PRINT_BOOL(SET_DEBUGGER_INSTALL);
-	PRINT_U32(SET_DEBUGGER_ADDR);
+	PRINT_HEX(SET_DEBUGGER_ADDR);
 	PRINT_BOOL(SET_DEBUGGER_AUTO_HOOK);
 	PRINT_BOOL(SET_DEBUGGER_PATCH_LOADMODULE);
 	PRINT_BOOL(SET_DEBUGGER_UNHOOK_IOP_RESET);
@@ -235,15 +235,15 @@ void _config_print(const config_t *config)
 
 	/* sdklibs */
 	PRINT_BOOL(SET_SDKLIBS_INSTALL);
-	PRINT_U32(SET_SDKLIBS_ADDR);
+	PRINT_HEX(SET_SDKLIBS_ADDR);
 
 	/* elfldr */
 	PRINT_BOOL(SET_ELFLDR_INSTALL);
-	PRINT_U32(SET_ELFLDR_ADDR);
+	PRINT_HEX(SET_ELFLDR_ADDR);
 
 	/* videomod */
 	PRINT_BOOL(SET_VIDEOMOD_INSTALL);
-	PRINT_U32(SET_VIDEOMOD_ADDR);
+	PRINT_HEX(SET_VIDEOMOD_ADDR);
 	PRINT_INT(SET_VIDEOMOD_VMODE);
 	PRINT_BOOL(SET_VIDEOMOD_YFIX);
 	PRINT_INT(SET_VIDEOMOD_YDIFF_LORES);
