@@ -27,12 +27,17 @@ use IO::Socket;
 my $remote_host = "localhost"; #"192.168.0.10";
 my $remote_port = 4234;
 
-my $REMOTE_CMD_HALT = 0x201;
-my $REMOTE_CMD_RESUME = 0x202;
+my $NTPB_MAGIC      = "\xff\x00NTPB";
 
-my $EOT = 0xffff; 
-my $ACK = 0x0001;
-my $MAGIC = pack("C2a4", 0xff, 0x00, "NTPB");
+# commands to be sent to server
+my $NTPB_DUMP       = 0x0100;
+my $NTPB_HALT       = 0x0201;
+my $NTPB_RESUME     = 0x0202;
+
+# commands returned by server
+my $NTPB_SEND_DUMP  = 0x0300;
+my $NTPB_EOT        = 0xffff; 
+my $NTPB_ACK        = 0x0001;
 
 my $sock = IO::Socket::INET->new(
     PeerAddr => $remote_host,
@@ -43,12 +48,12 @@ my $sock = IO::Socket::INET->new(
 
 sub ntpb_send_cmd {
     my ($cmd, $buf) = @_;
-    my $msg = $MAGIC;
+    my $msg = $NTPB_MAGIC;
 
     if (defined $buf) {
-        $msg .= pack("S S", length $buf, $cmd) . $buf;
+        $msg .= pack("S2", length $buf, $cmd) . $buf;
     } else {
-        $msg .= pack("S S", 0, $cmd);
+        $msg .= pack("S2", 0, $cmd);
     }
 
     $sock->send($msg) or return undef;
@@ -57,19 +62,20 @@ sub ntpb_send_cmd {
 }
 
 sub ntpb_recv_data {
+    # TODO adapt for dump command
     my ($buf, $size);
     my $ret = $sock->recv($buf, 65536);
     unless (defined $ret) { return undef; }
-    $sock->send($MAGIC . pack("S S S", $size, $EOT, $ACK));
+    $sock->send($NTPB_MAGIC . pack("S3", $size, $NTPB_EOT, $NTPB_ACK));
 }
 
 my $cmd = shift;
 unless (defined $cmd) { die "Command missing.\n" };
 
 if ($cmd eq "halt") {
-    ntpb_send_cmd($REMOTE_CMD_HALT);
+    ntpb_send_cmd($NTPB_HALT);
 } elsif ($cmd eq "resume") {
-    ntpb_send_cmd($REMOTE_CMD_RESUME);
+    ntpb_send_cmd($NTPB_RESUME);
 } else {
     die "Invalid command.\n";
 }
