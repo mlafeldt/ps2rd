@@ -24,20 +24,11 @@ use warnings;
 use strict;
 use IO::Socket;
 
-my $remote_host = "localhost"; #"192.168.0.10";
-my $remote_port = 4234;
+my ($remote_host, $remote_port) = ("localhost", 4234);
 
-my $NTPB_MAGIC      = "\xff\x00NTPB";
-
-# commands to be sent to server
-my $NTPB_DUMP       = 0x0100;
-my $NTPB_HALT       = 0x0201;
-my $NTPB_RESUME     = 0x0202;
-
-# commands returned by server
-my $NTPB_SEND_DUMP  = 0x0300;
-my $NTPB_EOT        = 0xffff; 
-my $NTPB_ACK        = 0x0001;
+my $NTPB_MAGIC = "\xff\x00NTPB";
+my ($NTPB_DUMP, $NTPB_HALT, $NTPB_RESUME) = (0x0100, 0x0201, 0x0202);
+my ($NTPB_SEND_DUMP, $NTPB_EOT, $NTPB_ACK) = (0x0300, 0xffff, 0x0001);
 
 my $sock = IO::Socket::INET->new(
     PeerAddr => $remote_host,
