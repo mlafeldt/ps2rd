@@ -47,16 +47,9 @@ my $sock = IO::Socket::INET->new(
 ) or die "Could not create socket: $!\n";
 
 sub ntpb_send_cmd {
-    my ($cmd, $buf) = @_;
-    my $msg = $NTPB_MAGIC;
-
-    if (defined $buf) {
-        $msg .= pack("S2", length $buf, $cmd) . $buf;
-    } else {
-        $msg .= pack("S2", 0, $cmd);
-    }
-
-    $sock->send($msg) or return undef;
+    my $cmd = shift;
+    my $buf = shift || "";
+    $sock->send($NTPB_MAGIC . pack("S2", length $buf, $cmd) . $buf) or return undef;
     my $ret = $sock->recv($buf, 65536);
     # TODO check magic
 }
