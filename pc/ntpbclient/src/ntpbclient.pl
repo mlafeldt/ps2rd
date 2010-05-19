@@ -24,7 +24,7 @@ use warnings;
 use strict;
 use IO::Socket;
 
-my $remote_host = "192.168.0.10";
+my $remote_host = "localhost"; #"192.168.0.10";
 my $remote_port = 4234;
 
 my $REMOTE_CMD_HALT = 0x201;
@@ -32,35 +32,47 @@ my $REMOTE_CMD_RESUME = 0x202;
 
 my $EOT = 0xffff; 
 my $ACK = 0x0001;
-
-print "target: $remote_host:$remote_port\n";
+my $MAGIC = pack("C2a4", 0xff, 0x00, "NTPB");
 
 my $sock = IO::Socket::INET->new(
-	PeerAddr => $remote_host,
-	PeerPort => $remote_port,
-	Proto => "tcp",
-	Type => SOCK_STREAM,
-	Timeout => 3
+    PeerAddr => $remote_host,
+    PeerPort => $remote_port,
+    Proto => "tcp",
+    Timeout => 3
 ) or die "Could not create socket: $!\n";
 
-my @magic = (0xff, 0x00, "NTPB");
-my $size = 0;
-my $cmd = $REMOTE_CMD_HALT;
+sub ntpb_send_cmd {
+    my ($cmd, $buf) = @_;
+    my $msg = $MAGIC;
 
-my $buf = pack("C2 a4 S S", @magic, $size, $cmd);
+    if (defined $buf) {
+        $msg .= pack("S S", length $buf, $cmd) . $buf;
+    } else {
+        $msg .= pack("S S", 0, $cmd);
+    }
 
-$sock->send($buf) or die "Send error: $!\n";
+    $sock->send($msg) or return undef;
+    my $ret = $sock->recv($buf, 65536);
+    # TODO check magic
+}
 
-my $ret = $sock->recv($buf, 65536);
-unless(defined $ret) { die "Recv error"; }
+sub ntpb_recv_data {
+    my ($buf, $size);
+    my $ret = $sock->recv($buf, 65536);
+    unless (defined $ret) { return undef; }
+    $sock->send($MAGIC . pack("S S S", $size, $EOT, $ACK));
+}
 
-$ret = $sock->recv($buf, 65536);
-unless(defined $ret) { die "Recv error"; }
+my $cmd = shift;
+unless (defined $cmd) { die "Command missing.\n" };
 
-$buf = pack("C2 a4 S S S", @magic, $size, $EOT, $ACK);
-
-$sock->send($buf) or die "Send error: $!\n";
-
-print "PS2 halted!\n";
+if ($cmd eq "halt") {
+    ntpb_send_cmd($REMOTE_CMD_HALT);
+} elsif ($cmd eq "resume") {
+    ntpb_send_cmd($REMOTE_CMD_RESUME);
+} else {
+    die "Invalid command.\n";
+}
+ntpb_recv_data();
 
 close($sock);
