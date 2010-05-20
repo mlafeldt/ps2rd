@@ -24,18 +24,22 @@ use warnings;
 use strict;
 use IO::Socket;
 
-my ($remote_host, $remote_port) = ("localhost", 4234);
+my ($remote_host, $remote_port) = ("192.168.0.10", 4234);
 
 my $NTPB_MAGIC = "\xff\x00NTPB";
 my ($NTPB_DUMP, $NTPB_HALT, $NTPB_RESUME) = (0x0100, 0x0201, 0x0202);
 my ($NTPB_SEND_DUMP, $NTPB_EOT, $NTPB_ACK) = (0x0300, 0xffff, 0x0001);
 
-my $sock = IO::Socket::INET->new(
-    PeerAddr => $remote_host,
-    PeerPort => $remote_port,
-    Proto => "tcp",
-    Timeout => 3
-) or die "Could not create socket: $!\n";
+my $sock;
+
+sub ntpb_connect {
+    IO::Socket::INET->new(
+        PeerAddr => $remote_host,
+        PeerPort => $remote_port,
+        Proto => "tcp",
+        Timeout => 3
+    )
+}
 
 sub ntpb_send_cmd {
     my $cmd = shift;
@@ -47,7 +51,8 @@ sub ntpb_send_cmd {
 
 sub ntpb_recv_data {
     # TODO adapt for dump command
-    my ($buf, $size);
+    my $buf;
+    my $size = 0;
     my $ret = $sock->recv($buf, 65536);
     unless (defined $ret) { return undef; }
     $sock->send($NTPB_MAGIC . pack("S3", $size, $NTPB_EOT, $NTPB_ACK));
@@ -55,6 +60,8 @@ sub ntpb_recv_data {
 
 my $cmd = shift;
 unless (defined $cmd) { die "Command missing.\n" };
+
+$sock = ntpb_connect($remote_host, $remote_port) or die "$!\n";
 
 if ($cmd eq "halt") {
     ntpb_send_cmd($NTPB_HALT);
