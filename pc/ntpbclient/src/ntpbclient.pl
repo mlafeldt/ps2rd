@@ -27,6 +27,7 @@ use IO::Socket;
 my ($remote_host, $remote_port) = ("192.168.0.10", 4234);
 
 my $NTPB_MAGIC = "\xff\x00NTPB";
+my $NTPB_HDR_SIZE = length($NTPB_MAGIC) + 2 + 2;
 my ($NTPB_DUMP, $NTPB_HALT, $NTPB_RESUME) = (0x0100, 0x0201, 0x0202);
 my ($NTPB_SEND_DUMP, $NTPB_EOT, $NTPB_ACK) = (0x0300, 0xffff, 0x0001);
 
@@ -45,17 +46,35 @@ sub ntpb_send_cmd {
     my $cmd = shift;
     my $buf = shift || "";
     $sock->send($NTPB_MAGIC . pack("S2", length $buf, $cmd) . $buf) or return undef;
-    my $ret = $sock->recv($buf, 65536);
-    # TODO check magic
+    $sock->recv($buf, 65536) // return undef;
+    print "recv: ", unpack("H*", $buf), "\n";
 }
 
 sub ntpb_recv_data {
-    # TODO adapt for dump command
     my $buf;
-    my $size = 0;
-    my $ret = $sock->recv($buf, 65536);
-    unless (defined $ret) { return undef; }
-    $sock->send($NTPB_MAGIC . pack("S3", $size, $NTPB_EOT, $NTPB_ACK));
+    my $eot = 0;
+
+    do {
+        $sock->recv($buf, 65536) // return undef;
+        print "recv: ", unpack("H*", $buf), "\n";
+        my ($magic, $size, $cmd) = unpack("a6 S S", $buf);
+        $size += $NTPB_HDR_SIZE;
+
+        while (length($buf) < $size) {
+            my $tmp;
+            $sock->recv($tmp, 65536 - length($buf)) // return undef;
+            $buf .= $tmp;
+        }
+
+        if ($cmd == $NTPB_SEND_DUMP) {
+            print "dump: ", unpack("H*", $buf), "\n";
+        } elsif ($cmd == $NTPB_EOT) {
+            print "eot\n";
+            $eot = 1;
+        }
+
+        $sock->send($NTPB_MAGIC . pack("S3", length $NTPB_ACK, $NTPB_EOT, $NTPB_ACK));
+    } while (!$eot);
 }
 
 my $cmd = shift;
@@ -65,11 +84,15 @@ $sock = ntpb_connect($remote_host, $remote_port) or die "$!\n";
 
 if ($cmd eq "halt") {
     ntpb_send_cmd($NTPB_HALT);
+    ntpb_recv_data();
 } elsif ($cmd eq "resume") {
     ntpb_send_cmd($NTPB_RESUME);
+    ntpb_recv_data();
+} elsif ($cmd eq "dump") {
+    ntpb_send_cmd($NTPB_DUMP, pack("L2", 0x00080000, 0x00080040));
+    ntpb_recv_data();
 } else {
     die "Invalid command.\n";
 }
-ntpb_recv_data();
 
 close($sock);
