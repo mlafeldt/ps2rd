@@ -95,6 +95,8 @@ static void __config_locale_override()
   locale_t loc = newlocale(LC_NUMERIC, "C", NULL);
   uselocale(loc);
 
+#elif defined(_EE)
+  /* do nothing */
 #else
 
 #warning "No way to modify calling thread's locale!"
@@ -116,6 +118,8 @@ static void __config_locale_restore()
   locale_t loc = uselocale(LC_GLOBAL_LOCALE);
   freelocale(loc);
 
+#elif defined(_EE)
+  /* do nothing */
 #else
 
 #warning "No way to modify calling thread's locale!"

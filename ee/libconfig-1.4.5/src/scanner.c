@@ -591,7 +591,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[42] =
 
 static unsigned long long fromhex(const char *s)
 {
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_EE)
 
   /* MinGW's strtoull() seems to be broken; it only returns the lower
    * 32 bits...
@@ -616,13 +616,17 @@ static unsigned long long fromhex(const char *s)
 
   return(val);
 
-#else /* ! __MINGW32__ */
+#else /* ! __MINGW32__ || _EE */
 
   return(strtoull(s, NULL, 16));
 
-#endif /* __MINGW32__ */
+#endif /* __MINGW32__ || _EE */
 }
 
+#ifdef _EE
+/* TODO: Add working atoll() to support 64-bit integers */
+static long long atoll(const char *nptr) { return 0; }
+#endif /* _EE */
 
 #line 628 "scanner.c"
 
@@ -1758,7 +1762,11 @@ static void libconfig_yy_load_buffer_state  (yyscan_t yyscanner)
 }
 
 #ifndef __cplusplus
+# ifdef _EE
+static int isatty(int fd) { return 0; }
+# else
 extern int isatty (int );
+# endif /* _EE */
 #endif /* __cplusplus */
     
 /* Initializes or reinitializes a buffer.
