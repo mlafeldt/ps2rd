@@ -1,4 +1,4 @@
-This is a list of people that have contributed to PS2rd.
+This is a list of people that have contributed source code to PS2rd.
 
 The fields are: alias name (A), real name (N), email (E), website (W),
 description (D), and snail mail address (S); A or N, and D are mandatory.
@@ -10,41 +10,33 @@ The list is sorted by (alias) name.
 A: EEUG
 N: Eugene Plotnikov
 E: e-plotnikov@operamail.com
-D: iop/SMSMAP/
-D: iop/SMSTCPIP/
+D: author of SMS
+D: iop/SMSMAP|SMSTCPIP
 
 A: jimmikaelkael
 N: Jimenez Michael
 E: jimmikaelkael@wanadoo.fr
 D: core developer
-D: ee/debugger/
-D: ee/elfldr/
-D: iop/debugger/
-D: iop/eesync/
-D: iop/memdisk/
-D: pc/ntpbclient/
+D: ee/debugger|elfldr
+D: iop/debugger|dev9|eesync|memdisk
+D: pc/ntpbclient
 S: France
 
 N: Mark Lindner
 W: http://www.hyperrealm.com/libconfig/
 D: author of libconfig
-D: ee/libconfig/
+D: ee/libconfig
 
 A: misfire
 N: Mathias Lafeldt
 E: misfire@debugon.org
 D: project maintainer and core developer
 D: common/libcheats/
-D: ee/debugger/
-D: ee/elfldr/
-D: ee/engine/
-D: ee/libconfig/ (port only)
-D: ee/loader/
-D: ee/videomod/
-D: iop/netlog/
+D: ee/debugger|elfldr|engine|libcheats|loader|videomod
+D: iop/netlog
 S: Germany
 
 A: mrbrown
 N: Marcus R. Brown
 D: author of original dev9 device driver
-D: iop/dev9/
+D: iop/dev9
