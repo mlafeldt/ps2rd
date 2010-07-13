@@ -18,17 +18,14 @@ VARS = DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
 
 .SILENT:
 
+.NOTPARALLEL: all
+
 all: check build-iop build-ee build-pc
 
-build-iop: build-iop-stamp
-
-build-iop-stamp:
+build-iop:
 	$(VARS) $(MAKE) -C iop
-	touch $@
 
-build-ee: build-ee-stamp
-
-build-ee-stamp: build-iop-stamp
+build-ee: build-iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
 	bin2o iop/dev9/ps2dev9.irx ee/loader/ps2dev9_irx.o _ps2dev9_irx
 	bin2o iop/eesync/eesync.irx ee/loader/eesync_irx.o _eesync_irx
@@ -42,13 +39,9 @@ build-ee-stamp: build-iop-stamp
 	bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx; \
 	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \
 	$(VARS) $(MAKE) -C ee
-	touch $@
 
-build-pc: build-pc-stamp
-
-build-pc-stamp:
+build-pc:
 	$(VARS) $(MAKE) -C pc
-	touch $@
 
 clean:
 	$(VARS) $(MAKE) -C ee clean
@@ -56,7 +49,6 @@ clean:
 	$(VARS) $(MAKE) -C iop clean
 	$(VARS) $(MAKE) -C pc clean
 	rm -rf release/
-	rm -f *-stamp
 
 run: all
 	$(MAKE) -C ee/loader run
