@@ -1,26 +1,32 @@
 .SILENT:
 
-LIBCHEATS = "libcheats-0.1"
-LIBCONFIG = "libconfig-1.4.4"
+LIBCHEATS = libcheats-0.1
+LIBCONFIG = libconfig-1.4.4
 
 EE_LIBS = $(LIBCHEATS) $(LIBCONFIG)
 VARS = LIBCHEATS=$(CURDIR)/$(LIBCHEATS) LIBCONFIG=$(CURDIR)/$(LIBCONFIG)
 
 ERL_MODULES = debugger elfldr engine videomod
 
-all:
+all: build-loader
+
+build-libs:
 	@for i in $(EE_LIBS); do \
 		echo "* [EE] Building lib $$i ..."; \
 		$(MAKE) -C $$i -f Makefile.PS2; \
 	done
+
+build-erls:
 	@for i in $(ERL_MODULES); do \
 		echo "* [EE] Building erl $$i ..."; \
 		$(MAKE) -C $$i; \
 		bin2o $${i}/$${i}.erl loader/$${i}_erl.o _$${i}_erl; \
 	done
+
+build-loader: build-libs build-erls
+	echo "* [EE] Building elf loader ..."
 	bin2o $(PS2SDK)/ee/lib/libkernel.erl loader/libkernel_erl.o _libkernel_erl
 	bin2o $(PS2SDK)/ee/lib/libpatches.erl loader/libpatches_erl.o _libpatches_erl
-	echo "* [EE] Building elf loader ..."
 	$(VARS) $(MAKE) -C loader
 
 clean:

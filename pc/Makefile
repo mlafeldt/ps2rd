@@ -10,6 +10,6 @@ all:
 
 clean:
 	@for i in $(TOOLS); do \
-		echo "* [IOP] Cleaning $$i ..."; \
+		echo "* [PC] Cleaning $$i ..."; \
 		$(MAKE) -C $$i clean; \
 	done
