@@ -14,10 +14,10 @@ http://www.hyperrealm.com/libconfig/
 BUILD
 
 Build the PS2 version of libconfig:
-$ make
+$ make -f Makefile.PS2
 
 To install it:
-# make install
+# make install -f Makefile.PS2
 
 
 USAGE
