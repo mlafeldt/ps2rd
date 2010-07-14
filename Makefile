@@ -18,12 +18,7 @@ VARS = DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
 
 .SILENT:
 
-.NOTPARALLEL: all
-
 all: check build-iop build-ee build-pc
-
-build-iop:
-	$(VARS) $(MAKE) -C iop
 
 build-ee: build-iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
@@ -39,6 +34,9 @@ build-ee: build-iop
 	bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx; \
 	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \
 	$(VARS) $(MAKE) -C ee
+
+build-iop:
+	$(VARS) $(MAKE) -C iop
 
 build-pc:
 	$(VARS) $(MAKE) -C pc
