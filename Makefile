@@ -26,7 +26,7 @@ subdir_clean = $(SUBDIRS:%=clean-%)
 
 .SILENT:
 
-all: $(subdir_list)
+all: check $(subdir_list)
 
 all-ee: copy-irx
 
