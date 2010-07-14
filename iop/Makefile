@@ -16,9 +16,9 @@ all: $(subdir_list)
 clean: $(subdir_clean)
 
 $(subdir_list):
-	echo "* [IOP] Building $(@:all-%=%) ..."
+	echo "* [IOP] Building irx $(@:all-%=%) ..."
 	$(MAKE) -C $(@:all-%=%)
 
 $(subdir_clean):
-	echo "* [IOP] Cleaning $(@:clean-%=%) ..."
+	echo "* [IOP] Cleaning irx $(@:clean-%=%) ..."
 	$(MAKE) -C $(@:clean-%=%) clean

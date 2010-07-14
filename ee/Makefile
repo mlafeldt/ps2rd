@@ -1,5 +1,3 @@
-.SILENT:
-
 LIBCHEATS = libcheats-0.1
 LIBCONFIG = libconfig-1.4.5
 
@@ -8,34 +6,40 @@ VARS = LIBCHEATS=$(CURDIR)/$(LIBCHEATS) LIBCONFIG=$(CURDIR)/$(LIBCONFIG)
 
 ERL_MODULES = debugger elfldr engine videomod
 
-all: build-loader
+lib_list  = $(EE_LIBS:%=all-%)
+lib_clean = $(EE_LIBS:%=clean-%)
 
-build-libs:
-	@for i in $(EE_LIBS); do \
-		echo "* [EE] Building lib $$i ..."; \
-		$(MAKE) -C $$i -f Makefile.PS2; \
-	done
+erl_list  = $(ERL_MODULES:%=all-%)
+erl_clean = $(ERL_MODULES:%=clean-%)
 
-build-erls:
+.PHONY: $(EE_LIBS) $(ERL_MODULES) $(lib_list) $(lib_clean) $(erl_list) $(erl_clean)
+
+.SILENT:
+
+all: $(lib_list) $(erl_list)
+	echo "* [EE] Building elf loader ..."
 	@for i in $(ERL_MODULES); do \
-		echo "* [EE] Building erl $$i ..."; \
-		$(MAKE) -C $$i; \
 		bin2o $${i}/$${i}.erl loader/$${i}_erl.o _$${i}_erl; \
 	done
-
-build-loader: build-libs build-erls
-	echo "* [EE] Building elf loader ..."
 	bin2o $(PS2SDK)/ee/lib/libkernel.erl loader/libkernel_erl.o _libkernel_erl
 	bin2o $(PS2SDK)/ee/lib/libpatches.erl loader/libpatches_erl.o _libpatches_erl
 	$(VARS) $(MAKE) -C loader
 
-clean:
-	@for i in $(EE_LIBS); do \
-		echo "* [EE] Cleaning $$i ..."; \
-		$(MAKE) -C $$i -f Makefile.PS2 clean; \
-	done
-	@for i in $(ERL_MODULES) loader; do \
-		echo "* [EE] Cleaning $$i ..."; \
-		$(MAKE) -C $$i clean; \
-	done
+clean: $(lib_clean) $(erl_clean)
 	rm -f loader/*_erl.o
+
+$(lib_list):
+	echo "* [EE] Building lib $(@:all-%=%) ..."
+	$(MAKE) -C $(@:all-%=%) -f Makefile.PS2
+
+$(lib_clean):
+	echo "* [EE] Cleaning lib $(@:clean-%=%) ..."
+	$(MAKE) -C $(@:clean-%=%) -f Makefile.PS2 clean
+
+$(erl_list):
+	echo "* [EE] Building erl $(@:all-%=%) ..."
+	$(MAKE) -C $(@:all-%=%)
+
+$(erl_clean):
+	echo "* [EE] Cleaning erl $(@:clean-%=%) ..."
+	$(MAKE) -C $(@:clean-%=%) clean
