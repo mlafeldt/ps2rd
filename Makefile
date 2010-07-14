@@ -16,11 +16,21 @@ SMS_MODULES = 1
 
 VARS = DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
 
+
+SUBDIRS = ee iop pc
+
+subdir_list  = $(SUBDIRS:%=all-%)
+subdir_clean = $(SUBDIRS:%=clean-%)
+
+.PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-irx all clean
+
 .SILENT:
 
-all: check build-iop build-ee build-pc
+all: $(subdir_list)
 
-build-ee: build-iop
+all-ee: copy-irx
+
+copy-irx: all-iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
 	bin2o iop/dev9/ps2dev9.irx ee/loader/ps2dev9_irx.o _ps2dev9_irx
 	bin2o iop/eesync/eesync.irx ee/loader/eesync_irx.o _eesync_irx
@@ -31,22 +41,18 @@ build-ee: build-iop
 		bin2o iop/SMSMAP/SMSMAP.irx ee/loader/ps2smap_sms_irx.o _ps2smap_sms_irx; \
 		bin2o iop/SMSTCPIP/SMSTCPIP.irx ee/loader/ps2ip_sms_irx.o _ps2ip_sms_irx; \
 	fi
-	bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx; \
-	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx; \
-	$(VARS) $(MAKE) -C ee
+	bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx
+	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx
 
-build-iop:
-	$(VARS) $(MAKE) -C iop
-
-build-pc:
-	$(VARS) $(MAKE) -C pc
-
-clean:
-	$(VARS) $(MAKE) -C ee clean
+clean: $(subdir_clean)
 	rm -f ee/loader/*_irx.o
-	$(VARS) $(MAKE) -C iop clean
-	$(VARS) $(MAKE) -C pc clean
 	rm -rf release/
+
+$(subdir_list):
+	$(VARS) $(MAKE) -C $(@:all-%=%)
+
+$(subdir_clean):
+	$(VARS) $(MAKE) -C $(@:clean-%=%) clean
 
 run: all
 	$(MAKE) -C ee/loader run
