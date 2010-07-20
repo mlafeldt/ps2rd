@@ -1,8 +1,9 @@
 0.5.2-wip (2010)
+- Rewrote ntpbclient C tool in Perl for platform independence.
 - Updated PS2 port of libconfig to version 1.4.5.
-- Incorporated libcheats and libconfig into normal build process. It is no more
+- Incorporated libcheats and libconfig into normal build process; it is no more
   required to install them manually to PS2SDK's "ports" folder.
-- Allow multiple make jobs to run simultaneously (make -j jobs).
+- Changed Makefiles to support parallel building (make -j jobs).
 
 0.5.1 (May 3 2010)
 - Added setting debugger.sms_modules to specify whether network modules from SMS
