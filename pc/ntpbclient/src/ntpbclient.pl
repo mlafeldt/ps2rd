@@ -74,7 +74,6 @@ sub ntpb_recv_data {
             $buf = substr($buf, $NTPB_HDR_SIZE);
             print FILE $buf if $file;
         } elsif ($cmd == $NTPB_EOT) {
-            print "eot\n";
             $eot = 1;
         }
 
