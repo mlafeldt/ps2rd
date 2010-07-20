@@ -69,7 +69,7 @@ release: all
 	fi
 	cp ee/loader/ps2rd.conf release/$(VERSION)/ps2/
 	cp ee/loader/cheats.txt release/$(VERSION)/ps2/
-	cp pc/ntpbclient/bin/* release/$(VERSION)/pc/
+	cp pc/ntpbclient/ntpbclient release/$(VERSION)/pc/
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(VERSION)/
 	cp -r doc/ release/$(VERSION)/
 	cd release && \

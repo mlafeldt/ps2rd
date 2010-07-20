@@ -1,4 +1,4 @@
-SUBDIRS = ntpbclient
+SUBDIRS =
 
 subdir_list  = $(SUBDIRS:%=all-%)
 subdir_clean = $(SUBDIRS:%=clean-%)
