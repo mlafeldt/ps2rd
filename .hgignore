@@ -8,5 +8,3 @@ syntax: glob
 *.exe
 
 release/
-pc/skeleton/build/
-pc/ntpbclient/bin/ntpbclient
