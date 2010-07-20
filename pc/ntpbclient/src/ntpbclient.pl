@@ -30,6 +30,7 @@ my $NTPB_MAGIC = "\xff\x00NTPB";
 my $NTPB_HDR_SIZE = length($NTPB_MAGIC) + 2 + 2;
 my ($NTPB_DUMP, $NTPB_HALT, $NTPB_RESUME) = (0x0100, 0x0201, 0x0202);
 my ($NTPB_SEND_DUMP, $NTPB_EOT, $NTPB_ACK) = (0x0300, 0xffff, 0x0001);
+my $BUFSIZE = 65536;
 
 my $sock;
 
@@ -46,28 +47,32 @@ sub ntpb_send_cmd {
     my $cmd = shift;
     my $buf = shift || "";
     $sock->send($NTPB_MAGIC . pack("S2", length $buf, $cmd) . $buf) or return undef;
-    $sock->recv($buf, 65536) // return undef;
-    print "recv: ", unpack("H*", $buf), "\n";
+    $sock->recv($buf, $BUFSIZE) // return undef;
 }
 
 sub ntpb_recv_data {
-    my $buf;
+    my $file = shift;
     my $eot = 0;
 
+    if ($file) {
+        open FILE, ">$file" or die $!;
+        binmode FILE;
+    }
+
     do {
-        $sock->recv($buf, 65536) // return undef;
-        print "recv: ", unpack("H*", $buf), "\n";
-        my ($magic, $size, $cmd) = unpack("a6 S S", $buf);
-        $size += $NTPB_HDR_SIZE;
+        my $buf;
+        $sock->recv($buf, $BUFSIZE) // return undef;
+        my ($magic, $bytes, $cmd) = unpack("a6 S S", $buf);
+        my $size = $bytes + $NTPB_HDR_SIZE;
 
         while (length($buf) < $size) {
-            my $tmp;
-            $sock->recv($tmp, 65536 - length($buf)) // return undef;
-            $buf .= $tmp;
+            $sock->recv($_, $BUFSIZE - length($buf)) // return undef;
+            $buf .= $_;
         }
 
         if ($cmd == $NTPB_SEND_DUMP) {
-            print "dump: ", unpack("H*", $buf), "\n";
+            $buf = substr($buf, $NTPB_HDR_SIZE);
+            print FILE $buf if $file;
         } elsif ($cmd == $NTPB_EOT) {
             print "eot\n";
             $eot = 1;
@@ -75,24 +80,29 @@ sub ntpb_recv_data {
 
         $sock->send($NTPB_MAGIC . pack("S3", length $NTPB_ACK, $NTPB_EOT, $NTPB_ACK));
     } while (!$eot);
+
+    close(FILE) if $file;
 }
 
-my $cmd = shift;
-unless (defined $cmd) { die "Command missing.\n" };
-
-$sock = ntpb_connect($remote_host, $remote_port) or die "$!\n";
+my $cmd = shift || die "command missing";
 
 if ($cmd eq "halt") {
+    $sock = ntpb_connect($remote_host, $remote_port) or die "$!";
     ntpb_send_cmd($NTPB_HALT);
     ntpb_recv_data();
+    close($sock);
 } elsif ($cmd eq "resume") {
+    $sock = ntpb_connect($remote_host, $remote_port) or die "$!";
     ntpb_send_cmd($NTPB_RESUME);
     ntpb_recv_data();
+    close($sock);
 } elsif ($cmd eq "dump") {
-    ntpb_send_cmd($NTPB_DUMP, pack("L2", 0x00080000, 0x00080040));
-    ntpb_recv_data();
+    die "arguments missing" if (@ARGV != 3);
+    my ($start, $end, $file) = @ARGV;
+    $sock = ntpb_connect($remote_host, $remote_port) or die "$!";
+    ntpb_send_cmd($NTPB_DUMP, pack("L2", hex $start, hex $end));
+    ntpb_recv_data($file);
+    close($sock);
 } else {
-    die "Invalid command.\n";
+    die "invalid command";
 }
-
-close($sock);
