@@ -1,4 +1,6 @@
-0.5.2 (Jun 21 2010)
+0.5.3-wip (2010)
+
+0.5.2 (Jul 21 2010)
 - Rewrote ntpbclient C tool in Perl for platform independence.
 - Updated PS2 port of libconfig to version 1.4.5.
 - Incorporated libcheats and libconfig into normal build process; it is no more
