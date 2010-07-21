@@ -29,6 +29,12 @@ PC client
 
 On the PC side, you can use ntpbclient to issue commands to the server.
 
+For example:
+
+$ perl ./ntpbclient halt
+$ perl ./ntpbclient resume
+$ perl ./ntpbclient dump bfc00000 c0000000 dump.bin
+
 Happy debugging!
 
 

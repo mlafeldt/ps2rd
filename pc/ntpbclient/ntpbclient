@@ -29,6 +29,8 @@ use warnings;
 use strict;
 use IO::Socket;
 
+my $version = "0.1";
+
 my $remote_host = $ENV{PS2_IP} || "192.168.0.10";
 my $remote_port = 4234;
 
@@ -90,7 +92,19 @@ sub ntpb_recv_data {
     close(FILE) if $file;
 }
 
-my $cmd = shift || die "Command missing";
+sub show_usage
+{
+    print <<HERE;
+$0: <command> [args]
+Supported commands:
+    halt                      halt game execution
+    resume                    resume game execution
+    dump <start> <end> <file> dump memory to file
+HERE
+    exit 1;
+}
+
+my $cmd = shift || show_usage();
 
 if ($cmd eq "halt") {
     $sock = ntpb_connect($remote_host, $remote_port) or die $!;
@@ -103,12 +117,12 @@ if ($cmd eq "halt") {
     ntpb_recv_data();
     close($sock);
 } elsif ($cmd eq "dump") {
-    die "Arguments missing" unless @ARGV == 3;
+    show_usage() unless @ARGV == 3;
     my ($start, $end, $file) = @ARGV;
     $sock = ntpb_connect($remote_host, $remote_port) or die $!;
     ntpb_send_cmd($NTPB_DUMP, pack("L2", hex $start, hex $end));
     ntpb_recv_data($file);
     close($sock);
 } else {
-    die "Invalid command";
+    show_usage();
 }
