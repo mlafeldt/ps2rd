@@ -1,8 +1,11 @@
 #!/usr/bin/perl
 #
-# $Id$
+# ntpbclient - PC client application for PS2rd
 #
 # Copyright (C) 2010 Mathias Lafeldt <misfire@debugon.org>
+#
+# based on ntpbclient.c
+# Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
 #
 # This file is part of PS2rd, the PS2 remote debugger.
 #
@@ -19,12 +22,15 @@
 # You should have received a copy of the GNU General Public License
 # along with PS2rd.  If not, see <http://www.gnu.org/licenses/>.
 #
+# $Id$
+#
 
 use warnings;
 use strict;
 use IO::Socket;
 
-my ($remote_host, $remote_port) = ("192.168.0.10", 4234);
+my $remote_host = $ENV{PS2_IP} || "192.168.0.10";
+my $remote_port = 4234;
 
 my $NTPB_MAGIC = "\xff\x00NTPB";
 my $NTPB_HDR_SIZE = length($NTPB_MAGIC) + 2 + 2;
@@ -55,7 +61,7 @@ sub ntpb_recv_data {
     my $eot = 0;
 
     if ($file) {
-        open FILE, ">$file" or die $!;
+        open FILE, ">", $file or die $!;
         binmode FILE;
     }
 
@@ -77,31 +83,32 @@ sub ntpb_recv_data {
             $eot = 1;
         }
 
-        $sock->send($NTPB_MAGIC . pack("S3", length $NTPB_ACK, $NTPB_EOT, $NTPB_ACK));
+        $sock->send($NTPB_MAGIC . pack("S3", length $NTPB_ACK,
+                    $NTPB_EOT, $NTPB_ACK)) or return undef;
     } while (!$eot);
 
     close(FILE) if $file;
 }
 
-my $cmd = shift || die "command missing";
+my $cmd = shift || die "Command missing";
 
 if ($cmd eq "halt") {
-    $sock = ntpb_connect($remote_host, $remote_port) or die "$!";
+    $sock = ntpb_connect($remote_host, $remote_port) or die $!;
     ntpb_send_cmd($NTPB_HALT);
     ntpb_recv_data();
     close($sock);
 } elsif ($cmd eq "resume") {
-    $sock = ntpb_connect($remote_host, $remote_port) or die "$!";
+    $sock = ntpb_connect($remote_host, $remote_port) or die $!;
     ntpb_send_cmd($NTPB_RESUME);
     ntpb_recv_data();
     close($sock);
 } elsif ($cmd eq "dump") {
-    die "arguments missing" if (@ARGV != 3);
+    die "Arguments missing" unless @ARGV == 3;
     my ($start, $end, $file) = @ARGV;
-    $sock = ntpb_connect($remote_host, $remote_port) or die "$!";
+    $sock = ntpb_connect($remote_host, $remote_port) or die $!;
     ntpb_send_cmd($NTPB_DUMP, pack("L2", hex $start, hex $end));
     ntpb_recv_data($file);
     close($sock);
 } else {
-    die "invalid command";
+    die "Invalid command";
 }
