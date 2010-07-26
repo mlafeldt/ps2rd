@@ -2,6 +2,8 @@
 # Makefile for boot loader
 #
 # Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
+#
+# $Id$
 ##
 
 ifeq ($(DEBUG),1)
