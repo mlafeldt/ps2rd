@@ -155,8 +155,8 @@ static inline int load_modules(const char **modv)
 	return 0;
 }
 
-/* Devices returned by get_dev() */
-enum dev {
+/* Device returned by get_dev() */
+enum dev_id {
 	DEV_CD,
 	DEV_HOST,
 	DEV_MASS,
@@ -165,25 +165,26 @@ enum dev {
 	DEV_UNKN
 };
 
+static const char *dev_prefix[] = {
+	[DEV_CD]   = "cdrom0:",
+	[DEV_HOST] = "host:",
+	[DEV_MASS] = "mass:",
+	[DEV_MC0]  = "mc0:",
+	[DEV_MC1]  = "mc1:",
+	[DEV_UNKN] = NULL
+};
+
 /**
  * get_dev - Get device from path.
- * @path: path information
- * @return: boot device
+ * @path: path
+ * @return: device id
  */
-static inline enum dev get_dev(const char *path)
+static inline enum dev_id get_dev(const char *path)
 {
-	const char *prefix[] = {
-		"cdrom0:",
-		"host:",
-		"mass:",
-		"mc0:",
-		"mc1:",
-		NULL
-	};
 	int i = 0;
 
-	while (prefix[i] != NULL) {
-		if (!strncmp(path, prefix[i], strlen(prefix[i])))
+	while (dev_prefix[i] != NULL) {
+		if (!strncmp(path, dev_prefix[i], strlen(dev_prefix[i])))
 			return i;
 		i++;
 	}

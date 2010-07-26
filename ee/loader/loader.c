@@ -50,15 +50,10 @@
 #define PAD_PORT	0
 #define PAD_SLOT	0
 
-#ifndef CONFIG_FILE
-#define CONFIG_FILE	"ps2rd.conf"
-#endif
 
-/* Boot information */
-static char g_bootpath[FIO_PATH_MAX];
-static enum dev g_bootdev = DEV_UNKN;
-
-static u8 g_padbuf[256] __attribute__((aligned(64)));
+static char _bootpath[FIO_PATH_MAX];
+static enum dev_id _bootdev = DEV_UNKN;
+static u8 _padbuf[256] __attribute__((aligned(64)));
 
 /*
  * TODO use dirname() from libgen.h
@@ -111,14 +106,14 @@ static int __dirname(char *filename)
 static char *__pathname(const char *name)
 {
 	static char filename[FIO_PATH_MAX];
-	enum dev dev;
+	enum dev_id dev;
 
 	filename[0] = '\0';
 	dev = get_dev(name);
 
 	/* Add boot path if name is relative */
 	if (dev == DEV_UNKN)
-		strcpy(filename, g_bootpath);
+		strcpy(filename, _bootpath);
 
 	strcat(filename, name);
 
@@ -133,7 +128,7 @@ static char *__pathname(const char *name)
 /*
  * Load cheats from text file.
  */
-static int load_cheats(const config_t *config, cheats_t *cheats)
+static int __load_cheats(const config_t *config, cheats_t *cheats)
 {
 	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
 	char *buf = NULL;
@@ -163,7 +158,7 @@ static int load_cheats(const config_t *config, cheats_t *cheats)
 /*
  * Build argument vector from string @s.
  */
-static void get_argv(const char *s, int *argc, char *argv[])
+static void __build_argv(const char *s, int *argc, char *argv[])
 {
 	static char argbuf[256];
 	int max;
@@ -172,7 +167,7 @@ static void get_argv(const char *s, int *argc, char *argv[])
 	max = *argc;
 	*argc = 0;
 
-	memset(argv, 0, max * sizeof(argv[0]));
+	memset(argv, 0, max*sizeof(argv[0]));
 	memset(argbuf, 0, sizeof(argbuf));
 	strncpy(argbuf, s, sizeof(argbuf)-1);
 
@@ -185,12 +180,12 @@ static void get_argv(const char *s, int *argc, char *argv[])
 }
 
 /*
- * Add cheats for inserted game to cheat engine.
+ * Add cheats for ELF to cheat engine.
  */
-static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
+static int __activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
 {
 	char elfname[FIO_PATH_MAX];
-	enum dev dev = DEV_CD;
+	enum dev_id dev = DEV_CD;
 	char *argv[1];
 	int argc = 1;
 	game_t *game = NULL;
@@ -210,7 +205,7 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 		boot2 = elfname;
 	}
 
-	get_argv(boot2, &argc, argv);
+	__build_argv(boot2, &argc, argv);
 
 	if (gameid_generate(argv[0], &id) < 0) {
 		A_PRINTF("Error: could not generate game ID from ELF %s\n", argv[0]);
@@ -238,7 +233,7 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 	CHEATS_FOREACH(cheat, &game->cheats) {
 		CODES_FOREACH(code, &cheat->codes) {
 			D_PRINTF("%08X %08X\n", code->addr, code->val);
-			/* TODO: improve check for hook */
+			/* TODO improve check for hook */
 			if ((code->addr & 0xfe000000) == 0x90000000)
 				engine_add_hook(engine, code->addr, code->val);
 			else
@@ -250,12 +245,12 @@ static int activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *
 }
 
 /*
- * Start ELF specified by @boot2, or parse SYSTEM.CNF if @boot2 is NULL.
+ * Start ELF specified by @boot2, or parse SYSTEM.CNF for ELF if @boot2 is NULL.
  */
-static int start_game(const char *boot2)
+static int __start_elf(const char *boot2)
 {
 	char elfname[FIO_PATH_MAX];
-	enum dev dev = DEV_CD;
+	enum dev_id dev = DEV_CD;
 	char *argv[16];
 	int argc = 16;
 
@@ -271,8 +266,7 @@ static int start_game(const char *boot2)
 		boot2 = elfname;
 	}
 
-	/* build args for LoadExecPS2() */
-	get_argv(boot2, &argc, argv);
+	__build_argv(boot2, &argc, argv);
 
 	if (!file_exists(argv[0])) {
 		A_PRINTF("Error: ELF %s not found\n", argv[0]);
@@ -292,7 +286,7 @@ static int start_game(const char *boot2)
 	if (dev == DEV_CD)
 		_cdStop(CDVD_NOBLOCK);
 	padInit(0);
-	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
+	padPortOpen(PAD_PORT, PAD_SLOT, _padbuf);
 
 	A_PRINTF("Error: could not load ELF %s\n", argv[0]);
 
@@ -314,10 +308,10 @@ int main(int argc, char *argv[])
 	A_PRINTF(WELCOME_STRING);
 	D_PRINTF("Build date: "APP_BUILD_DATE"\n");
 
-	strcpy(g_bootpath, argv[0]);
-	__dirname(g_bootpath);
-	g_bootdev = get_dev(g_bootpath);
-	A_PRINTF("Booting from: %s\n", g_bootpath);
+	strcpy(_bootpath, argv[0]);
+	__dirname(_bootpath);
+	_bootdev = get_dev(_bootpath);
+	A_PRINTF("Booting from: %s\n", _bootpath);
 	A_PRINTF("Initializing...\n");
 
 	D_PRINTF("* Reading config...\n");
@@ -326,7 +320,7 @@ int main(int argc, char *argv[])
 		D_PRINTF("config: %s\n", config_error_text(&config));
 	config_print(&config);
 
-	if (g_bootdev != DEV_HOST && config_get_bool(&config, SET_IOP_RESET))
+	if (_bootdev != DEV_HOST && config_get_bool(&config, SET_IOP_RESET))
 		reset_iop("rom0:UDNL rom0:EELOADCNF");
 
 	if (config_get_bool(&config, SET_SBV_PATCHES)) {
@@ -345,7 +339,7 @@ int main(int argc, char *argv[])
 	_cdStop(CDVD_NOBLOCK);
 
 	padInit(0);
-	padPortOpen(PAD_PORT, PAD_SLOT, g_padbuf);
+	padPortOpen(PAD_PORT, PAD_SLOT, _padbuf);
 	padWaitReady(PAD_PORT, PAD_SLOT);
 	padSetMainMode(PAD_PORT, PAD_SLOT, PAD_MMODE_DIGITAL, PAD_MMODE_LOCK);
 
@@ -355,7 +349,7 @@ int main(int argc, char *argv[])
 	}
 
 	cheats_init(&cheats);
-	load_cheats(&config, &cheats);
+	__load_cheats(&config, &cheats);
 
 	A_PRINTF(OPTIONS);
 	A_PRINTF("Ready.\n");
@@ -372,7 +366,7 @@ int main(int argc, char *argv[])
 		old_pad = paddata;
 
 		if ((new_pad & PAD_START) || (new_pad & PAD_CROSS)) {
-			start_game(boot2);
+			__start_elf(boot2);
 		} else if (new_pad & PAD_SELECT) {
 			boot2 = config_get_string_elem(&config, SET_BOOT2, select++);
 			if (boot2 != NULL) {
@@ -382,11 +376,12 @@ int main(int argc, char *argv[])
 				select = 0;
 			}
 		} else if (new_pad & PAD_CIRCLE) {
-			if (!config_get_bool(&config, SET_ENGINE_INSTALL))
+			if (!config_get_bool(&config, SET_ENGINE_INSTALL)) {
 				A_PRINTF("Error: could not activate cheats - "
 					"engine not installed\n");
-			else
-				activate_cheats(boot2, &cheats, &engine);
+			} else {
+				__activate_cheats(boot2, &cheats, &engine);
+			}
 		} else if (new_pad & PAD_TRIANGLE) {
 			/* Do nothing */
 		} else if (new_pad & PAD_SQUARE) {

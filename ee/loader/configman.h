@@ -25,6 +25,10 @@
 #include <tamtypes.h>
 #include <libconfig.h>
 
+#ifndef CONFIG_FILE
+#define CONFIG_FILE		"ps2rd.conf"
+#endif
+
 /* Define some default settings */
 #ifndef IOP_RESET
 #define IOP_RESET		1
