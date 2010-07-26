@@ -29,7 +29,7 @@
 #include "configman.h"
 #include "dbgprintf.h"
 #include "erlman.h"
-#include "gameid.h"
+#include "elfid.h"
 #include "irxman.h"
 #include "mycdvd.h"
 #include "mypad.h"
@@ -179,6 +179,28 @@ static void __build_argv(const char *s, int *argc, char *argv[])
 	}
 }
 
+#define GAME_ID_START "/ID"
+
+/*
+ * Find cheats for a game by its elf id.
+ */
+game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
+{
+	game_t *game;
+	elfid_t id2;
+	char *p = NULL;
+
+	GAMES_FOREACH(game, list) {
+		p = strstr(game->title, GAME_ID_START);
+		if (p != NULL && !elfid_parse(p + strlen(GAME_ID_START), &id2)) {
+			if (!elfid_compare(id, &id2))
+				return game;
+		}
+	}
+
+	return NULL;
+}
+
 /*
  * Add cheats for ELF to cheat engine.
  */
@@ -191,7 +213,7 @@ static int __activate_cheats(const char *boot2, const cheats_t *cheats, engine_t
 	game_t *game = NULL;
 	cheat_t *cheat = NULL;
 	code_t *code = NULL;
-	gameid_t id;
+	elfid_t id;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
 		_cdStandby(CDVD_BLOCK);
@@ -207,7 +229,7 @@ static int __activate_cheats(const char *boot2, const cheats_t *cheats, engine_t
 
 	__build_argv(boot2, &argc, argv);
 
-	if (gameid_generate(argv[0], &id) < 0) {
+	if (elfid_generate(argv[0], &id) < 0) {
 		A_PRINTF("Error: could not generate game ID from ELF %s\n", argv[0]);
 		if (dev == DEV_CD)
 			_cdStop(CDVD_NOBLOCK);
@@ -217,7 +239,7 @@ static int __activate_cheats(const char *boot2, const cheats_t *cheats, engine_t
 	if (dev == DEV_CD)
 		_cdStop(CDVD_NOBLOCK);
 
-	if ((game = gameid_find(&id, &cheats->games)) == NULL) {
+	if ((game = __find_cheats(&id, &cheats->games)) == NULL) {
 		A_PRINTF("Error: no cheats found for ELF %s\n", argv[0]);
 		return -1;
 	}

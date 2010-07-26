@@ -1,5 +1,5 @@
 /*
- * gameid.c - Game ID handling
+ * ELF ID
  *
  * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
  *
@@ -17,33 +17,34 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with PS2rd.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
  */
 
 #include <tamtypes.h>
-#include <libcheats.h>
 #include <string.h>
-#include "dbgprintf.h"
-#include "gameid.h"
+#include <stdio.h>
+#include "elfid.h"
 
-int gameid_set(gameid_t *id, const char *name, size_t size)
+int elfid_set(elfid_t *id, const char *name, size_t size)
 {
 	if (id != NULL) {
-		memset(id, 0, sizeof(gameid_t));
+		memset(id, 0, sizeof(elfid_t));
 		if (name != NULL) {
-			strncpy(id->name, name, GID_NAME_MAX);
-			id->set |= GID_F_NAME;
+			strncpy(id->name, name, ELFID_NAME_MAX);
+			id->set |= ELFID_F_NAME;
 		}
 		if (size > 0) {
 			id->size = size;
-			id->set |= GID_F_SIZE;
+			id->set |= ELFID_F_SIZE;
 		}
 		return id->set;
 	}
 
-	return GID_F_NONE;
+	return ELFID_F_NONE;
 }
 
-int gameid_generate(const char *filename, gameid_t *id)
+int elfid_generate(const char *filename, elfid_t *id)
 {
 	int fd;
 	size_t size;
@@ -60,7 +61,7 @@ int gameid_generate(const char *filename, gameid_t *id)
 
 	/* XXX get checksum? */
 
-	gameid_set(id, filename, size);
+	elfid_set(id, filename, size);
 
 	return 0;
 }
@@ -99,58 +100,54 @@ static char *strstr_wc(const char *haystack, const char *needle, int wc)
 	return NULL;
 }
 
-int gameid_compare(const gameid_t *id1, const gameid_t *id2)
+int elfid_compare(const elfid_t *id1, const elfid_t *id2)
 {
-	int match = GID_F_NONE;
+	int match = ELFID_F_NONE;
 
 	if (id1 != NULL && id2 != NULL) {
 		/* compare name */
-		if ((id1->set & GID_F_NAME) && (id2->set & GID_F_NAME)) {
-			if (strstr_wc(id1->name, id2->name, GID_WILDCARD))
-				match |= GID_F_NAME;
+		if ((id1->set & ELFID_F_NAME) && (id2->set & ELFID_F_NAME)) {
+			if (strstr_wc(id1->name, id2->name, ELFID_WILDCARD))
+				match |= ELFID_F_NAME;
 			else
 				return -1;
 		}
 		/* compare size */
-		if ((id1->set & GID_F_SIZE) && (id2->set & GID_F_SIZE)) {
+		if ((id1->set & ELFID_F_SIZE) && (id2->set & ELFID_F_SIZE)) {
 			if (id1->size == id2->size)
-				match |= GID_F_SIZE;
+				match |= ELFID_F_SIZE;
 			else
 				return -1;
 		}
 	}
 
-	return (match != GID_F_NONE) ? 0 : -1;
+	return (match != ELFID_F_NONE) ? 0 : -1;
 }
 
-int gameid_parse(const char *s, gameid_t *id)
+int elfid_parse(const char *s, elfid_t *id)
 {
 	const char *sep = " \t";
-	char buf[GID_NAME_MAX + 1];
+	char buf[ELFID_NAME_MAX + 1];
 	char *p = NULL;
 	int i = 0;
 
-	memset(id, 0, sizeof(gameid_t));
+	memset(id, 0, sizeof(elfid_t));
 
-	p = strstr(s, GID_START);
-	if (p == NULL)
-		return -1;
-
-	strncpy(buf, p + strlen(GID_START), GID_NAME_MAX);
+	strncpy(buf, s, ELFID_NAME_MAX);
 	p = strtok(buf, sep);
 
 	while (p != NULL && i < 3) {
 		if (p[0] != '-') { /* '-' means that the value is not set */
 			switch (i) {
 			case 0: /* name */
-				strncpy(id->name, p, GID_NAME_MAX);
-				id->set |= GID_F_NAME;
+				strncpy(id->name, p, ELFID_NAME_MAX);
+				id->set |= ELFID_F_NAME;
 				break;
 
 			case 1: /* size */
 				if (!sscanf(p, "%i", &id->size))
 					return -1;
-				id->set |= GID_F_SIZE;
+				id->set |= ELFID_F_SIZE;
 				break;
 
 			case 2: /* XXX checksum? */
@@ -163,19 +160,4 @@ int gameid_parse(const char *s, gameid_t *id)
 	}
 
 	return 0;
-}
-
-game_t *gameid_find(const gameid_t *id, const gamelist_t *list)
-{
-	game_t *game;
-	gameid_t id2;
-
-	GAMES_FOREACH(game, list) {
-		if (!gameid_parse(game->title, &id2)) {
-			if (!gameid_compare(id, &id2))
-				return game;
-		}
-	}
-
-	return NULL;
 }

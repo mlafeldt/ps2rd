@@ -32,7 +32,7 @@ EE_CFLAGS += -D_SMS_MODULES
 IRX_FILES += ps2ip_sms_irx.o ps2smap_sms_irx.o
 endif
 
-LDR_FILES = loader.o configman.o erlman.o irxman.o gameid.o
+LDR_FILES = loader.o configman.o erlman.o irxman.o elfid.o
 
 EE_OBJS = $(LDR_FILES) $(ERL_FILES) $(IRX_FILES)
 
@@ -47,6 +47,8 @@ clean:
 loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
+
+loader.o: mycdvd.h mypad.h myutil.h
 
 pack:
 	ps2-packer $(EE_BIN) $(EE_BIN).2 -v
