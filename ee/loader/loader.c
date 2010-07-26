@@ -260,7 +260,7 @@ static int __auto_activate_cheats(const char *boot2, const cheats_t *cheats, eng
 	__build_argv(boot2, &argc, argv);
 
 	if (elfid_generate(argv[0], &id) < 0) {
-		A_PRINTF("Error: could not generate game ID from ELF %s\n", argv[0]);
+		A_PRINTF("Error: could not generate ID from ELF %s\n", argv[0]);
 		if (dev == DEV_CD)
 			_cdStop(CDVD_NOBLOCK);
 		return -1;
@@ -421,6 +421,7 @@ int main(int argc, char *argv[])
 					__auto_activate_cheats(boot2, &cheats, &engine);
 			}
 		} else if (new_pad & PAD_TRIANGLE) {
+			/* for dev only */
 			break;
 		} else if (new_pad & PAD_SQUARE) {
 			/* Do nothing */
@@ -434,7 +435,7 @@ int main(int argc, char *argv[])
 			/* Do nothing */
 		} else if (new_pad & PAD_DOWN) {
 			game = game ? GAMES_NEXT(game) : GAMES_FIRST(&cheats.games);
-			A_PRINTF("Select \"%s\"\n", game ? game->title : "no cheats");
+			A_PRINTF("Select %s\n", game ? game->title : "no cheats");
 		} else if (new_pad & PAD_UP) {
 			game = NULL;
 			A_PRINTF("Select no cheats\n");
