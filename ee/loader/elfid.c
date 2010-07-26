@@ -66,7 +66,7 @@ int elfid_generate(const char *filename, elfid_t *id)
 	return 0;
 }
 
-static int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
+static int __strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
 {
 	unsigned char a, b;
 
@@ -82,7 +82,7 @@ static int strncmp_wc(const char *s1, const char *s2, size_t n, int wc)
 	return 0;
 }
 
-static char *strstr_wc(const char *haystack, const char *needle, int wc)
+static char *__strstr_wc(const char *haystack, const char *needle, int wc)
 {
 	char *pos;
 
@@ -92,7 +92,7 @@ static char *strstr_wc(const char *haystack, const char *needle, int wc)
 	pos = (char*)haystack;
 
 	while (*pos) {
-		if (!strncmp_wc(pos, needle, strlen(needle), wc))
+		if (!__strncmp_wc(pos, needle, strlen(needle), wc))
 			return pos;
 		pos++;
 	}
@@ -100,14 +100,14 @@ static char *strstr_wc(const char *haystack, const char *needle, int wc)
 	return NULL;
 }
 
-int elfid_compare(const elfid_t *id1, const elfid_t *id2)
+int elfid_compare(const elfid_t *id1, const elfid_t *id2, int wc)
 {
 	int match = ELFID_F_NONE;
 
 	if (id1 != NULL && id2 != NULL) {
 		/* compare name */
 		if ((id1->set & ELFID_F_NAME) && (id2->set & ELFID_F_NAME)) {
-			if (strstr_wc(id1->name, id2->name, ELFID_WILDCARD))
+			if (__strstr_wc(id1->name, id2->name, wc))
 				match |= ELFID_F_NAME;
 			else
 				return -1;

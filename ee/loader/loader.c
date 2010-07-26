@@ -52,6 +52,9 @@
 #define PAD_PORT	0
 #define PAD_SLOT	0
 
+#define GAME_ID_START	"/ID"
+#define GAME_ID_WC	'?'
+
 
 static char _bootpath[FIO_PATH_MAX];
 static enum dev_id _bootdev = DEV_UNKN;
@@ -181,8 +184,6 @@ static void __build_argv(const char *s, int *argc, char *argv[])
 	}
 }
 
-#define GAME_ID_START "/ID"
-
 /*
  * Find cheats for a game by its elf id.
  */
@@ -195,7 +196,7 @@ game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
 	GAMES_FOREACH(game, list) {
 		p = strstr(game->title, GAME_ID_START);
 		if (p != NULL && !elfid_parse(p + strlen(GAME_ID_START), &id2)) {
-			if (!elfid_compare(id, &id2))
+			if (!elfid_compare(id, &id2, GAME_ID_WC))
 				return game;
 		}
 	}

@@ -27,8 +27,6 @@
 #include <tamtypes.h>
 #include <stddef.h> /* for size_t */
 
-#define ELFID_WILDCARD	'?'
-
 #define ELFID_NAME_MAX	255
 
 #define ELFID_F_NONE	0
@@ -69,9 +67,10 @@ int elfid_generate(const char *filename, elfid_t *id);
  * elfid_compare - Compare two elf ids.
  * @id1: ptr to 1st elf id
  * @id2: ptr to 2nd elf id
+ * @wc: wildcard character for name comparison
  * @return: 0: equal, -1: unequal
  */
-int elfid_compare(const elfid_t *id1, const elfid_t *id2);
+int elfid_compare(const elfid_t *id1, const elfid_t *id2, int wc);
 
 /**
  * elfid_parse - Parse a string for a elf id.
