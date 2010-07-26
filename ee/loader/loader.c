@@ -45,9 +45,11 @@
 
 #define OPTIONS \
 	"Options:\n" \
-	"START | X - Start Game\n" \
-	"SELECT    - Select Boot ELF\n" \
-	"CIRCLE    - Activate Cheats\n"
+	"START | X - Start game\n" \
+	"SELECT    - Select boot ELF\n" \
+	"UP        - Deselect cheats\n" \
+	"DOWN      - Select next game cheats\n" \
+	"CIRCLE    - Activate cheats\n"
 
 #define PAD_PORT	0
 #define PAD_SLOT	0
@@ -131,6 +133,30 @@ static char *__pathname(const char *name)
 }
 
 /*
+ * Build argument vector from string @s.
+ */
+static void __build_argv(const char *s, int *argc, char *argv[])
+{
+	static char argbuf[256];
+	int max;
+	char *tok;
+
+	max = *argc;
+	*argc = 0;
+
+	memset(argv, 0, max*sizeof(argv[0]));
+	memset(argbuf, 0, sizeof(argbuf));
+	strncpy(argbuf, s, sizeof(argbuf)-1);
+
+	tok = strtok(argbuf, "\t ");
+	while (tok != NULL && *argc < max) {
+		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, *argc, tok);
+		argv[(*argc)++] = tok;
+		tok = strtok(NULL, "\t ");
+	}
+}
+
+/*
  * Load cheats from text file.
  */
 static int __load_cheats(const config_t *config, cheats_t *cheats)
@@ -161,30 +187,6 @@ static int __load_cheats(const config_t *config, cheats_t *cheats)
 }
 
 /*
- * Build argument vector from string @s.
- */
-static void __build_argv(const char *s, int *argc, char *argv[])
-{
-	static char argbuf[256];
-	int max;
-	char *tok;
-
-	max = *argc;
-	*argc = 0;
-
-	memset(argv, 0, max*sizeof(argv[0]));
-	memset(argbuf, 0, sizeof(argbuf));
-	strncpy(argbuf, s, sizeof(argbuf)-1);
-
-	tok = strtok(argbuf, "\t ");
-	while (tok != NULL && *argc < max) {
-		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, *argc, tok);
-		argv[(*argc)++] = tok;
-		tok = strtok(NULL, "\t ");
-	}
-}
-
-/*
  * Find cheats for a game by its elf id.
  */
 game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
@@ -205,17 +207,42 @@ game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
 }
 
 /*
- * Add cheats for ELF to cheat engine.
+ * Activate all cheats for a specific game.
  */
-static int __activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
+static int __activate_cheats(const game_t *game, engine_t *engine)
+{
+	cheat_t *cheat = NULL;
+	code_t *code = NULL;
+
+	A_PRINTF("Activate cheats for \"%s\"\n", game->title);
+
+	engine_clear_hooks(engine);
+	engine_clear_codes(engine);
+
+	CHEATS_FOREACH(cheat, &game->cheats) {
+		CODES_FOREACH(code, &cheat->codes) {
+			D_PRINTF("%08X %08X\n", code->addr, code->val);
+			/* TODO improve check for hook */
+			if ((code->addr & 0xfe000000) == 0x90000000)
+				engine_add_hook(engine, code->addr, code->val);
+			else
+				engine_add_code(engine, code->addr, code->val);
+		}
+	}
+
+	return 0;
+}
+
+/*
+ * Auto-activate cheats for selected ELF.
+ */
+static int __auto_activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
 {
 	char elfname[FIO_PATH_MAX];
 	enum dev_id dev = DEV_CD;
 	char *argv[1];
 	int argc = 1;
 	game_t *game = NULL;
-	cheat_t *cheat = NULL;
-	code_t *code = NULL;
 	elfid_t id;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
@@ -242,31 +269,13 @@ static int __activate_cheats(const char *boot2, const cheats_t *cheats, engine_t
 	if (dev == DEV_CD)
 		_cdStop(CDVD_NOBLOCK);
 
-	if ((game = __find_cheats(&id, &cheats->games)) == NULL) {
+	game = __find_cheats(&id, &cheats->games);
+	if (game == NULL) {
 		A_PRINTF("Error: no cheats found for ELF %s\n", argv[0]);
 		return -1;
 	}
 
-	/*
-	 * Add hooks and codes for found game to cheat engine.
-	 */
-	engine_clear_hooks(engine);
-	engine_clear_codes(engine);
-
-	A_PRINTF("Activate cheats for \"%s\"\n", game->title);
-
-	CHEATS_FOREACH(cheat, &game->cheats) {
-		CODES_FOREACH(code, &cheat->codes) {
-			D_PRINTF("%08X %08X\n", code->addr, code->val);
-			/* TODO improve check for hook */
-			if ((code->addr & 0xfe000000) == 0x90000000)
-				engine_add_hook(engine, code->addr, code->val);
-			else
-				engine_add_code(engine, code->addr, code->val);
-		}
-	}
-
-	return 0;
+	return __activate_cheats(game, engine);
 }
 
 /*
@@ -325,6 +334,7 @@ int main(int argc, char *argv[])
 	engine_t engine;
 	const char *boot2 = NULL;
 	int select = 0;
+	game_t *game = NULL;
 
 	SifInitRpc(0);
 	init_scr();
@@ -405,10 +415,13 @@ int main(int argc, char *argv[])
 				A_PRINTF("Error: could not activate cheats - "
 					"engine not installed\n");
 			} else {
-				__activate_cheats(boot2, &cheats, &engine);
+				if (game != NULL)
+					__activate_cheats(game, &engine);
+				else
+					__auto_activate_cheats(boot2, &cheats, &engine);
 			}
 		} else if (new_pad & PAD_TRIANGLE) {
-			/* Do nothing */
+			break;
 		} else if (new_pad & PAD_SQUARE) {
 			/* Do nothing */
 		} else if (new_pad & PAD_L1) {
@@ -419,6 +432,12 @@ int main(int argc, char *argv[])
 			/* Do nothing */
 		} else if (new_pad & PAD_R2) {
 			/* Do nothing */
+		} else if (new_pad & PAD_DOWN) {
+			game = game ? GAMES_NEXT(game) : GAMES_FIRST(&cheats.games);
+			A_PRINTF("Select \"%s\"\n", game ? game->title : "no cheats");
+		} else if (new_pad & PAD_UP) {
+			game = NULL;
+			A_PRINTF("Select no cheats\n");
 		}
 	}
 end:
