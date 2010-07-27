@@ -194,6 +194,30 @@ static inline enum dev_id get_dev(const char *path)
 	return DEV_UNKN;
 }
 
+/*
+ * Build argument vector from string @s.
+ */
+static inline void build_argv(const char *s, int *argc, char *argv[])
+{
+	static char argbuf[256];
+	int max;
+	char *tok;
+
+	max = *argc;
+	*argc = 0;
+
+	memset(argv, 0, max*sizeof(argv[0]));
+	memset(argbuf, 0, sizeof(argbuf));
+	strncpy(argbuf, s, sizeof(argbuf)-1);
+
+	tok = strtok(argbuf, "\t ");
+	while (tok != NULL && *argc < max) {
+		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, *argc, tok);
+		argv[(*argc)++] = tok;
+		tok = strtok(NULL, "\t ");
+	}
+}
+
 /**
  * file_exists - Checks if a file exists.
  * @filename: name of file to check

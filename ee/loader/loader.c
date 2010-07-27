@@ -133,30 +133,6 @@ static char *__pathname(const char *name)
 }
 
 /*
- * Build argument vector from string @s.
- */
-static void __build_argv(const char *s, int *argc, char *argv[])
-{
-	static char argbuf[256];
-	int max;
-	char *tok;
-
-	max = *argc;
-	*argc = 0;
-
-	memset(argv, 0, max*sizeof(argv[0]));
-	memset(argbuf, 0, sizeof(argbuf));
-	strncpy(argbuf, s, sizeof(argbuf)-1);
-
-	tok = strtok(argbuf, "\t ");
-	while (tok != NULL && *argc < max) {
-		D_PRINTF("%s: argv[%i] = %s\n", __FUNCTION__, *argc, tok);
-		argv[(*argc)++] = tok;
-		tok = strtok(NULL, "\t ");
-	}
-}
-
-/*
  * Load cheats from text file.
  */
 static int __load_cheats(const config_t *config, cheats_t *cheats)
@@ -230,7 +206,7 @@ static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
 		boot2 = elfname;
 	}
 
-	__build_argv(boot2, &argc, argv);
+	build_argv(boot2, &argc, argv);
 
 	if (elfid_generate(argv[0], &id) < 0) {
 		A_PRINTF("Error: could not generate ID from ELF %s\n", argv[0]);
@@ -302,7 +278,7 @@ static int __start_elf(const char *boot2)
 		boot2 = elfname;
 	}
 
-	__build_argv(boot2, &argc, argv);
+	build_argv(boot2, &argc, argv);
 
 	if (!file_exists(argv[0])) {
 		A_PRINTF("Error: ELF %s not found\n", argv[0]);
