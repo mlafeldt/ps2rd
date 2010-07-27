@@ -47,9 +47,9 @@
 	"Options:\n" \
 	"START | X - Start game\n" \
 	"SELECT    - Select boot ELF\n" \
-	"UP        - Deselect cheats\n" \
+	"UP        - Deselect all cheats\n" \
 	"DOWN      - Select next game cheats\n" \
-	"CIRCLE    - Activate cheats\n"
+	"CIRCLE    - Auto-select cheats\n"
 
 #define PAD_PORT	0
 #define PAD_SLOT	0
@@ -189,7 +189,7 @@ static int __load_cheats(const config_t *config, cheats_t *cheats)
 /*
  * Find cheats for a game by its elf id.
  */
-game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
+static game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
 {
 	game_t *game;
 	elfid_t id2;
@@ -207,7 +207,52 @@ game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
 }
 
 /*
- * Activate all cheats for a specific game.
+ * Auto-select cheats for ELF.
+ */
+static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
+{
+	char elfname[FIO_PATH_MAX];
+	enum dev_id dev = DEV_CD;
+	char *argv[1];
+	int argc = 1;
+	game_t *game = NULL;
+	elfid_t id;
+
+	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
+		_cdStandby(CDVD_BLOCK);
+
+	if (boot2 == NULL) {
+		if (cdGetElf(elfname) < 0) {
+			A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
+			_cdStop(CDVD_NOBLOCK);
+			return NULL;
+		}
+		boot2 = elfname;
+	}
+
+	__build_argv(boot2, &argc, argv);
+
+	if (elfid_generate(argv[0], &id) < 0) {
+		A_PRINTF("Error: could not generate ID from ELF %s\n", argv[0]);
+		if (dev == DEV_CD)
+			_cdStop(CDVD_NOBLOCK);
+		return NULL;
+	}
+
+	if (dev == DEV_CD)
+		_cdStop(CDVD_NOBLOCK);
+
+	game = __find_cheats(&id, &cheats->games);
+	if (game == NULL) {
+		A_PRINTF("Error: no cheats found for ELF %s\n", argv[0]);
+		return NULL;
+	}
+
+	return game;
+}
+
+/*
+ * Activate selected cheats.
  */
 static int __activate_cheats(const game_t *game, engine_t *engine)
 {
@@ -215,9 +260,6 @@ static int __activate_cheats(const game_t *game, engine_t *engine)
 	code_t *code = NULL;
 
 	A_PRINTF("Activate cheats for \"%s\"\n", game->title);
-
-	engine_clear_hooks(engine);
-	engine_clear_codes(engine);
 
 	CHEATS_FOREACH(cheat, &game->cheats) {
 		CODES_FOREACH(code, &cheat->codes) {
@@ -234,48 +276,12 @@ static int __activate_cheats(const game_t *game, engine_t *engine)
 }
 
 /*
- * Auto-activate cheats for selected ELF.
+ * Reset activated cheats.
  */
-static int __auto_activate_cheats(const char *boot2, const cheats_t *cheats, engine_t *engine)
+static void __reset_cheats(engine_t *engine)
 {
-	char elfname[FIO_PATH_MAX];
-	enum dev_id dev = DEV_CD;
-	char *argv[1];
-	int argc = 1;
-	game_t *game = NULL;
-	elfid_t id;
-
-	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
-		_cdStandby(CDVD_BLOCK);
-
-	if (boot2 == NULL) {
-		if (cdGetElf(elfname) < 0) {
-			A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
-			_cdStop(CDVD_NOBLOCK);
-			return -1;
-		}
-		boot2 = elfname;
-	}
-
-	__build_argv(boot2, &argc, argv);
-
-	if (elfid_generate(argv[0], &id) < 0) {
-		A_PRINTF("Error: could not generate ID from ELF %s\n", argv[0]);
-		if (dev == DEV_CD)
-			_cdStop(CDVD_NOBLOCK);
-		return -1;
-	}
-
-	if (dev == DEV_CD)
-		_cdStop(CDVD_NOBLOCK);
-
-	game = __find_cheats(&id, &cheats->games);
-	if (game == NULL) {
-		A_PRINTF("Error: no cheats found for ELF %s\n", argv[0]);
-		return -1;
-	}
-
-	return __activate_cheats(game, engine);
+	engine_clear_hooks(engine);
+	engine_clear_codes(engine);
 }
 
 /*
@@ -389,10 +395,9 @@ int main(int argc, char *argv[])
 	A_PRINTF(OPTIONS);
 	A_PRINTF("Ready.\n");
 
-	/* Main loop */
 	struct padButtonStatus btn;
 	u32 old_pad = 0;
-	for (;;) {
+	while (1) {
 		padWaitReady(PAD_PORT, PAD_SLOT);
 		if (!padRead(PAD_PORT, PAD_SLOT, &btn))
 			continue;
@@ -401,6 +406,13 @@ int main(int argc, char *argv[])
 		old_pad = paddata;
 
 		if ((new_pad & PAD_START) || (new_pad & PAD_CROSS)) {
+			if (!config_get_bool(&config, SET_ENGINE_INSTALL)) {
+				A_PRINTF("Skipping cheats - engine not installed\n");
+			} else {
+				__reset_cheats(&engine);
+				if (game != NULL)
+					__activate_cheats(game, &engine);
+			}
 			__start_elf(boot2);
 		} else if (new_pad & PAD_SELECT) {
 			boot2 = config_get_string_elem(&config, SET_BOOT2, select++);
@@ -411,15 +423,7 @@ int main(int argc, char *argv[])
 				select = 0;
 			}
 		} else if (new_pad & PAD_CIRCLE) {
-			if (!config_get_bool(&config, SET_ENGINE_INSTALL)) {
-				A_PRINTF("Error: could not activate cheats - "
-					"engine not installed\n");
-			} else {
-				if (game != NULL)
-					__activate_cheats(game, &engine);
-				else
-					__auto_activate_cheats(boot2, &cheats, &engine);
-			}
+			game = __auto_select_cheats(boot2, &cheats);
 		} else if (new_pad & PAD_TRIANGLE) {
 			/* for dev only */
 			break;
@@ -435,10 +439,14 @@ int main(int argc, char *argv[])
 			/* Do nothing */
 		} else if (new_pad & PAD_DOWN) {
 			game = game ? GAMES_NEXT(game) : GAMES_FIRST(&cheats.games);
-			A_PRINTF("Select %s\n", game ? game->title : "no cheats");
+			if (game != NULL) {
+				A_PRINTF("Select \"%s\"\n", game->title);
+			} else {
+				A_PRINTF("Deselect all cheats\n");
+			}
 		} else if (new_pad & PAD_UP) {
 			game = NULL;
-			A_PRINTF("Select no cheats\n");
+			A_PRINTF("Deselect all cheats\n");
 		}
 	}
 end:
