@@ -34,7 +34,7 @@ EE_CFLAGS += -D_SMS_MODULES
 IRX_FILES += ps2ip_sms_irx.o ps2smap_sms_irx.o
 endif
 
-LDR_FILES = loader.o configman.o erlman.o irxman.o elfid.o
+LDR_FILES = loader.o configman.o erlman.o irxman.o elfid.o cheatman.o
 
 EE_OBJS = $(LDR_FILES) $(ERL_FILES) $(IRX_FILES)
 

@@ -23,15 +23,16 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <libcheats.h>
+#include <libconfig.h>
 #include <sbv_patches.h>
 #include <sifrpc.h>
 #include <string.h>
-#include <libcheats.h>
-#include <libconfig.h>
+#include "cheatman.h"
 #include "configman.h"
 #include "dbgprintf.h"
-#include "erlman.h"
 #include "elfid.h"
+#include "erlman.h"
 #include "irxman.h"
 #include "mycdvd.h"
 #include "mypad.h"
@@ -53,10 +54,6 @@
 
 #define PAD_PORT	0
 #define PAD_SLOT	0
-
-#define GAME_ID_START	"/ID"
-#define GAME_ID_WC	'?'
-
 
 static char _bootpath[FIO_PATH_MAX];
 static enum dev_id _bootdev = DEV_UNKN;
@@ -133,126 +130,6 @@ static char *__pathname(const char *name)
 }
 
 /*
- * Load cheats from text file.
- */
-static int __load_cheats(const config_t *config, cheats_t *cheats)
-{
-	const char *cheatfile = config_get_string(config, SET_CHEATS_FILE);
-	char *buf = NULL;
-	int ret;
-
-	cheats_destroy(cheats);
-
-	buf = read_text_file(__pathname(cheatfile), 0);
-	if (buf == NULL) {
-		fprintf(stderr, "%s: could not read cheats file '%s'\n",
-			__FUNCTION__, cheatfile);
-		return -1;
-	}
-
-	cheats_init(cheats);
-	ret = cheats_read_buf(cheats, buf);
-	free(buf);
-	if (ret != CHEATS_TRUE) {
-		fprintf(stderr, "%s: line %i: %s\n", cheatfile,
-			cheats->error_line, cheats->error_text);
-		cheats_destroy(cheats);
-		return -1;
-	}
-
-	return 0;
-}
-
-/*
- * Find cheats for a game by its elf id.
- */
-static game_t *__find_cheats(const elfid_t *id, const gamelist_t *list)
-{
-	game_t *game;
-	elfid_t id2;
-	char *p = NULL;
-
-	GAMES_FOREACH(game, list) {
-		p = strstr(game->title, GAME_ID_START);
-		if (p != NULL && !elfid_parse(p + strlen(GAME_ID_START), &id2)) {
-			if (!elfid_compare(id, &id2, GAME_ID_WC))
-				return game;
-		}
-	}
-
-	return NULL;
-}
-
-/*
- * Auto-select cheats for ELF.
- */
-static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
-{
-	char elfname[FIO_PATH_MAX];
-	enum dev_id dev = DEV_CD;
-	char *argv[1];
-	int argc = 1;
-	elfid_t id;
-
-	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
-		_cdStandby(CDVD_BLOCK);
-
-	if (boot2 == NULL) {
-		if (cdGetElf(elfname) < 0) {
-			fprintf(stderr, "%s: could not get ELF name from SYSTEM.CNF\n",
-				__FUNCTION__);
-			_cdStop(CDVD_NOBLOCK);
-			return NULL;
-		}
-		boot2 = elfname;
-	}
-
-	build_argv(boot2, &argc, argv);
-
-	if (elfid_generate(argv[0], &id) < 0) {
-		fprintf(stderr, "%s: could not generate ID from ELF %s\n",
-			__FUNCTION__, argv[0]);
-		if (dev == DEV_CD)
-			_cdStop(CDVD_NOBLOCK);
-		return NULL;
-	}
-
-	if (dev == DEV_CD)
-		_cdStop(CDVD_NOBLOCK);
-
-	return __find_cheats(&id, &cheats->games);
-}
-
-/*
- * Activate selected cheats.
- */
-static void __activate_cheats(const game_t *game, engine_t *engine)
-{
-	cheat_t *cheat = NULL;
-	code_t *code = NULL;
-
-	CHEATS_FOREACH(cheat, &game->cheats) {
-		CODES_FOREACH(code, &cheat->codes) {
-			D_PRINTF("%08X %08X\n", code->addr, code->val);
-			/* TODO improve check for hook */
-			if ((code->addr & 0xfe000000) == 0x90000000)
-				engine_add_hook(engine, code->addr, code->val);
-			else
-				engine_add_code(engine, code->addr, code->val);
-		}
-	}
-}
-
-/*
- * Reset activated cheats.
- */
-static void __reset_cheats(engine_t *engine)
-{
-	engine_clear_hooks(engine);
-	engine_clear_codes(engine);
-}
-
-/*
  * Start ELF specified by @boot2, or parse SYSTEM.CNF for ELF if @boot2 is NULL.
  */
 static int __start_elf(const char *boot2)
@@ -306,6 +183,7 @@ int main(int argc, char *argv[])
 	config_t config;
 	cheats_t cheats;
 	engine_t engine;
+	const char *cheatfile = NULL;
 	const char *boot2 = NULL;
 	int select = 0;
 	game_t *game = NULL;
@@ -358,8 +236,9 @@ int main(int argc, char *argv[])
 	}
 
 	cheats_init(&cheats);
-	if (__load_cheats(&config, &cheats) < 0)
-		A_PRINTF("Error: failed to load cheats\n");
+	cheatfile = __pathname(config_get_string(&config, SET_CHEATS_FILE));
+	if (load_cheats(cheatfile, &cheats) < 0)
+		A_PRINTF("Error: failed to load cheats from %s\n", cheatfile);
 
 	A_PRINTF(OPTIONS);
 	A_PRINTF("Ready.\n");
@@ -378,10 +257,10 @@ int main(int argc, char *argv[])
 			if (!config_get_bool(&config, SET_ENGINE_INSTALL)) {
 				A_PRINTF("Skipping cheats - engine not installed\n");
 			} else {
-				__reset_cheats(&engine);
+				reset_cheats(&engine);
 				if (game != NULL) {
 					A_PRINTF("Activate cheats for \"%s\"\n", game->title);
-					__activate_cheats(game, &engine);
+					activate_cheats(game, &engine);
 				}
 			}
 			__start_elf(boot2);
@@ -394,7 +273,7 @@ int main(int argc, char *argv[])
 				select = 0;
 			}
 		} else if (new_pad & PAD_CIRCLE) {
-			game = __auto_select_cheats(boot2, &cheats);
+			game = find_cheats(boot2, &cheats);
 			if (game != NULL)
 				A_PRINTF("Auto-select \"%s\"\n", game->title);
 			else
