@@ -145,7 +145,8 @@ static int __load_cheats(const config_t *config, cheats_t *cheats)
 
 	buf = read_text_file(__pathname(cheatfile), 0);
 	if (buf == NULL) {
-		A_PRINTF("Error: could not read cheats file '%s'\n", cheatfile);
+		fprintf(stderr, "%s: could not read cheats file '%s'\n",
+			__FUNCTION__, cheatfile);
 		return -1;
 	}
 
@@ -153,8 +154,8 @@ static int __load_cheats(const config_t *config, cheats_t *cheats)
 	ret = cheats_read_buf(cheats, buf);
 	free(buf);
 	if (ret != CHEATS_TRUE) {
-		A_PRINTF("%s: line %i: %s\n", cheatfile, cheats->error_line,
-			cheats->error_text);
+		fprintf(stderr, "%s: line %i: %s\n", cheatfile,
+			cheats->error_line, cheats->error_text);
 		cheats_destroy(cheats);
 		return -1;
 	}
@@ -191,7 +192,6 @@ static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
 	enum dev_id dev = DEV_CD;
 	char *argv[1];
 	int argc = 1;
-	game_t *game = NULL;
 	elfid_t id;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
@@ -199,7 +199,8 @@ static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
 
 	if (boot2 == NULL) {
 		if (cdGetElf(elfname) < 0) {
-			A_PRINTF("Error: could not get ELF name from SYSTEM.CNF\n");
+			fprintf(stderr, "%s: could not get ELF name from SYSTEM.CNF\n",
+				__FUNCTION__);
 			_cdStop(CDVD_NOBLOCK);
 			return NULL;
 		}
@@ -209,7 +210,8 @@ static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
 	build_argv(boot2, &argc, argv);
 
 	if (elfid_generate(argv[0], &id) < 0) {
-		A_PRINTF("Error: could not generate ID from ELF %s\n", argv[0]);
+		fprintf(stderr, "%s: could not generate ID from ELF %s\n",
+			__FUNCTION__, argv[0]);
 		if (dev == DEV_CD)
 			_cdStop(CDVD_NOBLOCK);
 		return NULL;
@@ -218,13 +220,7 @@ static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
 	if (dev == DEV_CD)
 		_cdStop(CDVD_NOBLOCK);
 
-	game = __find_cheats(&id, &cheats->games);
-	if (game == NULL) {
-		A_PRINTF("Error: no cheats found for ELF %s\n", argv[0]);
-		return NULL;
-	}
-
-	return game;
+	return __find_cheats(&id, &cheats->games);
 }
 
 /*
@@ -362,7 +358,8 @@ int main(int argc, char *argv[])
 	}
 
 	cheats_init(&cheats);
-	__load_cheats(&config, &cheats);
+	if (__load_cheats(&config, &cheats) < 0)
+		A_PRINTF("Error: failed to load cheats\n");
 
 	A_PRINTF(OPTIONS);
 	A_PRINTF("Ready.\n");
@@ -400,6 +397,8 @@ int main(int argc, char *argv[])
 			game = __auto_select_cheats(boot2, &cheats);
 			if (game != NULL)
 				A_PRINTF("Auto-select \"%s\"\n", game->title);
+			else
+				A_PRINTF("No cheats found\n");
 		} else if (new_pad & PAD_TRIANGLE) {
 			/* for dev only */
 			break;
