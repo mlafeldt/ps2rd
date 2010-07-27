@@ -254,12 +254,10 @@ static game_t *__auto_select_cheats(const char *boot2, const cheats_t *cheats)
 /*
  * Activate selected cheats.
  */
-static int __activate_cheats(const game_t *game, engine_t *engine)
+static void __activate_cheats(const game_t *game, engine_t *engine)
 {
 	cheat_t *cheat = NULL;
 	code_t *code = NULL;
-
-	A_PRINTF("Activate cheats for \"%s\"\n", game->title);
 
 	CHEATS_FOREACH(cheat, &game->cheats) {
 		CODES_FOREACH(code, &cheat->codes) {
@@ -271,8 +269,6 @@ static int __activate_cheats(const game_t *game, engine_t *engine)
 				engine_add_code(engine, code->addr, code->val);
 		}
 	}
-
-	return 0;
 }
 
 /*
@@ -410,8 +406,10 @@ int main(int argc, char *argv[])
 				A_PRINTF("Skipping cheats - engine not installed\n");
 			} else {
 				__reset_cheats(&engine);
-				if (game != NULL)
+				if (game != NULL) {
+					A_PRINTF("Activate cheats for \"%s\"\n", game->title);
 					__activate_cheats(game, &engine);
+				}
 			}
 			__start_elf(boot2);
 		} else if (new_pad & PAD_SELECT) {
@@ -424,6 +422,8 @@ int main(int argc, char *argv[])
 			}
 		} else if (new_pad & PAD_CIRCLE) {
 			game = __auto_select_cheats(boot2, &cheats);
+			if (game != NULL)
+				A_PRINTF("Auto-select \"%s\"\n", game->title);
 		} else if (new_pad & PAD_TRIANGLE) {
 			/* for dev only */
 			break;
@@ -439,11 +439,10 @@ int main(int argc, char *argv[])
 			/* Do nothing */
 		} else if (new_pad & PAD_DOWN) {
 			game = game ? GAMES_NEXT(game) : GAMES_FIRST(&cheats.games);
-			if (game != NULL) {
+			if (game != NULL)
 				A_PRINTF("Select \"%s\"\n", game->title);
-			} else {
+			else
 				A_PRINTF("Deselect all cheats\n");
-			}
 		} else if (new_pad & PAD_UP) {
 			game = NULL;
 			A_PRINTF("Deselect all cheats\n");
