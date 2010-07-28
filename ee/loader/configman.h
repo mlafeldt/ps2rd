@@ -41,6 +41,9 @@
 #ifndef USB_SUPPORT
 #define USB_SUPPORT		1
 #endif
+#ifndef CHEATS_FILE
+#define CHEATS_FILE		"cheats.txt"
+#endif
 
 #ifndef ENGINE_INSTALL
 #define ENGINE_INSTALL		1
@@ -107,15 +110,13 @@
 #define VIDEOMOD_YDIFF_HIRES	0
 #endif
 
-#ifndef CHEATS_FILE
-#define CHEATS_FILE		"cheats.txt"
-#endif
 
 /* Keys to access different settings in configuration */
 #define SET_IOP_RESET                   "loader.iop_reset"
 #define SET_SBV_PATCHES                 "loader.sbv_patches"
 #define SET_USB_SUPPORT                 "loader.usb_support"
 #define SET_BOOT2                       "loader.boot2"
+#define SET_CHEATS_FILE                 "loader.cheats"
 #define SET_ENGINE_INSTALL              "engine.install"
 #define SET_ENGINE_ADDR                 "engine.addr"
 #define SET_DEBUGGER_INSTALL            "debugger.install"
@@ -139,7 +140,6 @@
 #define SET_VIDEOMOD_YFIX               "videomod.yfix"
 #define SET_VIDEOMOD_YDIFF_LORES	"videomod.ydiff_lores"
 #define SET_VIDEOMOD_YDIFF_HIRES	"videomod.ydiff_hires"
-#define SET_CHEATS_FILE                 "cheats.file"
 
 
 void config_build(config_t *config);

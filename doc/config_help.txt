@@ -40,6 +40,10 @@ Section "loader"
     "cdrom0:\\REZ.ELF;1"
   ];
 
+* cheats [path, cheats.txt by default]
+
+  Set 'cheats' to the name of the cheats file to use.
+
 
 Section "engine"
 ----------------
@@ -141,7 +145,7 @@ Section "elfldr"
 
 
 Section "videomod"
-----------------
+------------------
 
 * install [bool, false by default]
 
@@ -172,14 +176,6 @@ Section "videomod"
 
   Defines the signed offset to be added to the DY field of the GS registers
   DISPLAY1 and DISPLAY2 in high resolution mode (DH >= 257).
-
-
-Section "cheats"
-----------------
-
-* file [path, cheats.txt by default]
-
-  Set 'file' to the name of the cheats file to use.
 
 
 EOF

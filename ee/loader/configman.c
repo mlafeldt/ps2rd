@@ -57,6 +57,10 @@ void config_build(config_t *config)
 #endif
 	set = config_setting_add(group, "boot2", CONFIG_TYPE_ARRAY);
 
+	set = config_setting_add(group, "cheats", CONFIG_TYPE_STRING);
+#ifdef CHEATS_FILE
+	config_setting_set_string(set, CHEATS_FILE);
+#endif
 	/*
 	 * engine section
 	 */
@@ -174,15 +178,6 @@ void config_build(config_t *config)
 #ifdef VIDEOMOD_YDIFF_HIRES
 	config_setting_set_int(set, VIDEOMOD_YDIFF_HIRES);
 #endif
-	/*
-	 * cheats section
-	 */
-	group = config_setting_add(root, "cheats", CONFIG_TYPE_GROUP);
-
-	set = config_setting_add(group, "file", CONFIG_TYPE_STRING);
-#ifdef CHEATS_FILE
-	config_setting_set_string(set, CHEATS_FILE);
-#endif
 }
 
 /**
@@ -217,6 +212,7 @@ void config_print(const config_t *config)
 	PRINT_BOOL(SET_SBV_PATCHES);
 	PRINT_BOOL(SET_USB_SUPPORT);
 	PRINT_STRING_ARRAY(SET_BOOT2);
+	PRINT_STRING(SET_CHEATS_FILE);
 
 	/* engine */
 	PRINT_BOOL(SET_ENGINE_INSTALL);
@@ -250,7 +246,4 @@ void config_print(const config_t *config)
 	PRINT_BOOL(SET_VIDEOMOD_YFIX);
 	PRINT_INT(SET_VIDEOMOD_YDIFF_LORES);
 	PRINT_INT(SET_VIDEOMOD_YDIFF_HIRES);
-
-	/* cheats */
-	PRINT_STRING(SET_CHEATS_FILE);
 }
