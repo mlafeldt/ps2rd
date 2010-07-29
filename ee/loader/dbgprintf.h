@@ -36,7 +36,8 @@
 #define A_PRINTF(format, args...) \
 	do { \
 	D_PRINTF(format, ## args); \
+	if (scr_getY() > 25) scr_clear(); \
 	scr_printf(format, ## args); \
 	} while (0)
 
-#endif /*_DBGPRINTF_H_*/
+#endif /* _DBGPRINTF_H_ */
