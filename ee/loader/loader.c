@@ -46,11 +46,10 @@
 
 #define OPTIONS \
 	"Options:\n" \
-	"START | X - Start game\n" \
-	"SELECT    - Select boot ELF\n" \
-	"UP        - Deselect all cheats\n" \
-	"DOWN      - Select next game cheats\n" \
-	"CIRCLE    - Auto-select cheats\n"
+	"START | X  - Start game\n" \
+	"LEFT RIGHT - Select boot ELF\n" \
+	"UP DOWN    - Select game cheats\n" \
+	"CIRCLE     - Auto-select cheats\n"
 
 #define PAD_PORT	0
 #define PAD_SLOT	0
@@ -265,13 +264,7 @@ int main(int argc, char *argv[])
 			}
 			__start_elf(boot2);
 		} else if (new_pad & PAD_SELECT) {
-			boot2 = config_get_string_elem(&config, SET_BOOT2, select++);
-			if (boot2 != NULL) {
-				A_PRINTF("Boot ELF is %s\n", boot2);
-			} else {
-				A_PRINTF("Boot ELF is read from SYSTEM.CNF\n");
-				select = 0;
-			}
+			/* do nothing */
 		} else if (new_pad & PAD_CIRCLE) {
 			game = find_cheats(boot2, &cheats);
 			if (game != NULL)
@@ -281,16 +274,15 @@ int main(int argc, char *argv[])
 		} else if (new_pad & PAD_TRIANGLE) {
 			/* for dev only */
 			break;
-		} else if (new_pad & PAD_SQUARE) {
-			/* Do nothing */
-		} else if (new_pad & PAD_L1) {
-			/* Do nothing */
-		} else if (new_pad & PAD_L2) {
-			/* Do nothing */
-		} else if (new_pad & PAD_R1) {
-			/* Do nothing */
-		} else if (new_pad & PAD_R2) {
-			/* Do nothing */
+		} else if ((new_pad & PAD_LEFT) || (new_pad & PAD_RIGHT)) {
+			boot2 = (new_pad & PAD_RIGHT) ?
+				config_get_string_elem(&config, SET_BOOT2, select++) : NULL;
+			if (boot2 != NULL) {
+				A_PRINTF("Select ELF \"%s\"\n", boot2);
+			} else {
+				A_PRINTF("Auto-select ELF from SYSTEM.CNF\n");
+				select = 0;
+			}
 		} else if (new_pad & PAD_DOWN) {
 			game = game ? GAMES_NEXT(game) : GAMES_FIRST(&cheats.games);
 			if (game != NULL)
