@@ -1,4 +1,10 @@
 0.5.3-wip (2010)
+- Added ability to select game cheats manually.
+- Changed the way cheats are activated.
+- Fixed bug in ELF loader to enable launching ELFs from mass.
+- Fixed freezing when there's no game in drive.
+- Clear screen if Y>25.
+- Moved setting cheats.file to loader.cheats.
 
 0.5.2 (Jul 21 2010)
 - Rewrote ntpbclient C tool in Perl for platform independence.
