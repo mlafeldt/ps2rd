@@ -139,7 +139,7 @@ static int __start_elf(const char *boot2)
 	int argc = 16;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
-		_cdStandby(CDVD_BLOCK);
+		_cdStandby(CDVD_NOBLOCK);
 
 	if (boot2 == NULL) {
 		if (cdGetElf(elfname) < 0) {

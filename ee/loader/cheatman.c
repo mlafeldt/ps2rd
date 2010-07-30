@@ -93,7 +93,7 @@ game_t *find_cheats(const char *boot2, const cheats_t *cheats)
 	elfid_t id;
 
 	if (boot2 == NULL || (boot2 != NULL && (dev = get_dev(boot2)) == DEV_CD))
-		_cdStandby(CDVD_BLOCK);
+		_cdStandby(CDVD_NOBLOCK);
 
 	if (boot2 == NULL) {
 		if (cdGetElf(elfname) < 0) {
