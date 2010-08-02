@@ -131,32 +131,6 @@ static inline void reset_iop(const char *img)
 	FlushCache(2); /* Instruction cache */
 }
 
-/**
- * load_modules - Loads multiple IOP modules.
- * @modv: list of modules
- * @return: 0: success, <0: error
- */
-static inline int load_modules(const char **modv)
-{
-	int i = 0, ret;
-
-	if (modv == NULL)
-		return -1;
-
-	while (modv[i] != NULL) {
-		ret = SifLoadModule(modv[i], 0, NULL);
-		if (ret < 0) {
-			fprintf(stderr, "%s: Failed to load module: %s (%i)\n",
-				__FUNCTION__, modv[i], ret);
-			return -1;
-		}
-		i++;
-	}
-
-	D_PRINTF("%s: All modules loaded.\n", __FUNCTION__);
-	return 0;
-}
-
 /* Device returned by get_dev() */
 enum dev_id {
 	DEV_CD,

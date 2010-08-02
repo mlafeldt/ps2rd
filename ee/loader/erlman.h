@@ -24,7 +24,6 @@
 #ifndef _ERLMAN_H_
 #define _ERLMAN_H_
 
-#include <tamtypes.h>
 #include "configman.h"
 #include "engine.h"
 

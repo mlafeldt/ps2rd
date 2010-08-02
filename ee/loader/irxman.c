@@ -121,7 +121,7 @@ static void ramfile_set(ramfile_t *file, const char *name, u8 *addr, u32 size)
  * Copy statically linked IRX files to kernel RAM.
  * They will be loaded by the debugger later...
  */
-static void copy_modules_to_kernel(const config_t *config)
+void install_modules(const config_t *config)
 {
 	ramfile_t file_tab[IRX_NUM + 1];
 	ramfile_t *file_ptr = file_tab;
@@ -179,9 +179,9 @@ static void copy_modules_to_kernel(const config_t *config)
 }
 
 /*
- * Load IRX modules into IOP RAM and copy modules to kernel RAM for debugger.
+ * Load IRX modules into IOP RAM.
  */
-int init_irx_modules(const config_t *config)
+int load_modules(const config_t *config)
 {
 	const char **modv = _modules;
 	int i = 0, ret;
@@ -209,8 +209,6 @@ int init_irx_modules(const config_t *config)
 				__FUNCTION__, ret);
 		}
 	}
-
-	copy_modules_to_kernel(config);
 
 	return 0;
 }

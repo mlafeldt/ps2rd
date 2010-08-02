@@ -24,9 +24,9 @@
 #ifndef _IRXMAN_H_
 #define _IRXMAN_H_
 
-#include <tamtypes.h>
 #include "configman.h"
 
-int init_irx_modules(const config_t *config);
+int load_modules(const config_t *config);
+void install_modules(const config_t *config);
 
 #endif /* _IRXMAN_H_ */

@@ -216,8 +216,8 @@ int main(int argc, char *argv[])
 		sbv_patch_user_mem_clear(0x00100000);
 	}
 
-	if (init_irx_modules(&config) < 0) {
-		A_PRINTF("Error: failed to init IRX modules\n");
+	if (load_modules(&config) < 0) {
+		A_PRINTF("Error: failed to load IRX modules\n");
 		goto end;
 	}
 
@@ -233,6 +233,7 @@ int main(int argc, char *argv[])
 		A_PRINTF("Error: failed to install ERLs\n");
 		goto end;
 	}
+	install_modules(&config);
 
 	cheats_init(&cheats);
 	cheatfile = __pathname(config_get_string(&config, SET_CHEATS_FILE));
