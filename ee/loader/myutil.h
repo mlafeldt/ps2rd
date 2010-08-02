@@ -258,4 +258,15 @@ end:
 	return buf;
 }
 
+/*
+ * Wrapper to call nopdelay many times.
+ */
+static inline void delay(int delay)
+{
+	int i = 0;
+
+	while (i++ < delay)
+		nopdelay();
+}
+
 #endif /*_MYUTIL_H_*/
