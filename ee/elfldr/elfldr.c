@@ -114,19 +114,23 @@ static void loadElf(void)
 	/* clear scratchpad memory */
 	memset((void*)0x70000000, 0, 16 * 1024);
 
-	/* reset IOP */
-	SifInitRpc(0);
-	SifResetIop();
-	SifInitRpc(0);
+	/* HACK do not reset IOP when launching ELF from mass */
+	if (!(_argv[0][0] == 'm' && _argv[0][1] == 'a' &&
+			_argv[0][2] == 's' && _argv[0][3] == 's')) {
+		/* reset IOP */
+		SifInitRpc(0);
+		SifResetIop();
+		SifInitRpc(0);
 
-	FlushCache(0);
-	FlushCache(2);
+		FlushCache(0);
+		FlushCache(2);
 
-	/* reload modules */
-	SifLoadFileInit();
-	SifLoadModule("rom0:SIO2MAN", 0, NULL);
-	SifLoadModule("rom0:MCMAN", 0, NULL);
-	SifLoadModule("rom0:MCSERV", 0, NULL);
+		/* reload modules */
+		SifLoadFileInit();
+		SifLoadModule("rom0:SIO2MAN", 0, NULL);
+		SifLoadModule("rom0:MCMAN", 0, NULL);
+		SifLoadModule("rom0:MCSERV", 0, NULL);
+	}
 
 	GS_BGCOLOUR = 0x004000; /* dark green */
 
