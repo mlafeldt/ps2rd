@@ -79,9 +79,9 @@ typedef struct {
 
 #define MAX_ARGS 15
 
-static int g_argc;
-static char *g_argv[1 + MAX_ARGS];
-static char g_argbuf[256];
+static int _argc;
+static char *_argv[1 + MAX_ARGS];
+static char _argbuf[256];
 
 static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
 extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
@@ -132,7 +132,7 @@ static void loadElf(void)
 
 	/* try to load the ELF with SifLoadElf() first */
 	memset(&elf, 0, sizeof(t_ExecData));
-	ret = SifLoadElf(g_argv[0], &elf);
+	ret = SifLoadElf(_argv[0], &elf);
 	if (!ret && elf.epc) {
 		/* exit services */
 		fioExit();
@@ -146,7 +146,7 @@ static void loadElf(void)
 		GS_BGCOLOUR = 0x000000; /* black */
 
 		/* finally, run game ELF... */
-		ExecPS2((void*)elf.epc, (void*)elf.gp, g_argc, g_argv);
+		ExecPS2((void*)elf.epc, (void*)elf.gp, _argc, _argv);
 
 		SifInitRpc(0);
 	}
@@ -155,7 +155,7 @@ static void loadElf(void)
 
 	/* if SifLoadElf() failed, load the ELF manually */
 	fioInit();
- 	fd = open(g_argv[0], O_RDONLY);
+ 	fd = open(_argv[0], O_RDONLY);
  	if (fd < 0) {
 		goto error; /* can't open file, exiting... */
  	}
@@ -202,7 +202,7 @@ static void loadElf(void)
 	GS_BGCOLOUR = 0x000000; /* black */
 
 	/* finally, run game ELF... */
-	ExecPS2((void*)elf_header.entry, NULL, g_argc, g_argv);
+	ExecPS2((void*)elf_header.entry, NULL, _argc, _argv);
 error:
 	GS_BGCOLOUR = 0x404040; /* dark gray screen: error */
 	SleepThread();
@@ -214,7 +214,7 @@ error:
  */
 void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 {
-	char *p = g_argbuf;
+	char *p = _argbuf;
 	int i;
 
 	GS_BGCOLOUR = 0x400000; /* dark blue */
@@ -224,18 +224,18 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	ee_kmode_enter();
 
 	/* copy args from main ELF */
-	g_argc = argc > MAX_ARGS ? MAX_ARGS : argc;
+	_argc = argc > MAX_ARGS ? MAX_ARGS : argc;
 
-	memset(g_argbuf, 0, sizeof(g_argbuf));
+	memset(_argbuf, 0, sizeof(_argbuf));
 
 	__strcpy(p, filename);
-	g_argv[0] = p;
+	_argv[0] = p;
 	p += strlen(filename) + 1;
-	g_argc++;
+	_argc++;
 
 	for (i = 0; i < argc; i++) {
 		__strcpy(p, argv[i]);
-		g_argv[i + 1] = p;
+		_argv[i + 1] = p;
 		p += strlen(argv[i]) + 1;
 	}
 
