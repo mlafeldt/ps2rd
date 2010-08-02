@@ -86,32 +86,6 @@ static char g_argbuf[256];
 static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
 extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
 
-static void reinit_iop(void)
-{
-	/* reset IOP */
-	SifInitRpc(0);
-	SifResetIop();
-	SifInitRpc(0);
-
-	FlushCache(0);
-	FlushCache(2);
-
-	/* reload modules */
-	SifLoadFileInit();
-	SifLoadModule("rom0:SIO2MAN", 0, NULL);
-	SifLoadModule("rom0:MCMAN", 0, NULL);
-	SifLoadModule("rom0:MCSERV", 0, NULL);
-
-	/* exit services */
-	fioExit();
-	SifLoadFileExit();
-	SifExitIopHeap();
-	SifExitRpc();
-
-	FlushCache(0);
-	FlushCache(2);
-}
-
 /*
  * ELF loader function
  */
@@ -140,13 +114,34 @@ static void loadElf(void)
 	/* clear scratchpad memory */
 	memset((void*)0x70000000, 0, 16 * 1024);
 
+	/* reset IOP */
+	SifInitRpc(0);
+	SifResetIop();
+	SifInitRpc(0);
+
+	FlushCache(0);
+	FlushCache(2);
+
+	/* reload modules */
+	SifLoadFileInit();
+	SifLoadModule("rom0:SIO2MAN", 0, NULL);
+	SifLoadModule("rom0:MCMAN", 0, NULL);
+	SifLoadModule("rom0:MCSERV", 0, NULL);
+
 	GS_BGCOLOUR = 0x004000; /* dark green */
 
 	/* try to load the ELF with SifLoadElf() first */
 	memset(&elf, 0, sizeof(t_ExecData));
 	ret = SifLoadElf(g_argv[0], &elf);
 	if (!ret && elf.epc) {
-		reinit_iop();
+		/* exit services */
+		fioExit();
+		SifLoadFileExit();
+		SifExitIopHeap();
+		SifExitRpc();
+
+		FlushCache(0);
+		FlushCache(2);
 
 		GS_BGCOLOUR = 0x000000; /* black */
 
@@ -195,7 +190,14 @@ static void loadElf(void)
 
 	close(fd);
 
-	reinit_iop();
+	/* exit services */
+	fioExit();
+	SifLoadFileExit();
+	SifExitIopHeap();
+	SifExitRpc();
+
+	FlushCache(0);
+	FlushCache(2);
 
 	GS_BGCOLOUR = 0x000000; /* black */
 
