@@ -18,7 +18,7 @@ A - TODO
 B - TODO
 C - 32-bit do all following codes if equal to
 D - Do multi-lines if conditional
-E - should be converted to D code type for backwards compatibility
+E - Do multi-lines if conditional (deprecated)
 F - TODO
 
 
@@ -291,6 +291,19 @@ D00802CC 07002882
 100800BC 00000083
 Activate next 7 lines of code if 16-bit value at address 0x000802CC is equal to
 0x2882; otherwise, skip the 7 code lines.
+
+--------------------
+
+"Do multi-lines if conditional (deprecated)"
+
+16-bit test
+E-0nnvvvv taaaaaaa
+
+8-bit test
+E-1nn00vv taaaaaaa
+
+This type is internally converted to the D type - see above. It has only been
+implementad for backwards compatibility.
 
 
 EOF
