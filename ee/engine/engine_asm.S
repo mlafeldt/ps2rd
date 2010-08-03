@@ -491,6 +491,35 @@ type_d:
 5:				/* skip if zero */
 	beqzl	$t5, next
 	addu	$t4, $a2
+	b	next
+	nop
+type_e:
+	/*
+	 * "Do multi-lines if conditional"
+	 *
+	 * 16-bit test
+	 * E-0nnvvvv taaaaaaa
+	 *
+	 * 8-bit test
+	 * E-1nn00vv taaaaaaa
+	 *
+	 * This type is internally converted to the D type - see above.
+	 */
+	srl	$a2, $a1, 28
+	srl	$a3, $a0, 16
+	andi	$t5, $a0, 0xffff
+	sll	$a2, 20
+	sll	$a3, 24
+	or	$t5, $a2
+	or	$t5, $a3
+	sll	$a0, $a1, 7
+	srl	$a0, 7
+	li	$t6, 0xe0000000
+	or	$t6, $a0
+	move	$a1, $t5
+	sw	$t6, 0($t2)	/* store converted address */
+	b	type_d
+	sw	$a1, 4($t2)	/* store converted value */
 next:
 	/* next code */
 	addiu	$t4, 1
@@ -518,7 +547,7 @@ type_tab:
 	.word	0 /* TODO */
 	.word	type_c
 	.word	type_d
-	.word	0 /* loader should convert E code type to D */
+	.word	type_e
 	.word	0 /* type F is a hook code */
 #endif
 
