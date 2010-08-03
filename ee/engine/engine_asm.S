@@ -507,19 +507,22 @@ type_e:
 	 *
 	 * This type is internally converted to the D type - see above.
 	 */
-	srl	$a2, $a1, 28
-	srl	$a3, $a0, 16
-	andi	$t5, $a0, 0xffff
-	sll	$a2, 20
-	sll	$a3, 24
-	or	$t5, $a2
-	or	$t5, $a3
+	andi	$a2, $a0, 0xffff
+	srl	$at, $a1, 28
+	sll	$at, 20
+	or	$a2, $at
+	srl	$at, $a0, 24
+	sll	$at, 16
+	or	$a2, $at
+	srl	$at, $a0, 16
+	sll	$at, 24
+	or	$a2, $at
 	sll	$a0, $a1, 7
 	srl	$a0, 7
-	li	$t6, 0xe0000000
-	or	$t6, $a0
-	move	$a1, $t5
-	sw	$t6, 0($t2)	/* store converted address */
+	li	$t5, 0xd0000000
+	or	$t5, $a0
+	move	$a1, $a2
+	sw	$t5, 0($t2)	/* store converted address */
 	b	type_d
 	sw	$a1, 4($t2)	/* store converted value */
 next:
