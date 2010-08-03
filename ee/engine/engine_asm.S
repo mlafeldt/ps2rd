@@ -660,7 +660,7 @@ j_SetupThread:
  * Some information about the engine used by the loader.
  */
 engine_info:
-	.word	0x00000001 /* version 0.1 */
+	.word	0x00000002 /* version 0.2 */
 
 maxcallbacks:
 	.word	MAX_CALLBACKS
