@@ -505,8 +505,7 @@ type_e:
 	 * 8-bit test
 	 * E-1nn00vv taaaaaaa
 	 *
-	 * This type is internally converted to the D type - see above. It has only
-	 * been implementad for backwards compatibility.
+	 * This type is internally converted to the D type - see above.
 	 */
 	srl	$a2, $a1, 28
 	srl	$a3, $a0, 16

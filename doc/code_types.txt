@@ -303,7 +303,7 @@ E-0nnvvvv taaaaaaa
 E-1nn00vv taaaaaaa
 
 This type is internally converted to the D type - see above. It has only been
-implementad for backwards compatibility.
+added for compatibility with other systems.
 
 
 EOF
