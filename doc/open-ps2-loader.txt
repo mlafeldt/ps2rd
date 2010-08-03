@@ -1,0 +1,13 @@
+The powerful features of PS2rd can be used with Open PS2 Loader (OPL).
+
+For this, PS2rd has to launch OPL. You can easily do this by adding the OPL ELF
+to loader.boot2 in ps2rd.conf. When PS2rd has started, manually select game
+cheats (auto-activation won't work here), and launch OPL.
+
+So the boot order goes as follows:
+
+  PS2rd --> OPL --> PS2 game
+
+While cheat system and video mode patcher integrate flawlessly with OPL, the
+debugger isn't compatible yet. Therefore, you need to disable it by setting
+debugger.install to "false". Otherwise, OPL will crash!
