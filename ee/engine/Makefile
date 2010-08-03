@@ -27,7 +27,7 @@ test.elf: $(TEST_OBJS)
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) $(EE_INCS) \
 	-o $@ $(TEST_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
-run: test.elf
+test: test.elf
 	ps2client reset; sleep 3
 	ps2client execee host:test.elf
 

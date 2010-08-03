@@ -305,6 +305,48 @@ static int test_type_d(void)
 	return 0;
 }
 
+static int test_type_e(void)
+{
+	const u32 addr = 0x00400e00;
+	u16 *p = (u16*)addr;
+
+	clear_codes();
+	p[0] = 0x1234;
+	p[1] = 0x1235;
+	p[2] = 0x1233;
+	p[3] = 0x1235;
+	p[4] = 0x0101;
+	p[5] = 0x1006;
+	p[6] = 0x0000;
+	p[7] = 0x1011;
+	p[8] = 0x0000;
+	add_code(0xe1100034, addr + 0x00000000);
+	add_code(0xe10f0034, addr + 0x10000002);
+	add_code(0xe10e0034, addr + 0x20000004);
+	add_code(0xe10d0034, addr + 0x30000006);
+	add_code(0xe10c0034, addr + 0x40000008);
+	add_code(0xe10b0034, addr + 0x5000000a);
+	add_code(0xe10a0000, addr + 0x6000000c);
+	add_code(0xe1090034, addr + 0x7000000e);
+	add_code(0xe0081234, addr + 0x00000000);
+	add_code(0xe0071234, addr + 0x10000002);
+	add_code(0xe0061234, addr + 0x20000004);
+	add_code(0xe0051234, addr + 0x30000006);
+	add_code(0xe0041234, addr + 0x40000008);
+	add_code(0xe0031234, addr + 0x5000000a);
+	add_code(0xe0020000, addr + 0x6000000c);
+	add_code(0xe0011234, addr + 0x7000000e);
+	add_code(addr + 0x10000010, 0x00001234);
+	CodeHandler();
+
+	if (p[8] != 0x1234) {
+		printf("test for type E failed\n");
+		return -1;
+	}
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	printf("Start testing...\n");
@@ -319,6 +361,7 @@ int main(int argc, char *argv[])
 	test_type_7();
 	test_type_c();
 	test_type_d();
+	test_type_e();
 
 	printf("Testing done.\n");
 
