@@ -151,7 +151,7 @@ Section "videomod"
 
   Set it to true if you want to install the video mode patcher.
 
-* addr [32-bit offset, 0x000f8000 by default]
+* addr [32-bit offset, 0x000fe000 by default]
 
   Specifies the load address of the video mode patcher.
 
