@@ -1,6 +1,7 @@
-0.5.3-wip (2010)
+0.5.3-wip (Aug xx 2010)
 - Added ability to select game cheats manually.
-- Changed the way cheats are activated.
+- Activated cheats are now copied to cheat engine only once.
+- Added code type E for compatibility with other systems.
 - Fixed bug in ELF loader to enable launching ELFs from mass.
 - Fixed freezing when there's no game in drive.
 - Clear screen if Y>25.
