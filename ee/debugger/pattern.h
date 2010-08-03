@@ -1,5 +1,5 @@
 /*
- * pattern.h - pattern search
+ * Pattern searching
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
@@ -18,6 +18,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with PS2rd.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
  */
 
 #ifndef _PATTERN_H_

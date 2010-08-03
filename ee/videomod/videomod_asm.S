@@ -1,5 +1,5 @@
 /*
- * videomod_asm.S - Video mode patcher
+ * Video mode patcher
  *
  * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
  *
@@ -17,6 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with PS2rd.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
  */
 
 	.text

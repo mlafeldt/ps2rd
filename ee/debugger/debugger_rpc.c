@@ -1,5 +1,5 @@
 /*
- * debugger_rpc.c - EE side of remote debugger
+ * EE side of remote debugger
  *
  * Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
  * Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
@@ -18,6 +18,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with PS2rd.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
  */
 
 #include <kernel.h>
