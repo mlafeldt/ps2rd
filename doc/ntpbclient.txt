@@ -1,6 +1,9 @@
 ntpbclient is a PC client to issue commands to the PS2 server program.
 
-You need a working Perl environment to run it (e.g. ActivePerl on Windows).
+You need a working Perl distribution to run it (e.g. ActivePerl on Windows).
+
+By default, ntpbclient connects to 192.168.0.10. You can change the IP by
+setting the variable "PS2_IP" in your environment.
 
 Usage:
 
