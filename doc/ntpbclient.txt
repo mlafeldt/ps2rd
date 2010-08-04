@@ -1,0 +1,18 @@
+ntpbclient is a PC client to issue commands to the PS2 server program.
+
+You need a working Perl environment to run it (e.g. ActivePerl on Windows).
+
+Usage:
+
+ntpbclient: <command> [args]
+Supported commands:
+    halt                      halt game execution
+    resume                    resume game execution
+    dump <start> <end> <file> dump memory to file
+
+Examples:
+
+$ perl ntpbclient halt
+$ perl ntpbclient resume
+$ perl ntpbclient dump bfc00000 c0000000 bios.bin
+$ perl ntpbclient dump 00100000 02000000 user.bin

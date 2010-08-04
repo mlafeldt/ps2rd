@@ -30,7 +30,8 @@ Section "loader"
 
   'boot2' holds a list of ELF pathnames (including arguments). You can later
   select one of those ELFs in order to boot it instead of the disc's default
-  ELF. This is handy if you want to directly boot/hack demos, for instance.
+  ELF. This is handy if you want to directly launch demos or applications like
+  Open PS2 Loader.
 
   Example:
 

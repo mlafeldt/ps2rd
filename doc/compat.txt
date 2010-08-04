@@ -64,6 +64,3 @@ you can try to disable it, and add your own hook code(s) to the cheats file.
 Please report any results to the compatibility list. Be as specific as possible.
 
 Thanks in advance.
-
-
-EOF

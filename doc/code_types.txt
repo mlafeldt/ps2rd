@@ -12,14 +12,14 @@ Overview:
 5 - Copy bytes
 6 - Pointer write
 7 - Boolean operation
-8 - TODO
+8 - unused
 9 - Hook code
-A - TODO
-B - TODO
+A - unused
+B - unused
 C - 32-bit do all following codes if equal to
 D - Do multi-lines if conditional
 E - Do multi-lines if conditional (deprecated)
-F - TODO
+F - unused
 
 
 "8-bit constant write"

@@ -7,7 +7,7 @@ If you have anything to contribute, don't hesitate to contact him.
 Submitting patches is the favored way to contribute changes. For this, the first
 thing to do is to clone the repository:
 
-$ hg clone https://bitbucket.org/misfire/ps2rd/
+$ hg clone http://bitbucket.org/misfire/ps2rd/
 
 To create a patch from your changes:
 

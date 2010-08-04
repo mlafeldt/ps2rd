@@ -8,6 +8,8 @@ So the boot order goes as follows:
 
   PS2rd --> OPL --> PS2 game
 
+HUGE NOTE:
+
 While cheat system and video mode patcher integrate flawlessly with OPL, the
-debugger isn't compatible yet. Therefore, you need to disable it by setting
-debugger.install to "false". Otherwise, OPL will crash!
+debugger isn't compatible yet. Therefore, it is mandatory to disable it by
+setting debugger.install to "false". Otherwise, OPL will crash!

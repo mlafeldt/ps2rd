@@ -17,6 +17,3 @@ $ make run
 
 If you want to boot it from mass, memory card, etc., make sure that ps2rd.conf
 is placed in the same folder as the ELF.
-
-
-EOF

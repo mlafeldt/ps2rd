@@ -9,7 +9,7 @@ Software Components:
 libconfig
 ---------
 
-ee/libconfig/
+ee/libconfig
 
 The current version of PS2rd uses a PS2 port of libconfig - a simple library for
 manipulating structured configuration files - to read and store its
@@ -22,7 +22,7 @@ http://www.hyperrealm.com/libconfig/
 libcheats
 ---------
 
-common/libcheats/
+ee/libcheats
 
 Furthermore, PS2rd makes use of the libcheats library to read, manipulate, and
 write cheat codes in text format - see cheats_format.txt.
@@ -31,7 +31,7 @@ write cheat codes in text format - see cheats_format.txt.
 Cheat Engine
 ------------
 
-ee/engine/
+ee/engine
 
 The cheat engine's primary task is to run in the game's background and process
 the cheat codes (see code_types.txt for more information).
@@ -43,8 +43,8 @@ user space.
 Debugger
 --------
 
-ee/debugger/
-iop/debugger/
+ee/debugger
+iop/debugger
 
 The debugger allows you to hack/debug commercial PS2 games over Ethernet using a
 PC-side debugger client.
@@ -53,7 +53,7 @@ PC-side debugger client.
 ELF Loader
 ----------
 
-ee/elfldr/
+ee/elfldr
 
 When the ELF loader is installed, it replaces the original (evil) LoadExecPS2()
 syscall. This component is required by the debugger to work properly.
@@ -62,7 +62,7 @@ syscall. This component is required by the debugger to work properly.
 Boot Loader
 -----------
 
-ee/loader/
+ee/loader
 
 This is where all the components come together. The loader does the following:
 - read configuration from file
