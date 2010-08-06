@@ -25,11 +25,12 @@
 # $Id$
 #
 
+use 5.010;
 use warnings;
 use strict;
 use IO::Socket;
 
-my $version = "0.1";
+my $version = "0.1.1";
 
 my $remote_host = $ENV{PS2_IP} || "192.168.0.10";
 my $remote_port = 4234;
