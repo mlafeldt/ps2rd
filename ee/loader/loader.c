@@ -189,23 +189,24 @@ int main(int argc, char *argv[])
 	int select = 0;
 	game_t *game = NULL;
 
+	strcpy(_bootpath, argv[0]);
+	__dirname(_bootpath);
+	_bootdev = get_dev(_bootpath);
+
 	SifInitRpc(0);
+
 	init_scr();
 	scr_clear();
 
 	A_PRINTF(WELCOME_STRING);
 	D_PRINTF("Build date: "APP_BUILD_DATE"\n");
-
-	strcpy(_bootpath, argv[0]);
-	__dirname(_bootpath);
-	_bootdev = get_dev(_bootpath);
 	A_PRINTF("Booting from: %s\n", _bootpath);
 	A_PRINTF("Initializing...\n");
 
 	D_PRINTF("* Reading config...\n");
 	config_build(&config);
 	if (config_read_file(&config, __pathname(CONFIG_FILE)) != CONFIG_TRUE)
-		D_PRINTF("config: %s\n", config_error_text(&config));
+		A_PRINTF("config error: %s\n", config_error_text(&config));
 	config_print(&config);
 
 	if (_bootdev != DEV_HOST && config_get_bool(&config, SET_IOP_RESET))
