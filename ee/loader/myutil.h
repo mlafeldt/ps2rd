@@ -110,25 +110,32 @@ static inline void reset_iop(const char *img)
 
 	SifInitRpc(0);
 
-	/* Exit services */
+	cdInit(CDVD_INIT_NOCHECK);
+	cdInit(CDVD_INIT_EXIT);
+
+	while (!SifIopReset(img, 0))
+		;
+	while (!SifIopSync())
+		;
+
+	/* exit services */
 	fioExit();
 	SifExitIopHeap();
 	SifLoadFileExit();
 	SifExitRpc();
+	SifExitCmd();
 
-	SifIopReset(img, 0);
+	FlushCache(0);
+	FlushCache(2);
 
-	while (!SifIopSync())
-		;
-
-	/* Init services */
+	/* init services */
 	SifInitRpc(0);
 	SifLoadFileInit();
 	SifInitIopHeap();
 	fioInit();
 
-	FlushCache(0); /* Writeback data cache */
-	FlushCache(2); /* Instruction cache */
+	FlushCache(0);
+	FlushCache(2);
 }
 
 /* Device returned by get_dev() */
