@@ -34,18 +34,37 @@
 #define CDVD_BLOCK	0
 #define CDVD_NOBLOCK	1
 
+static inline int _cdDiskReady(int mode)
+{
+	if (cdStatus() == CDVD_STAT_OPEN)
+		return 0;
+
+	/* HACK if tray is open before startup, it is detected as closed */
+	while (cdGetDiscType() == CDVD_TYPE_DETECT)
+		;
+
+	if (cdGetDiscType() == CDVD_TYPE_NODISK)
+		return 0;
+
+	cdDiskReady(mode);
+
+	return 1;
+}
+
 static inline void _cdStandby(int mode)
 {
-	cdDiskReady(mode);
-	cdStandby();
-	cdSync(mode);
+	if (_cdDiskReady(mode)) {
+		cdStandby();
+		cdSync(mode);
+	}
 }
 
 static inline void _cdStop(int mode)
 {
-	cdDiskReady(mode);
-	cdStop();
-	cdSync(mode);
+	if (_cdDiskReady(mode)) {
+		cdStop();
+		cdSync(mode);
+	}
 }
 
 /**
