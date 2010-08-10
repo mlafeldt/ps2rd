@@ -39,7 +39,7 @@
 #include "myutil.h"
 
 #define APP_NAME	"PS2rd"
-#define APP_VERSION	"0.5.3"
+#define APP_VERSION	"0.5.4"
 #define APP_BUILD_DATE	__DATE__" "__TIME__
 
 #define WELCOME_STRING	"Welcome to "APP_NAME" "APP_VERSION"\n"
