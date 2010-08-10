@@ -1,11 +1,11 @@
-0.5.3-wip (Aug xx 2010)
+0.5.3 (Aug 10 2010)
 - Improved compatibility with Open PS2 Loader; cheat system and video mode
   patcher integrate flawlessly.
-- Added ability to select game cheats manually.
+- Added ability to select game cheats manually (press up/down).
 - Activated cheats are now copied to cheat engine only once.
-- Added code type E for compatibility with other systems.
-- Fixed bug in ELF loader to enable launching ELFs from mass.
+- Added code type E for compatibility with other cheat systems.
 - Fixed freezing when there's no game in drive.
+- Added quick hack to enable launching ELFs from mass (to be improved).
 - Clear screen if Y>25.
 - Moved setting cheats.file to loader.cheats.
 
