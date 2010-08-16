@@ -1,7 +1,7 @@
 *.a
-*.o
 *.elf
 *.erl
-*.irx
 *.exe
+*.irx
+*.o
 release/
