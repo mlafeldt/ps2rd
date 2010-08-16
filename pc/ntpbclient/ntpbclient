@@ -95,8 +95,8 @@ sub ntpb_recv_data {
 
 sub show_usage
 {
-    print <<HERE;
-$0: <command> [args]
+    print STDERR <<HERE;
+Usage: $0 <command> [args]
 Supported commands:
     halt                      halt game execution
     resume                    resume game execution
