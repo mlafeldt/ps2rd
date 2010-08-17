@@ -1,29 +1,5 @@
 Developer Guidelines
 
-All development of PS2rd takes place at http://bitbucket.org/misfire/ps2rd/.
-The Mercurial repository is maintained by Mathias Lafeldt <misfire@debugon.org>.
+All development of PS2rd takes place at http://github.com/misfire/ps2rd.
+The Git repository is maintained by Mathias Lafeldt <misfire@debugon.org>.
 If you have anything to contribute, don't hesitate to contact him.
-
-Submitting patches is the favored way to contribute changes. For this, the first
-thing to do is to clone the repository:
-
-$ hg clone http://bitbucket.org/misfire/ps2rd/
-
-To create a patch from your changes:
-
-$ hg di -g [FILE] > foo.patch
-
-Of course, you can also commit offline with "hg ci", and create patches from
-your changesets:
-
-$ hg out -p [-r REV]
-or
-$ hg log -p -r REV
-
-Please try to always create a patch against the latest revision. Use "hg in" to
-show new changesets found in the online repository, and "hg pull" to actually
-pull changes to your local repository.
-
-Finally, you can submit the patch files via email to misfire@debugon.org
-
-Thanks in advance.
