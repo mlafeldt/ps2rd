@@ -1,44 +1,24 @@
 #!/usr/bin/perl
-#
-# ntpbclient - PC client application for PS2rd
-#
-# Copyright (C) 2010 Mathias Lafeldt <misfire@debugon.org>
-#
-# based on ntpbclient.c
-# Copyright (C) 2009-2010 jimmikaelkael <jimmikaelkael@wanadoo.fr>
-#
-# This file is part of PS2rd, the PS2 remote debugger.
-#
-# PS2rd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# PS2rd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with PS2rd.  If not, see <http://www.gnu.org/licenses/>.
-#
-# $Id$
-#
 
 use 5.010;
 use warnings;
 use strict;
+use File::Basename;
 use IO::Socket;
+use Getopt::Long;
+use Pod::Usage;
 
-my $version = "0.1.1";
-my $usage = <<HERE;
-Usage:
-    $0 <command> [args]
-Commands:
-    halt                      halt game execution
-    resume                    resume game execution
-    dump <start> <end> <file> dump memory to file
-HERE
+use constant VERSION => "0.1.1";
+
+my ($help, $man) = (0, 0);
+
+GetOptions(
+    "help|h" => \$help,
+    "man" => \$man
+) or pod2usage(2);
+
+pod2usage(1) if $help;
+pod2usage(-verbose => 2) if $man;
 
 my $remote_host = $ENV{PS2_IP} || "192.168.0.10";
 my $remote_port = 4234;
@@ -127,13 +107,114 @@ sub ntpb_cmd_dump {
     close $sock;
 }
 
-my $cmd = shift || die $usage;
+my $cmd = shift || die pod2usage("$0: command missing");
 given ($cmd) {
     when (/halt/i) { ntpb_cmd_halt }
     when (/resume/i) { ntpb_cmd_resume }
     when (/dump/i) {
-        die $usage unless @ARGV == 3;
+        pod2usage("$0: not enough arguments") unless @ARGV == 3;
         my ($start, $end, $file) = @ARGV;
         ntpb_cmd_dump hex $start, hex $end, $file }
-    default { die $usage }
+    default { pod2usage("$0: invalid command") }
 }
+
+__END__
+
+=head1 NAME
+
+ntpbclient - issue commands to PS2rd
+
+=head1 SYNOPSIS
+
+ntpbclient [options] <command> [args]
+
+=head1 DESCRIPTION
+
+ntpbclient is a client application to talk to the server side of PS2rd.
+
+=head1 OPTIONS
+
+=over
+
+=item -h, --help
+
+Show help text.
+
+=item --man
+
+Show man page.
+
+=back
+
+=head2 COMMANDS
+
+=over
+
+=item halt
+
+Halt game execution.
+
+=item resume
+
+Resume game execution.
+
+=item dump <start> <end> <file>
+
+Dump memory from address <start> to address <end> to <file>.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over
+
+=item B<PS2_IP>
+
+By default, ntpbclient connects to the IP 192.168.0.10. You can change
+the address by setting the B<PS2_IP> environment variable.
+
+=back
+
+=head1 EXAMPLES
+
+=over
+
+=item *
+
+ntpbclient halt
+
+=item *
+
+ntpbclient resume
+
+=item *
+
+ntpbclient dump bfc00000 c0000000 bios.bin
+
+=item *
+
+ntpbclient dump 00100000 02000000 user.bin
+
+=back
+
+=head1 AUTHORS
+
+=over
+
+=item *
+
+Written by Mathias Lafeldt <misfire@debugon.org>
+
+=item *
+
+Based on ntpbclient.c by jimmikaelkael <jimmikaelkael@wanadoo.fr>
+
+=back
+
+=head1 LICENSE
+
+ntpbclient is part of PS2rd, the PS2 remote debugger.
+
+PS2rd is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
