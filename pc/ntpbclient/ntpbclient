@@ -101,25 +101,38 @@ sub ntpb_recv_data {
     close(FILE) if $file;
 }
 
+sub ntpb_cmd_halt {
+    $sock = ntpb_connect $remote_host, $remote_port or die $!;
+    ntpb_send_cmd $NTPB_HALT;
+    ntpb_recv_data;
+    close $sock;
+}
+
+sub ntpb_cmd_resume {
+    $sock = ntpb_connect $remote_host, $remote_port or die $!;
+    ntpb_send_cmd $NTPB_RESUME;
+    ntpb_recv_data;
+    close $sock;
+}
+
+sub ntpb_cmd_dump {
+    my ($start, $end, $file) = @_;
+    $sock = ntpb_connect $remote_host, $remote_port or die $!;
+    ntpb_send_cmd $NTPB_DUMP, pack("L2", $start, $end);
+    ntpb_recv_data $file;
+    close $sock;
+}
+
 my $cmd = shift || die $usage;
 
 if ($cmd eq "halt") {
-    $sock = ntpb_connect($remote_host, $remote_port) or die $!;
-    ntpb_send_cmd($NTPB_HALT);
-    ntpb_recv_data();
-    close($sock);
+    ntpb_cmd_halt
 } elsif ($cmd eq "resume") {
-    $sock = ntpb_connect($remote_host, $remote_port) or die $!;
-    ntpb_send_cmd($NTPB_RESUME);
-    ntpb_recv_data();
-    close($sock);
+    ntpb_cmd_resume
 } elsif ($cmd eq "dump") {
     die $usage unless @ARGV == 3;
     my ($start, $end, $file) = @ARGV;
-    $sock = ntpb_connect($remote_host, $remote_port) or die $!;
-    ntpb_send_cmd($NTPB_DUMP, pack("L2", hex $start, hex $end));
-    ntpb_recv_data($file);
-    close($sock);
+    ntpb_cmd_dump hex $start, hex $end, $file
 } else {
     die $usage;
 }
