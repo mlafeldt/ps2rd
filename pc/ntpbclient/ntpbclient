@@ -49,8 +49,6 @@ my ($NTPB_DUMP, $NTPB_HALT, $NTPB_RESUME) = (0x0100, 0x0201, 0x0202);
 my ($NTPB_SEND_DUMP, $NTPB_EOT, $NTPB_ACK) = (0x0300, 0xffff, 0x0001);
 my $BUFSIZE = 65536;
 
-my $sock;
-
 sub ntpb_connect {
     IO::Socket::INET->new(
         PeerAddr => $remote_host,
@@ -61,14 +59,14 @@ sub ntpb_connect {
 }
 
 sub ntpb_send_cmd {
-    my $cmd = shift;
-    my $buf = shift || "";
+    my ($sock, $cmd, $buf) = @_;
+    $buf ||= "";
     $sock->send($NTPB_MAGIC . pack("S2", length $buf, $cmd) . $buf) or return undef;
     $sock->recv($buf, $BUFSIZE) // return undef;
 }
 
 sub ntpb_recv_data {
-    my $file = shift;
+    my ($sock, $file) = @_;
     my $eot = 0;
 
     if ($file) {
@@ -102,24 +100,24 @@ sub ntpb_recv_data {
 }
 
 sub ntpb_cmd_halt {
-    $sock = ntpb_connect $remote_host, $remote_port or die $!;
-    ntpb_send_cmd $NTPB_HALT;
-    ntpb_recv_data;
+    my $sock = ntpb_connect $remote_host, $remote_port or die $!;
+    ntpb_send_cmd $sock, $NTPB_HALT;
+    ntpb_recv_data $sock;
     close $sock;
 }
 
 sub ntpb_cmd_resume {
-    $sock = ntpb_connect $remote_host, $remote_port or die $!;
-    ntpb_send_cmd $NTPB_RESUME;
-    ntpb_recv_data;
+    my $sock = ntpb_connect $remote_host, $remote_port or die $!;
+    ntpb_send_cmd $sock, $NTPB_RESUME;
+    ntpb_recv_data $sock;
     close $sock;
 }
 
 sub ntpb_cmd_dump {
     my ($start, $end, $file) = @_;
-    $sock = ntpb_connect $remote_host, $remote_port or die $!;
-    ntpb_send_cmd $NTPB_DUMP, pack("L2", $start, $end);
-    ntpb_recv_data $file;
+    my $sock = ntpb_connect $remote_host, $remote_port or die $!;
+    ntpb_send_cmd $sock, $NTPB_DUMP, pack("L2", $start, $end);
+    ntpb_recv_data $sock, $file;
     close $sock;
 }
 
