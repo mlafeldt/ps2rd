@@ -2,7 +2,7 @@
 # This is the root makefile of PS2rd.
 #
 
-VERSION = ps2rd-$(shell head -n1 CHANGES | cut -f1 -d " ")
+VERSION = ps2rd-$(shell git describe --tags 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
 
 # Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
 # messages will be printed to "host:" when using ps2link.
