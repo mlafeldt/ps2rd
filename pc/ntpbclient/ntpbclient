@@ -43,11 +43,17 @@ HERE
 my $remote_host = $ENV{PS2_IP} || "192.168.0.10";
 my $remote_port = 4234;
 
-my $NTPB_MAGIC = "\xff\x00NTPB";
-my $NTPB_HDR_SIZE = length($NTPB_MAGIC) + 2 + 2;
-my ($NTPB_DUMP, $NTPB_HALT, $NTPB_RESUME) = (0x0100, 0x0201, 0x0202);
-my ($NTPB_SEND_DUMP, $NTPB_EOT, $NTPB_ACK) = (0x0300, 0xffff, 0x0001);
-my $BUFSIZE = 65536;
+use constant {
+    NTPB_MAGIC => "\xff\x00NTPB",
+    NTPB_HDR_SIZE => 6 + 2 + 2,
+    NTPB_DUMP => 0x0100,
+    NTPB_HALT => 0x0201,
+    NTPB_RESUME => 0x0202,
+    NTPB_SEND_DUMP => 0x0300,
+    NTPB_EOT => 0xffff,
+    NTPB_ACK => 0x0001,
+    BUFSIZE => 65536
+};
 
 sub ntpb_connect {
     IO::Socket::INET->new(
@@ -61,8 +67,8 @@ sub ntpb_connect {
 sub ntpb_send_cmd {
     my ($sock, $cmd, $buf) = @_;
     $buf ||= "";
-    $sock->send($NTPB_MAGIC . pack("S2", length $buf, $cmd) . $buf) or return undef;
-    $sock->recv($buf, $BUFSIZE) // return undef;
+    $sock->send(NTPB_MAGIC . pack("S2", length $buf, $cmd) . $buf) or return undef;
+    $sock->recv($buf, BUFSIZE) // return undef;
 }
 
 sub ntpb_recv_data {
@@ -76,24 +82,24 @@ sub ntpb_recv_data {
 
     do {
         my $buf;
-        $sock->recv($buf, $BUFSIZE) // return undef;
+        $sock->recv($buf, BUFSIZE) // return undef;
         my ($magic, $bytes, $cmd) = unpack("a6 S S", $buf);
-        my $size = $bytes + $NTPB_HDR_SIZE;
+        my $size = $bytes + NTPB_HDR_SIZE;
 
         while (length($buf) < $size) {
-            $sock->recv($_, $BUFSIZE - length($buf)) // return undef;
+            $sock->recv($_, BUFSIZE - length($buf)) // return undef;
             $buf .= $_;
         }
 
-        if ($cmd == $NTPB_SEND_DUMP) {
-            $buf = substr($buf, $NTPB_HDR_SIZE);
+        if ($cmd == NTPB_SEND_DUMP) {
+            $buf = substr($buf, NTPB_HDR_SIZE);
             print FILE $buf if $file;
-        } elsif ($cmd == $NTPB_EOT) {
+        } elsif ($cmd == NTPB_EOT) {
             $eot = 1;
         }
 
-        $sock->send($NTPB_MAGIC . pack("S3", length $NTPB_ACK,
-                    $NTPB_EOT, $NTPB_ACK)) or return undef;
+        $sock->send(NTPB_MAGIC . pack("S3", length NTPB_ACK,
+                    NTPB_EOT, NTPB_ACK)) or return undef;
     } while (!$eot);
 
     close(FILE) if $file;
@@ -101,14 +107,14 @@ sub ntpb_recv_data {
 
 sub ntpb_cmd_halt {
     my $sock = ntpb_connect $remote_host, $remote_port or die $!;
-    ntpb_send_cmd $sock, $NTPB_HALT;
+    ntpb_send_cmd $sock, NTPB_HALT;
     ntpb_recv_data $sock;
     close $sock;
 }
 
 sub ntpb_cmd_resume {
     my $sock = ntpb_connect $remote_host, $remote_port or die $!;
-    ntpb_send_cmd $sock, $NTPB_RESUME;
+    ntpb_send_cmd $sock, NTPB_RESUME;
     ntpb_recv_data $sock;
     close $sock;
 }
@@ -116,7 +122,7 @@ sub ntpb_cmd_resume {
 sub ntpb_cmd_dump {
     my ($start, $end, $file) = @_;
     my $sock = ntpb_connect $remote_host, $remote_port or die $!;
-    ntpb_send_cmd $sock, $NTPB_DUMP, pack("L2", $start, $end);
+    ntpb_send_cmd $sock, NTPB_DUMP, pack("L2", $start, $end);
     ntpb_recv_data $sock, $file;
     close $sock;
 }
