@@ -122,15 +122,12 @@ sub ntpb_cmd_dump {
 }
 
 my $cmd = shift || die $usage;
-
-if ($cmd eq "halt") {
-    ntpb_cmd_halt
-} elsif ($cmd eq "resume") {
-    ntpb_cmd_resume
-} elsif ($cmd eq "dump") {
-    die $usage unless @ARGV == 3;
-    my ($start, $end, $file) = @ARGV;
-    ntpb_cmd_dump hex $start, hex $end, $file
-} else {
-    die $usage;
+given ($cmd) {
+    when (/halt/i) { ntpb_cmd_halt }
+    when (/resume/i) { ntpb_cmd_resume }
+    when (/dump/i) {
+        die $usage unless @ARGV == 3;
+        my ($start, $end, $file) = @ARGV;
+        ntpb_cmd_dump hex $start, hex $end, $file }
+    default { die $usage }
 }
