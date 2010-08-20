@@ -5,4 +5,5 @@
 *.irx
 *.o
 *.swp
+ee/loader/version.h
 release/

@@ -37,12 +37,10 @@
 #include "mycdvd.h"
 #include "mypad.h"
 #include "myutil.h"
+#include "version.h"
 
-#define APP_NAME	"PS2rd"
-#define APP_VERSION	"0.5.4"
-#define APP_BUILD_DATE	__DATE__" "__TIME__
-
-#define WELCOME_STRING	"Welcome to "APP_NAME" "APP_VERSION"\n"
+#define WELCOME_STRING	"Welcome to PS2rd "PS2RD_VERSION"\n"
+#define BUILD_DATE	__DATE__" "__TIME__
 
 #define OPTIONS \
 	"Options:\n" \
@@ -199,7 +197,7 @@ int main(int argc, char *argv[])
 	scr_clear();
 
 	A_PRINTF(WELCOME_STRING);
-	D_PRINTF("Build date: "APP_BUILD_DATE"\n");
+	D_PRINTF("Build date: "BUILD_DATE"\n");
 	A_PRINTF("Booting from: %s\n", _bootpath);
 	A_PRINTF("Initializing...\n");
 

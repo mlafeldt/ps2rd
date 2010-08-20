@@ -2,7 +2,8 @@
 # This is the root makefile of PS2rd.
 #
 
-VERSION = ps2rd-$(shell git describe --tags 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
+VERSION = $(shell git describe --tags 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
+PACKAGE = ps2rd-$(VERSION)
 
 # Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
 # messages will be printed to "host:" when using ps2link.
@@ -28,7 +29,10 @@ subdir_clean = $(SUBDIRS:%=clean-%)
 
 all: check $(subdir_list)
 
-all-ee: copy-irx
+gen-version:
+	echo "#define PS2RD_VERSION \"$(VERSION)\"" > ee/loader/version.h
+
+all-ee: copy-irx gen-version
 
 copy-irx: all-iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
@@ -58,24 +62,24 @@ run: all
 	$(MAKE) -C ee/loader run
 
 release: all
-	echo "* Building $(VERSION) release packages ..."
+	echo "* Building $(PACKAGE) release packages ..."
 	rm -rf release
-	mkdir -p release/$(VERSION)/pc release/$(VERSION)/ps2
+	mkdir -p release/$(PACKAGE)/pc release/$(PACKAGE)/ps2
 	@if [ -x $(PS2DEV)/bin/ps2-packer ]; then \
-		ps2-packer -v ee/loader/ps2rd.elf release/$(VERSION)/ps2/ps2rd.elf; \
-		chmod +x release/$(VERSION)/ps2/ps2rd.elf; \
+		ps2-packer -v ee/loader/ps2rd.elf release/$(PACKAGE)/ps2/ps2rd.elf; \
+		chmod +x release/$(PACKAGE)/ps2/ps2rd.elf; \
 	else \
-		cp ee/loader/ps2rd.elf release/$(VERSION)/ps2/ps2rd.elf; \
+		cp ee/loader/ps2rd.elf release/$(PACKAGE)/ps2/ps2rd.elf; \
 	fi
-	cp ee/loader/ps2rd.conf release/$(VERSION)/ps2/
-	cp ee/loader/cheats.txt release/$(VERSION)/ps2/
-	cp pc/ntpbclient/ntpbclient release/$(VERSION)/pc/
-	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(VERSION)/
-	cp -r doc/ release/$(VERSION)/
+	cp ee/loader/ps2rd.conf release/$(PACKAGE)/ps2/
+	cp ee/loader/cheats.txt release/$(PACKAGE)/ps2/
+	cp pc/ntpbclient/ntpbclient release/$(PACKAGE)/pc/
+	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(PACKAGE)/
+	cp -r doc/ release/$(PACKAGE)/
 	cd release && \
-		tar -cjf $(VERSION).tar.bz2 $(VERSION)/; \
-		zip -qr $(VERSION).zip $(VERSION)/; \
-		sha1sum $(VERSION).* > $(VERSION).sha1
+		tar -cjf $(PACKAGE).tar.bz2 $(PACKAGE)/; \
+		zip -qr $(PACKAGE).zip $(PACKAGE)/; \
+		sha1sum $(PACKAGE).* > $(PACKAGE).sha1
 
 check:
 	@if [ -z $(PS2SDK) ]; then \
