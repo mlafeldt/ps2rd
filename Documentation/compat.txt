@@ -9,7 +9,7 @@ can dump memory at pretty much any point. There're also games that are only
 partially compatible (status "Incomplete") or don't work at all ("Nothing").
 
 PS2rd changes the background color to keep you informed about certain events
-and errors - see doc/colors.html for an overview. Please always name this color
+and errors - see colors.html for an overview. Please always name this color
 when reporting a non-working game.
 
 Here're some specific steps to test compatibility. You can mainly influence

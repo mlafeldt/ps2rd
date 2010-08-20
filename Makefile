@@ -75,7 +75,7 @@ release: all
 	cp ee/loader/cheats.txt release/$(PACKAGE)/ps2/
 	cp pc/ntpbclient/ntpbclient release/$(PACKAGE)/pc/
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(PACKAGE)/
-	cp -r doc/ release/$(PACKAGE)/
+	cp -r Documentation/ release/$(PACKAGE)/
 	cd release && \
 		tar -cjf $(PACKAGE).tar.bz2 $(PACKAGE)/; \
 		zip -qr $(PACKAGE).zip $(PACKAGE)/; \

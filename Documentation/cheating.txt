@@ -7,11 +7,11 @@ automatically or manually activate them for a game.
 The configuration file holds a setting named "loader.cheats" which specifies the
 (absolute or relative) path to the cheats file to use, e.g. "mass:cheats.txt".
 
-The cheats file must follow the format described in doc/cheats_format.txt. This
+The cheats file must follow the format described in cheats_format.txt. This
 document also explains the concept of game IDs, and how to use them to auto-
 matically activate cheats for a certain game.
 
-Last but not least, take a look at doc/code_types.txt for a complete list of
+Last but not least, take a look at code_types.txt for a complete list of
 available code types. Note that PS2rd only supports _raw_ codes.
 
 Happy cheating!
