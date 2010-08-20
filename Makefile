@@ -2,7 +2,7 @@
 # This is the root makefile of PS2rd.
 #
 
-VERSION = $(shell git describe --tags 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
+VERSION = $(shell git describe --tags --dirty 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
 PACKAGE = ps2rd-$(VERSION)
 
 # Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
