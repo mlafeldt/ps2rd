@@ -51,7 +51,7 @@ extern u32 j_SetupThread;
 /*
  * _init - Automatically invoked on ERL load.
  */
-int _init(void)
+int __attribute__((section(".init"))) _init(void)
 {
 	/* Hook syscall */
 #ifdef _HOOK_9
@@ -65,7 +65,7 @@ int _init(void)
 /*
  * _fini - Automatically invoked on ERL unload.
  */
-int _fini(void)
+int __attribute__((section(".fini"))) _fini(void)
 {
 	/* Unhook syscall */
 #ifdef _HOOK_9

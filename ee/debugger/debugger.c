@@ -772,7 +772,7 @@ static int execRemoteCmd(void)
 /*
  * _init - Automatically invoked on ERL load.
  */
-int _init(void)
+int __attribute__((section(".init"))) _init(void)
 {
 	/* Set default debugger options */
 	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
@@ -802,7 +802,7 @@ int _init(void)
 /*
  * _fini - Automatically invoked on ERL unload.
  */
-int _fini(void)
+int __attribute__((section(".fini"))) _fini(void)
 {
 	/* Unhook syscalls */
 	SetSyscall(__NR_SifSetDma, OldSifSetDma);
