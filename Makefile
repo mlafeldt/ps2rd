@@ -50,6 +50,7 @@ copy-irx: all-iop
 
 clean: $(subdir_clean)
 	rm -f ee/loader/*_irx.o
+	rm -f ee/loader/version.h
 	rm -rf release/
 
 $(subdir_list):
