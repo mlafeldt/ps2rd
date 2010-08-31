@@ -1,21 +1,53 @@
-ntpbclient is a PC client to issue commands to the PS2 server program.
+NAME
+    ntpbclient - issue commands to PS2rd
 
-You need a working Perl distribution to run it (e.g. ActivePerl on Windows).
+SYNOPSIS
+    ntpbclient [options] <command> [args]
 
-By default, ntpbclient connects to 192.168.0.10. You can change the IP by
-setting the variable "PS2_IP" in your environment.
+DESCRIPTION
+    ntpbclient is a client application to talk to the server side of PS2rd.
 
-Usage:
+OPTIONS
+    -h, --help
+        Show help text.
 
-ntpbclient: <command> [args]
-Supported commands:
-    halt                      halt game execution
-    resume                    resume game execution
-    dump <start> <end> <file> dump memory to file
+    --man
+        Show man page.
 
-Examples:
+  COMMANDS
+    halt
+        Halt game execution.
 
-$ perl ntpbclient halt
-$ perl ntpbclient resume
-$ perl ntpbclient dump bfc00000 c0000000 bios.bin
-$ perl ntpbclient dump 00100000 02000000 user.bin
+    resume
+        Resume game execution.
+
+    dump <start> <end> <file>
+        Dump memory from address <start> to address <end> to <file>.
+
+ENVIRONMENT
+    PS2_IP
+        By default, ntpbclient connects to the IP 192.168.0.10. You can
+        change the address by setting the PS2_IP environment variable.
+
+EXAMPLES
+    *   ntpbclient halt
+
+    *   ntpbclient resume
+
+    *   ntpbclient dump bfc00000 c0000000 bios.bin
+
+    *   ntpbclient dump 00100000 02000000 user.bin
+
+AUTHORS
+    *   Written by Mathias Lafeldt <misfire@debugon.org>
+
+    *   Based on ntpbclient.c by jimmikaelkael <jimmikaelkael@wanadoo.fr>
+
+LICENSE
+    ntpbclient is part of PS2rd, the PS2 remote debugger.
+
+    PS2rd is free software: you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your
+    option) any later version.
+
