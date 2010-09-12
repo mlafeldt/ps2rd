@@ -214,15 +214,16 @@ int install_erls(const config_t *config, engine_t *engine)
 			return -1;
 
 		/* populate engine context */
-		GET_SYMBOL(engine->info, "engine_info");
-		GET_SYMBOL(engine->maxhooks, "maxhooks");
-		GET_SYMBOL(engine->numhooks, "numhooks");
-		GET_SYMBOL(engine->hooklist, "hooklist");
-		GET_SYMBOL(engine->maxcodes, "maxcodes");
-		GET_SYMBOL(engine->numcodes, "numcodes");
-		GET_SYMBOL(engine->codelist, "codelist");
-		GET_SYMBOL(engine->maxcallbacks, "maxcallbacks");
-		GET_SYMBOL(engine->callbacks, "callbacks");
+		GET_SYMBOL(engine->get_max_hooks, "get_max_hooks");
+		GET_SYMBOL(engine->get_num_hooks, "get_num_hooks");
+		GET_SYMBOL(engine->add_hook, "add_hook");
+		GET_SYMBOL(engine->clear_hooks, "clear_hooks");
+		GET_SYMBOL(engine->get_max_codes, "get_max_codes");
+		GET_SYMBOL(engine->set_max_codes, "set_max_codes");
+		GET_SYMBOL(engine->get_num_codes, "get_num_codes");
+		GET_SYMBOL(engine->add_code, "add_code");
+		GET_SYMBOL(engine->clear_codes, "clear_codes");
+		GET_SYMBOL(engine->register_callback, "register_callback");
 	}
 
 	/*
@@ -277,7 +278,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		if (config_get_bool(config, SET_ENGINE_INSTALL)) {
 			int (*debugger_loop)(void) = NULL;
 			GET_SYMBOL(debugger_loop, "debugger_loop");
-			engine->callbacks[0] = (u32)debugger_loop;
+			engine->register_callback(debugger_loop);
 		}
 
 		/* set debugger options */
