@@ -67,7 +67,7 @@ enum {
 	ERL_FILE_NUM /* number of files */
 };
 
-/* Statically linked ERL files */
+/* statically linked ERL files */
 extern u8  _engine_erl_start[];
 extern u8  _libkernel_erl_start[];
 #if 0
@@ -80,37 +80,37 @@ extern u8  _elfldr_erl_start[];
 extern u8  _videomod_erl_start[];
 
 static erl_file_t _erl_files[ERL_FILE_NUM] = {
-	{
+	[ERL_FILE_ENGINE] = {
 		.name = "engine.erl",
 		.start = _engine_erl_start,
 	},
-	{
+	[ERL_FILE_LIBKERNEL] = {
 		.name = "libkernel.erl",
 		.start = _libkernel_erl_start,
 	},
 #if 0
-	{
+	[ERL_FILE_LIBC] = {
 		.name = "libc.erl",
 		.start = _libc_erl_start,
 	},
-	{
+	[ERL_FILE_LIBDEBUG] = {
 		.name = "libdebug.erl",
 		.start = _libdebug_erl_start,
 	},
 #endif
-	{
+	[ERL_FILE_LIBPATCHES] = {
 		.name = "libpatches.erl",
 		.start = _libpatches_erl_start,
 	},
-	{
+	[ERL_FILE_DEBUGGER] = {
 		.name = "debugger.erl",
 		.start = _debugger_erl_start,
 	},
-	{
+	[ERL_FILE_ELFLDR] = {
 		.name = "elfldr.erl",
 		.start = _elfldr_erl_start,
 	},
-	{
+	[ERL_FILE_VIDEOMOD] = {
 		.name = "videomod.erl",
 		.start = _videomod_erl_start,
 	}
