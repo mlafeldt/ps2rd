@@ -230,27 +230,27 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install videomod
 	 */
 	if (config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
+		void (*set_vmode)(int m) = NULL;
 		addr = config_get_int(config, SET_VIDEOMOD_ADDR);
 		file = &_erl_files[ERL_FILE_VIDEOMOD];
 
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
-		int *vmode;
-		GET_SYMBOL(vmode, "vmode");
-		*vmode = config_get_int(config, SET_VIDEOMOD_VMODE);
+		GET_SYMBOL(set_vmode, "set_vmode");
+		set_vmode(config_get_int(config, SET_VIDEOMOD_VMODE));
 
 		if (config_get_bool(config, SET_VIDEOMOD_YFIX)) {
-			int *ydiff;
+			void (*set_ydiff)(int lo, int hi) = NULL;
 			void (*YPosHandler)(void) = NULL;
 
-			GET_SYMBOL(ydiff, "ydiff_lores");
-			*ydiff = config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
-			GET_SYMBOL(ydiff, "ydiff_hires");
-			*ydiff = config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
+			GET_SYMBOL(set_ydiff, "set_ydiff");
+			GET_SYMBOL(YPosHandler, "YPosHandler");
+
+			set_ydiff(config_get_int(config, SET_VIDEOMOD_YDIFF_LORES),
+				config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES));
 
 			/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
-			GET_SYMBOL(YPosHandler, "YPosHandler");
 			install_debug_handler(YPosHandler);
 			InitBPC();
 			SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
