@@ -189,7 +189,7 @@ int load_modules(const config_t *config)
 	while (modv[i] != NULL) {
 		ret = SifLoadModule(modv[i], 0, NULL);
 		if (ret < 0) {
-			D_PRINTF("%s: failed to load module: %s (%i)\n",
+			fprintf(stderr, "%s: failed to load module: %s (%i)\n",
 				__FUNCTION__, modv[i], ret);
 			return -1;
 		}
@@ -199,13 +199,13 @@ int load_modules(const config_t *config)
 	if (config_get_bool(config, SET_USB_SUPPORT)) {
 		SifExecModuleBuffer(_usbd_irx_start, _usbd_irx_size, 0, NULL, &ret);
 		if (ret < 0) {
-			D_PRINTF("%s: failed to load module usbd.irx (%i)\n",
+			fprintf(stderr, "%s: failed to load module usbd.irx (%i)\n",
 				__FUNCTION__, ret);
 		}
 
 		SifExecModuleBuffer(_usb_mass_irx_start, _usb_mass_irx_size, 0, NULL, &ret);
 		if (ret < 0) {
-			D_PRINTF("%s: failed to load module usb_mass.irx (%i)\n",
+			fprintf(stderr, "%s: failed to load module usb_mass.irx (%i)\n",
 				__FUNCTION__, ret);
 		}
 	}

@@ -122,7 +122,7 @@ static int __install_erl(erl_file_t *file, u32 addr)
 
 	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
 	if (file->erl == NULL) {
-		D_PRINTF("%s: %s load error\n", __FUNCTION__, file->name);
+		fprintf(stderr, "%s: %s load error\n", __FUNCTION__, file->name);
 		return -1;
 	}
 
@@ -142,7 +142,7 @@ static int __uninstall_erl(erl_file_t *file)
 		(u32)file->erl->bytes);
 
 	if (!unload_erl(file->erl)) {
-		D_PRINTF("%s: %s unload error\n", __FUNCTION__, file->name);
+		fprintf(stderr, "%s: %s unload error\n", __FUNCTION__, file->name);
 		return -1;
 	}
 
@@ -169,7 +169,7 @@ int install_erls(const config_t *config, engine_t *engine)
 #define GET_SYMBOL(var, name) \
 	sym = erl_find_local_symbol(name, file->erl); \
 	if (sym == NULL) { \
-		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, name); \
+		fprintf(stderr, "%s: could not find symbol '%s'\n", __FUNCTION__, name); \
 		return -1; \
 	} \
 	D_PRINTF("%08x %s\n", (u32)sym->address, name); \
@@ -267,7 +267,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
 		if (!config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
+			fprintf(stderr, "%s: dependency error: %s needs SDK libs\n",
 				__FUNCTION__, file->name);
 			return -1;
 		}
@@ -307,7 +307,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		file = &_erl_files[ERL_FILE_ELFLDR];
 
 		if (!config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
+			fprintf(stderr, "%s: dependency error: %s needs SDK libs\n",
 				__FUNCTION__, file->name);
 			return -1;
 		}
