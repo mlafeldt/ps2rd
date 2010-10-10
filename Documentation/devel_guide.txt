@@ -1,5 +1,0 @@
-Developer Guidelines
-
-All development of PS2rd takes place at http://github.com/misfire/ps2rd.
-The Git repository is maintained by Mathias Lafeldt <misfire@debugon.org>.
-If you have anything to contribute, don't hesitate to contact him.
