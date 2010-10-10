@@ -172,6 +172,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, name); \
 		return -1; \
 	} \
+	D_PRINTF("%08x %s\n", (u32)sym->address, name); \
 	var = (typeof(var))sym->address
 
 	/*
