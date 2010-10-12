@@ -4,6 +4,7 @@
 *.exe
 *.irx
 *.o
+*.res
 *.swp
 /PS2RD-VERSION-FILE
 /config.mak
