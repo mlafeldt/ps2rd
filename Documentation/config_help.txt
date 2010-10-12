@@ -159,8 +159,8 @@ Section "videomod"
 * vmode [integer, 2 for NTSC by default]
 
   Force the video mode to NTSC (2) or PAL (3). For a complete list of modes,
-  take a look at the SetGsCrt() syscall in ee-syscalls.txt. More detailed
-  information can be found in ps2videomodes.txt.
+  take a look at the SetGsCrt() syscall in technical/ee-syscalls.txt. More
+  detailed information can be found in technical/ps2videomodes.txt.
 
 * yfix [bool, true by default]
 
