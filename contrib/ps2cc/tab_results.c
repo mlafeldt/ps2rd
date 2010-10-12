@@ -28,7 +28,7 @@ BOOL CALLBACK SearchResultsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
             SendMessage(hwndResList,LVM_DELETEALLITEMS,0,0);
             SendMessage(hwndResList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_LABELTIP);
 //            SendMessage(hwndResList, WM_SETFONT, (WPARAM)Settings.ValueHFont, TRUE);
-            ListViewAddCol(hwndResList, "Address", 0, 0x80);            //subclassing
+            ListViewAddCol(hwndResList, "Address", 0, 0x80);            //subclassing
 			SetSubclassProc((WNDPROC)GetWindowLongPtr (hwndActiveResAddr, GWLP_WNDPROC), ACTIVE_RES_ADDR_TXT);
 			SetSubclassProc((WNDPROC)GetWindowLongPtr (hwndActiveResValue, GWLP_WNDPROC), ACTIVE_RES_VALUE_TXT);
 		    SetWindowLongPtr (hwndActiveResAddr, GWLP_WNDPROC, (LONG_PTR)ValueEditBoxHandler);
@@ -375,7 +375,7 @@ LRESULT CALLBACK ResultsListHandler (HWND hwnd, UINT message, WPARAM wParam, LPA
    if (wpOriginalProc) { return CallWindowProc (wpOriginalProc, hwnd, message, wParam, lParam); }
    else { return DefWindowProc (hwnd, message, wParam, lParam); }
 }
-
+
 /****************************************************************************
 Active List Handler
 *****************************************************************************/

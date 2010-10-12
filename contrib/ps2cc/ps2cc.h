@@ -297,7 +297,7 @@ DWORD WINAPI clientThread(LPVOID lpParam);
 int DumpRAM(char *dump_file, unsigned int dump_start, unsigned int dump_end, int NotifyId, HWND NotifyHwnd);
 int ActivateCheats(unsigned char codes[128], int numcodes);
 int DeActivateCheats();
-int SysHalt(int halt);
+int SysHalt(int halt);
 int ReadMem(unsigned char *read_buffer, unsigned int dump_start, unsigned int dump_end);
 int ClientReconnect();
 
@@ -331,9 +331,9 @@ LRESULT CALLBACK ActiveListHandler (HWND hwnd, UINT message, WPARAM wParam, LPAR
 int LoadResultsList();
 s64 ShowResPage(s64 ResNum);
 int ResFormatString(char *tmpstring, int outfmt, int numbytes);
-int Result2ActiveList(u32 address, u64 value, int size);int UpdateActiveCheats();
+int Result2ActiveList(u32 address, u64 value, int size);int UpdateActiveCheats();
 u64 GetResListValue(HWND hwndResList, int iItem, int iSubItem, int SearchSize);
-int ExportResults(int ExportType);
+int ExportResults(int ExportType);
 
 //tab_search
 BOOL CALLBACK CodeSearchProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
