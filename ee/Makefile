@@ -12,7 +12,9 @@ subdir_clean = $(SUBDIRS:%=clean-%)
 
 .PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-erl all clean
 
+ifndef VERBOSE
 .SILENT:
+endif
 
 all: $(subdir_list)
 
