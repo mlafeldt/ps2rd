@@ -6,13 +6,6 @@
 # $Id$
 ##
 
-ifeq ($(DEBUG),1)
-EE_CFLAGS += -D_DEBUG -g
-EE_LDFLAGS += -g
-else
-EE_LDFLAGS += -s
-endif
-
 EE_INCS += -I$(LIBCHEATS)/include -I$(LIBCONFIG)/include
 EE_CFLAGS += -DPS2RD_VERSION='"$(PS2RD_VERSION)"'
 EE_LDFLAGS += -L$(LIBCHEATS)/lib -L$(LIBCONFIG)/lib
@@ -22,14 +15,19 @@ EE_BIN = ps2rd.elf
 
 ERL_FILES = engine_erl.o libkernel_erl.o libpatches_erl.o \
 	debugger_erl.o elfldr_erl.o videomod_erl.o
-ifeq ($(DEBUG),1)
-ERL_FILES +=
-endif
 
 IRX_FILES = ps2dev9_irx.o ps2ip_irx.o ps2smap_irx.o \
 	debugger_irx.o memdisk_irx.o eesync_irx.o \
 	usbd_irx.o usb_mass_irx.o
-ifeq ($(SMS_MODULES),1)
+
+ifeq ($(DEBUG),1)
+EE_CFLAGS += -D_DEBUG -g
+EE_LDFLAGS += -g
+else
+EE_LDFLAGS += -s
+endif
+
+ifndef NO_SMS
 EE_CFLAGS += -D_SMS_MODULES
 IRX_FILES += ps2ip_sms_irx.o ps2smap_sms_irx.o
 endif

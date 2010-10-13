@@ -1,6 +1,6 @@
 SUBDIRS = debugger dev9 eesync memdisk usb_mass smap
 
-ifeq ($(SMS_MODULES),1)
+ifndef NO_SMS
 SUBDIRS += SMSMAP SMSTCPIP
 endif
 
