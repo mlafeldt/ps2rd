@@ -1,39 +1,33 @@
----========================---
-   PS2rd - PS2 remote debugger
----===========================---
+===================================
+    PS2rd - PS2 remote debugger
+===================================
 
-PS2rd is a collection of open source tools to debug commercial PS2 games
+PS2rd is a collection of Open Source tools to debug commercial PS2 games
 remotely over Ethernet.
 
 Features:
 
-- Dump contents of PS2 memory to PC
-- (planned) Write data to PS2 memory
-- (planned) Set breakpoints/watchpoints
-- Powerful cheat system similar to CB or AR
-- Video mode patcher
-- Compatible with Open PS2 Loader
+ - Dump contents of PS2 memory to PC
+ - (planned) Write data to PS2 memory
+ - (planned) Set breakpoints/watchpoints
+ - Powerful cheat system similar to CB or AR
+ - Video mode patcher
+ - Compatible with Open PS2 Loader
 
 Requirements:
 
-- PS2 game console with Ethernet port/adapter
-- Ability to run homebrew on PS2 (FMCB, Independence Exploit, etc.)
-- PC with Linux or Windows OS
-- Ethernet cable for PC-PS2 connection
-
-
----==========---
-   Documentation
----=============---
+ - PS2 game console with Ethernet port/adapter
+ - Ability to run homebrew on PS2 (FMCB, Independence Exploit, etc.)
+ - PC with Linux or Windows OS
+ - Ethernet cable for PC-PS2 connection
 
 Instructions on how to compile and install PS2rd can be found in the INSTALL
 file. The directory "Documentation" is generally the first place to look for
 further information.
 
 
----=======---
-   Disclaimer
----==========---
+Disclaimer
+----------
 
 PS2RD IS NOT LICENSED, ENDORSED, NOR SPONSORED BY SONY COMPUTER ENTERTAINMENT,
 INC. ALL TRADEMARKS ARE PROPERTY OF THEIR RESPECTIVE OWNERS.
@@ -49,17 +43,11 @@ Both libraries are covered by the GNU Lesser General Public License. Please see
 file COPYING.LESSER for further information.
 
 
----====---
-   Contact
----=======---
+Contact
+-------
 
 PS2rd project site:
 http://github.com/misfire/ps2rd
 
 Official PS2rd forum at PSX-Scene:
 http://psx-scene.com/forums/forumdisplay.php?f=173
-
-
----======================---
-   HACKING NEEDS TO BE FREE!
----=========================---
