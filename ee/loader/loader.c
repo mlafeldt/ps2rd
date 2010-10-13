@@ -37,7 +37,6 @@
 #include "mycdvd.h"
 #include "mypad.h"
 #include "myutil.h"
-#include "version.h"
 
 #define WELCOME_STRING	"Welcome to PS2rd "PS2RD_VERSION"\n"
 #define BUILD_DATE	__DATE__" "__TIME__

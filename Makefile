@@ -2,8 +2,16 @@
 # This is the root makefile of PS2rd.
 #
 
-VERSION = $(shell git describe --tags --dirty 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
-PACKAGE = ps2rd-$(VERSION)
+# Default make target
+all:
+
+# Generate version info
+PS2RD-VERSION-FILE: FORCE
+	@./PS2RD-VERSION-GEN
+-include PS2RD-VERSION-FILE
+export PS2RD_VERSION
+
+PACKAGE = ps2rd-$(PS2RD_VERSION)
 
 # Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
 # messages will be printed to "host:" when using ps2link.
@@ -23,7 +31,7 @@ SUBDIRS = ee iop pc
 subdir_list  = $(SUBDIRS:%=all-%)
 subdir_clean = $(SUBDIRS:%=clean-%)
 
-.PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-irx all clean
+.PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-irx all clean FORCE
 
 ifndef VERBOSE
 .SILENT:
@@ -31,10 +39,7 @@ endif
 
 all: check $(subdir_list)
 
-gen-version:
-	echo "#define PS2RD_VERSION \"$(VERSION)\"" > ee/loader/version.h
-
-all-ee: copy-irx gen-version
+all-ee: copy-irx
 
 copy-irx: all-iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
@@ -52,8 +57,8 @@ copy-irx: all-iop
 
 clean: $(subdir_clean)
 	rm -f ee/loader/*_irx.o
-	rm -f ee/loader/version.h
 	rm -rf release/
+	rm -f PS2RD-VERSION-FILE
 
 $(subdir_list):
 	$(VARS) $(MAKE) -C $(@:all-%=%)

@@ -5,5 +5,5 @@
 *.irx
 *.o
 *.swp
-ee/loader/version.h
-release/
+/PS2RD-VERSION-FILE
+/release/

@@ -14,7 +14,7 @@ EE_LDFLAGS += -s
 endif
 
 EE_INCS += -I$(LIBCHEATS)/include -I$(LIBCONFIG)/include
-EE_CFLAGS +=
+EE_CFLAGS += -DPS2RD_VERSION='"$(PS2RD_VERSION)"'
 EE_LDFLAGS += -L$(LIBCHEATS)/lib -L$(LIBCONFIG)/lib
 EE_ASFLAGS +=
 
@@ -50,7 +50,7 @@ loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
-loader.o: mycdvd.h mypad.h myutil.h dbgprintf.h version.h
+loader.o: mycdvd.h mypad.h myutil.h dbgprintf.h ../../PS2RD-VERSION-FILE
 
 pack:
 	ps2-packer $(EE_BIN) $(EE_BIN).2 -v
