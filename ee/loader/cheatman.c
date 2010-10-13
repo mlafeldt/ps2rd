@@ -136,9 +136,9 @@ void activate_cheats(const game_t *game, engine_t *engine)
 			D_PRINTF("%08X %08X\n", code->addr, code->val);
 			/* TODO improve check for hook */
 			if ((code->addr & 0xfe000000) == 0x90000000)
-				engine_add_hook(engine, code->addr, code->val);
+				engine->add_hook(code->addr, code->val);
 			else
-				engine_add_code(engine, code->addr, code->val);
+				engine->add_code(code->addr, code->val);
 		}
 	}
 }
@@ -148,6 +148,6 @@ void activate_cheats(const game_t *game, engine_t *engine)
  */
 void reset_cheats(engine_t *engine)
 {
-	engine_clear_hooks(engine);
-	engine_clear_codes(engine);
+	engine->clear_hooks();
+	engine->clear_codes();
 }

@@ -34,14 +34,40 @@ char *erl_dependancies[] = {
 };
 #endif
 
+#define KSEG0(x)	((void*)(((u32)(x)) | 0x80000000))
+#define MAKE_J(addr)	(u32)(0x08000000 | (0x03FFFFFF & ((u32)addr >> 2)))
+
 static void (*OldSetGsCrt)(s16 interlace, s16 pal_ntsc, s16 field) = NULL;
 extern void HookSetGsCrt(s16 interlace, s16 pal_ntsc, s16 field);
 extern u32 j_SetGsCrt;
 
-#define KSEG0(x)	((void*)(((u32)(x)) | 0x80000000))
-#define MAKE_J(addr)	(u32)(0x08000000 | (0x03FFFFFF & ((u32)addr >> 2)))
+extern int vmode;
+extern int ydiff_lores;
+extern int ydiff_hires;
 
-int _init(void)
+int get_vmode(void)
+{
+	return vmode;
+}
+
+void set_vmode(int m)
+{
+	vmode = m;
+}
+
+void get_ydiff(int *lo, int *hi)
+{
+	*lo = ydiff_lores;
+	*hi = ydiff_hires;
+}
+
+void set_ydiff(int lo, int hi)
+{
+	ydiff_lores = lo;
+	ydiff_hires = hi;
+}
+
+int __attribute__((section(".init"))) _init(void)
 {
 	OldSetGsCrt = GetSyscallHandler(__NR_SetGsCrt);
 	j_SetGsCrt = MAKE_J(OldSetGsCrt);
@@ -50,7 +76,7 @@ int _init(void)
 	return 0;
 }
 
-int _fini(void)
+int __attribute__((section(".fini"))) _fini(void)
 {
 	SetSyscall(__NR_SetGsCrt, OldSetGsCrt);
 

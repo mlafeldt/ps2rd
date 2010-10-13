@@ -1,0 +1,54 @@
+Like other projects, we also have some guidelines to keep to the code.
+
+As a general rule, just imitate the existing code (this is a good guideline, no
+matter which project you are contributing to). It is always preferable to match
+the _local_ convention. New code added is expected to match the overall style of
+existing code. Modifications to existing code is expected to match the style the
+surrounding code already uses (even if it doesn't match the overall style of
+existing code).
+
+In particular, for C programs:
+
+ - We use tabs to indent, and interpret tabs as taking up to
+   8 spaces.
+
+ - We try to keep to at most 80 characters per line.
+
+ - When declaring pointers, the star sides with the variable
+   name, i.e. "char *string", not "char* string" or
+   "char * string".  This makes it easier to understand code
+   like "char *string, c;".
+
+ - We avoid using braces unnecessarily.  I.e.
+
+	if (bla) {
+		x = 1;
+	}
+
+   is frowned upon.  A gray area is when the statement extends
+   over a few lines, and/or you have a lengthy comment atop of
+   it.  Also, like in the Linux kernel, if there is a long list
+   of "else if" statements, it can make sense to add braces to
+   single line blocks.
+
+ - We try to avoid assignments inside if().
+
+ - Try to make your code understandable.  You may put comments
+   in, but comments invariably tend to stale out when the code
+   they were describing changes.  Often splitting a function
+   into two makes the intention of the code much clearer.
+
+ - Double negation is often harder to understand than no negation
+   at all.
+
+ - Some clever tricks, like using the !! operator with arithmetic
+   constructs, can be extremely confusing to others.  Avoid them,
+   unless there is a compelling reason to use them.
+
+ - Use the API.  No, really.  Check existing code before reinventing
+   the wheel.
+
+ - When you come up with an API, document it.
+
+ - When we pass <string, length> pair to functions, we should try to
+   pass them in that order.

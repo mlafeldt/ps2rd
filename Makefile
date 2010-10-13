@@ -62,6 +62,9 @@ $(subdir_clean):
 run: all
 	$(MAKE) -C ee/loader run
 
+update-doc:
+	pod2text pc/ntpbclient/ntpbclient Documentation/ntpbclient.txt
+
 release: all
 	echo "* Building $(PACKAGE) release packages ..."
 	rm -rf release

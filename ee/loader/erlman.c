@@ -67,7 +67,7 @@ enum {
 	ERL_FILE_NUM /* number of files */
 };
 
-/* Statically linked ERL files */
+/* statically linked ERL files */
 extern u8  _engine_erl_start[];
 extern u8  _libkernel_erl_start[];
 #if 0
@@ -80,37 +80,37 @@ extern u8  _elfldr_erl_start[];
 extern u8  _videomod_erl_start[];
 
 static erl_file_t _erl_files[ERL_FILE_NUM] = {
-	{
+	[ERL_FILE_ENGINE] = {
 		.name = "engine.erl",
 		.start = _engine_erl_start,
 	},
-	{
+	[ERL_FILE_LIBKERNEL] = {
 		.name = "libkernel.erl",
 		.start = _libkernel_erl_start,
 	},
 #if 0
-	{
+	[ERL_FILE_LIBC] = {
 		.name = "libc.erl",
 		.start = _libc_erl_start,
 	},
-	{
+	[ERL_FILE_LIBDEBUG] = {
 		.name = "libdebug.erl",
 		.start = _libdebug_erl_start,
 	},
 #endif
-	{
+	[ERL_FILE_LIBPATCHES] = {
 		.name = "libpatches.erl",
 		.start = _libpatches_erl_start,
 	},
-	{
+	[ERL_FILE_DEBUGGER] = {
 		.name = "debugger.erl",
 		.start = _debugger_erl_start,
 	},
-	{
+	[ERL_FILE_ELFLDR] = {
 		.name = "elfldr.erl",
 		.start = _elfldr_erl_start,
 	},
-	{
+	[ERL_FILE_VIDEOMOD] = {
 		.name = "videomod.erl",
 		.start = _videomod_erl_start,
 	}
@@ -122,7 +122,7 @@ static int __install_erl(erl_file_t *file, u32 addr)
 
 	file->erl = load_erl_from_mem_to_addr(file->start, addr, 0, NULL);
 	if (file->erl == NULL) {
-		D_PRINTF("%s: %s load error\n", __FUNCTION__, file->name);
+		fprintf(stderr, "%s: %s load error\n", __FUNCTION__, file->name);
 		return -1;
 	}
 
@@ -142,7 +142,7 @@ static int __uninstall_erl(erl_file_t *file)
 		(u32)file->erl->bytes);
 
 	if (!unload_erl(file->erl)) {
-		D_PRINTF("%s: %s unload error\n", __FUNCTION__, file->name);
+		fprintf(stderr, "%s: %s unload error\n", __FUNCTION__, file->name);
 		return -1;
 	}
 
@@ -169,9 +169,10 @@ int install_erls(const config_t *config, engine_t *engine)
 #define GET_SYMBOL(var, name) \
 	sym = erl_find_local_symbol(name, file->erl); \
 	if (sym == NULL) { \
-		D_PRINTF("%s: could not find symbol '%s'\n", __FUNCTION__, name); \
+		fprintf(stderr, "%s: could not find symbol '%s'\n", __FUNCTION__, name); \
 		return -1; \
 	} \
+	D_PRINTF("%08x %s\n", (u32)sym->address, name); \
 	var = (typeof(var))sym->address
 
 	/*
@@ -214,42 +215,43 @@ int install_erls(const config_t *config, engine_t *engine)
 			return -1;
 
 		/* populate engine context */
-		GET_SYMBOL(engine->info, "engine_info");
-		GET_SYMBOL(engine->maxhooks, "maxhooks");
-		GET_SYMBOL(engine->numhooks, "numhooks");
-		GET_SYMBOL(engine->hooklist, "hooklist");
-		GET_SYMBOL(engine->maxcodes, "maxcodes");
-		GET_SYMBOL(engine->numcodes, "numcodes");
-		GET_SYMBOL(engine->codelist, "codelist");
-		GET_SYMBOL(engine->maxcallbacks, "maxcallbacks");
-		GET_SYMBOL(engine->callbacks, "callbacks");
+		GET_SYMBOL(engine->get_max_hooks, "get_max_hooks");
+		GET_SYMBOL(engine->get_num_hooks, "get_num_hooks");
+		GET_SYMBOL(engine->add_hook, "add_hook");
+		GET_SYMBOL(engine->clear_hooks, "clear_hooks");
+		GET_SYMBOL(engine->get_max_codes, "get_max_codes");
+		GET_SYMBOL(engine->set_max_codes, "set_max_codes");
+		GET_SYMBOL(engine->get_num_codes, "get_num_codes");
+		GET_SYMBOL(engine->add_code, "add_code");
+		GET_SYMBOL(engine->clear_codes, "clear_codes");
+		GET_SYMBOL(engine->register_callback, "register_callback");
 	}
 
 	/*
 	 * install videomod
 	 */
 	if (config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
+		void (*set_vmode)(int m) = NULL;
 		addr = config_get_int(config, SET_VIDEOMOD_ADDR);
 		file = &_erl_files[ERL_FILE_VIDEOMOD];
 
 		if (__install_erl(file, addr) < 0)
 			return -1;
 
-		int *vmode;
-		GET_SYMBOL(vmode, "vmode");
-		*vmode = config_get_int(config, SET_VIDEOMOD_VMODE);
+		GET_SYMBOL(set_vmode, "set_vmode");
+		set_vmode(config_get_int(config, SET_VIDEOMOD_VMODE));
 
 		if (config_get_bool(config, SET_VIDEOMOD_YFIX)) {
-			int *ydiff;
+			void (*set_ydiff)(int lo, int hi) = NULL;
 			void (*YPosHandler)(void) = NULL;
 
-			GET_SYMBOL(ydiff, "ydiff_lores");
-			*ydiff = config_get_int(config, SET_VIDEOMOD_YDIFF_LORES);
-			GET_SYMBOL(ydiff, "ydiff_hires");
-			*ydiff = config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES);
+			GET_SYMBOL(set_ydiff, "set_ydiff");
+			GET_SYMBOL(YPosHandler, "YPosHandler");
+
+			set_ydiff(config_get_int(config, SET_VIDEOMOD_YDIFF_LORES),
+				config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES));
 
 			/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
-			GET_SYMBOL(YPosHandler, "YPosHandler");
 			install_debug_handler(YPosHandler);
 			InitBPC();
 			SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
@@ -265,7 +267,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
 		if (!config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
+			fprintf(stderr, "%s: dependency error: %s needs SDK libs\n",
 				__FUNCTION__, file->name);
 			return -1;
 		}
@@ -277,7 +279,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		if (config_get_bool(config, SET_ENGINE_INSTALL)) {
 			int (*debugger_loop)(void) = NULL;
 			GET_SYMBOL(debugger_loop, "debugger_loop");
-			engine->callbacks[0] = (u32)debugger_loop;
+			engine->register_callback(debugger_loop);
 		}
 
 		/* set debugger options */
@@ -305,7 +307,7 @@ int install_erls(const config_t *config, engine_t *engine)
 		file = &_erl_files[ERL_FILE_ELFLDR];
 
 		if (!config_get_bool(config, SET_SDKLIBS_INSTALL)) {
-			D_PRINTF("%s: dependency error: %s needs SDK libs\n",
+			fprintf(stderr, "%s: dependency error: %s needs SDK libs\n",
 				__FUNCTION__, file->name);
 			return -1;
 		}

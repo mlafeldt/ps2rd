@@ -27,14 +27,6 @@
 
 extern void CodeHandler();
 
-#ifdef _HOOK_9
-extern void *HookSetupThread(void *gp, void *stack, s32 stack_size, void *args,
-	void *root_func);
-extern u32 maxhooks;
-extern u32 numhooks;
-extern u32 *hooklist;
-#endif
-
 extern u32 maxcodes;
 extern u32 numcodes;
 extern u32 codelist[];
