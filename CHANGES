@@ -1,107 +1,186 @@
-0.5.4-wip (2010)
+v0.5.4 (draft)
+--------------
 
-0.5.3 (Aug 10 2010)
-- Improved compatibility with Open PS2 Loader; cheat system and video mode
-  patcher integrate flawlessly.
-- Added ability to select game cheats manually (press up/down).
-- Activated cheats are now copied to cheat engine only once.
-- Added code type E for compatibility with other cheat systems.
-- Fixed freezing when there's no game in drive.
-- Added quick hack to enable launching ELFs from mass (to be improved).
-- Clear screen if Y>25.
-- Moved setting cheats.file to loader.cheats.
 
-0.5.2 (Jul 21 2010)
-- Rewrote ntpbclient C tool in Perl for platform independence.
-- Updated PS2 port of libconfig to version 1.4.5.
-- Incorporated libcheats and libconfig into normal build process; it is no more
-  required to install them manually to PS2SDK's "ports" folder.
-- Changed Makefiles to support parallel building (make -j jobs).
-- Stripped unused library functions.
+v0.5.3 (Aug 10 2010)
+--------------------
 
-0.5.1 (May 3 2010)
-- Added setting debugger.sms_modules to specify whether network modules from SMS
-  should be loaded. Users reporting routing issues with those modules can turn
-  it off to use the standard PS2SDK modules instead.
-- Improved pattern searching (auto hook etc.)
-- Fixed minor build issues.
+ * Improved compatibility with Open PS2 Loader; cheat system and video mode
+   patcher integrate flawlessly.
 
-0.5 (Dec 8 2009)
-- Replaced existing network modules with EEUG's SMSMAP.irx and SMSTCPIP.irx, and
-  optimized them for use in PS2rd (see below). This way, we almost doubled TCP
-  transfer rates to about 1MB/s.
-- SMSMAP: try to force 100Mb/s full duplex mode.
-- SMSTCPIP: modify lwIP TCP/IP stack to save as much IOP RAM as possible.
-- Disabled netlog support and shrinked size of RPC buffer in debugger.irx.
-- Reduced footprint of dev9.irx and added dev9x device driver to it.
-- Do not use syscall 251 to store original vector of SifSetReg().
-- Tweaked Makefiles (less verbose etc.)
-- Added compiler flags to ntpbclient: -O2 -s -m32
-- Fixed games:
-   Black
-   Castlevania: COD - Demo
-   Devil May Cry
-   ICO - Demo
-   Maximo VS AoZ - Demo
-   Silent Hill 4: The Room
-   Soul Calibur 2
-   Soul Calibur 3
-   TMNT - The Movie
-   Tomb Raider: Anniversary
-   Tomb Raider: Legend
+ * Added ability to select game cheats manually (press up/down).
 
-0.4.2 (Oct 27 2009)
-- This is an intermediate version created after renaming the project to "PS2rd".
-  It doesn't include any bug fixes or new features.
+ * Activated cheats are now copied to cheat engine only once.
 
-0.4.1 (Oct 20 2009)
-- The USB modules are now included and loaded by default, allowing you to read
-  files from the mass: device. To disable USB support, change the new setting
-  loader.usb_support to false.
+ * Added code type E for compatibility with other cheat systems.
 
-0.4 (Oct 13 2009)
-- Added video mode patcher.
-- Finally fixed relocation of common symbols for all ERLs - no more SDK patches.
-- ELF loader: copy LoadExecPS2 args in kernel mode and nul-terminate them
-  properly to fix some multi-ELF games (e.g. Splinter Cell). Try to load ELF
-  with SifLoadElf() first, allowing PES 2008 to boot.
-- Apply SBV patches a 2nd time before loading our modules, ensuring that
-  LoadModuleBuffer() works for games like TimeSplitters (pink screen problem).
-- Added automatic patching of _SifLoadModule() to prevent network games from
-  loading their dev9.irx and smap.irx modules. This way, we can hack games like
-  GT4, Sniper Elite, and TimeSplitters 2 (enable debugger.patch_loadmodule).
-- Added ability to disable the IOP reset hook after the first reset (enable
-  debugger.unhook_iop_reset). This is similar to HD Loader's mode 3.
-- Setting debugger.rpc_mode to -1 disables RPC for compatibility tests.
-- Now there's only one dump command for all memory areas (NTPB protocol).
-- Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
-- Added more documentation, e.g. doc/colors.html and doc/compat.txt.
+ * Fixed freezing when there's no game in drive.
 
-0.3 (Sep 16 2009)
-- Added support for DNAS games; Metal Gear Solid 3 is now hackable.
-- Added ELF selector to directly boot/hack demos, for instance.
-- All ERLs hook/unhook syscalls internally when they're loaded/unloaded.
-- Game IDs: allow wildcard '?' in file name and add file size.
-- In auto-hook mode, the debugger logs all hook addresses and original opcodes
-  to a list at 0x000fff00. You can easily create Mastercodes from it.
-- IP settings for PS2-side debugger are now configurable.
-- Added setting debugger.load_modules and removed engine.file.
-- Fixed handling of absolute paths for devices mass and mc0.
-- Load IOP modules for USB access (PS2rd must be compiled with USB=1).
-- Added updated version of ntpbclient.
+ * Added quick hack to enable launching ELFs from mass (to be improved).
 
-0.2 (Aug 19 2009)
-- Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
-- Added ELF loader to replace evil LoadExecPS2() syscall.
-- Except for the boot loader, all code was made relocatable.
-- Reset IOP on startup by default; never do it when run from host.
-- Stop disc spin after initialization to enable swapping.
-- Cheats are only loaded once from text file on startup.
-- Increased maximum number of active codes from 50 to 100.
-- With code type D, if the number of lines is 0, it is internally set to 1 for
-  compatibility.
-- Added global debug mode (set DEBUG to 1 in root Makefile).
-- Compressed final ELF with ps2-packer.
+ * Clear screen if Y>25.
 
-0.1 (Jul 29 2009)
-- Initial public release
+ * Moved setting cheats.file to loader.cheats.
+
+
+v0.5.2 (Jul 21 2010)
+--------------------
+
+ * Rewrote ntpbclient C tool in Perl for platform independence.
+
+ * Updated PS2 port of libconfig to version 1.4.5.
+
+ * Incorporated libcheats and libconfig into normal build process; it is no more
+   required to install them manually to PS2SDK's "ports" folder.
+
+ * Changed Makefiles to support parallel building (make -j jobs).
+
+ * Stripped unused library functions.
+
+
+v0.5.1 (May 3 2010)
+-------------------
+
+ * Added setting debugger.sms_modules to specify whether network modules from
+   SMS should be loaded. Users reporting routing issues with those modules can
+   turn it off to use the standard PS2SDK modules instead.
+
+ * Improved pattern searching (auto hook etc.)
+
+ * Fixed minor build issues.
+
+
+v0.5 (Dec 8 2009)
+-----------------
+
+ * Replaced existing network modules with EEUG's SMSMAP.irx and SMSTCPIP.irx,
+   and optimized them for use in PS2rd (see below). This way, we almost doubled
+   TCP transfer rates to about 1MB/s.
+
+ * SMSMAP: try to force 100Mb/s full duplex mode.
+
+ * SMSTCPIP: modify lwIP TCP/IP stack to save as much IOP RAM as possible.
+
+ * Disabled netlog support and shrinked size of RPC buffer in debugger.irx.
+
+ * Reduced footprint of dev9.irx and added dev9x device driver to it.
+
+ * Do not use syscall 251 to store original vector of SifSetReg().
+
+ * Tweaked Makefiles (less verbose etc.)
+
+ * Added compiler flags to ntpbclient: -O2 -s -m32
+
+ * Fixed games:
+   - Black
+   - Castlevania: COD - Demo
+   - Devil May Cry
+   - ICO - Demo
+   - Maximo VS AoZ - Demo
+   - Silent Hill 4: The Room
+   - Soul Calibur 2
+   - Soul Calibur 3
+   - TMNT - The Movie
+   - Tomb Raider: Anniversary
+   - Tomb Raider: Legend
+
+
+v0.4.2 (Oct 27 2009)
+--------------------
+
+ * This is an intermediate version created after renaming the project to
+   "PS2rd". It doesn't include any bug fixes or new features.
+
+
+v0.4.1 (Oct 20 2009)
+--------------------
+
+ * The USB modules are now included and loaded by default, allowing you to read
+   files from the mass: device. To disable USB support, change the new setting
+   loader.usb_support to false.
+
+
+v0.4 (Oct 13 2009)
+------------------
+
+ * Added video mode patcher.
+
+ * Finally fixed relocation of common symbols for all ERLs; no more SDK patches.
+
+ * ELF loader: copy LoadExecPS2 args in kernel mode and nul-terminate them
+   properly to fix some multi-ELF games (e.g. Splinter Cell). Try to load ELF
+   with SifLoadElf() first, allowing PES 2008 to boot.
+
+ * Apply SBV patches a 2nd time before loading our modules, ensuring that
+   LoadModuleBuffer() works for games like TimeSplitters (pink screen problem).
+
+ * Added automatic patching of _SifLoadModule() to prevent network games from
+   loading their dev9.irx and smap.irx modules. This way, we can hack games like
+   GT4, Sniper Elite, and TimeSplitters 2 (enable debugger.patch_loadmodule).
+
+ * Added ability to disable the IOP reset hook after the first reset (enable
+   debugger.unhook_iop_reset). This is similar to HD Loader's mode 3.
+
+ * Setting debugger.rpc_mode to -1 disables RPC for compatibility tests.
+
+ * Now there's only one dump command for all memory areas (NTPB protocol).
+
+ * Removed unused modules libc.erl, libdebug.erl, and netlog.irx.
+
+ * Added more documentation, e.g. doc/colors.html and doc/compat.txt.
+
+
+v0.3 (Sep 16 2009)
+------------------
+
+ * Added support for DNAS games; Metal Gear Solid 3 is now hackable.
+
+ * Added ELF selector to directly boot/hack demos, for instance.
+
+ * All ERLs hook/unhook syscalls internally when they're loaded/unloaded.
+
+ * Game IDs: allow wildcard '?' in file name and add file size.
+
+ * In auto-hook mode, the debugger logs all hook addresses and original opcodes
+   to a list at 0x000fff00. You can easily create Mastercodes from it.
+
+ * IP settings for PS2-side debugger are now configurable.
+
+ * Added setting debugger.load_modules and removed engine.file.
+
+ * Fixed handling of absolute paths for devices mass and mc0.
+
+ * Load IOP modules for USB access (PS2rd must be compiled with USB=1).
+
+ * Added updated version of ntpbclient.
+
+
+v0.2 (Aug 19 2009)
+------------------
+
+ * Merged jimmikaelkael's code from Core Launcher v2 to allow remote debugging.
+
+ * Added ELF loader to replace evil LoadExecPS2() syscall.
+
+ * Except for the boot loader, all code was made relocatable.
+
+ * Reset IOP on startup by default; never do it when run from host.
+
+ * Stop disc spin after initialization to enable swapping.
+
+ * Cheats are only loaded once from text file on startup.
+
+ * Increased maximum number of active codes from 50 to 100.
+
+ * With code type D, if the number of lines is 0, it is internally set to 1 for
+   compatibility.
+
+ * Added global debug mode (set DEBUG to 1 in root Makefile).
+
+ * Compressed final ELF with ps2-packer.
+
+
+v0.1 (Jul 29 2009)
+------------------
+
+ * Initial public release
