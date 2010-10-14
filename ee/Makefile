@@ -1,9 +1,12 @@
-LIBCHEATS = libcheats-0.1
-LIBCONFIG = libconfig-1.4.5
+LIBCHEATS_DIR = libcheats-0.1
+LIBCHEATS = $(CURDIR)/$(LIBCHEATS_DIR)
+export LIBCHEATS
 
-VARS = LIBCHEATS=$(CURDIR)/$(LIBCHEATS) LIBCONFIG=$(CURDIR)/$(LIBCONFIG)
+LIBCONFIG_DIR = libconfig-1.4.5
+LIBCONFIG = $(CURDIR)/$(LIBCONFIG_DIR)
+export LIBCONFIG
 
-EE_LIBS = $(LIBCHEATS) $(LIBCONFIG)
+EE_LIBS = $(LIBCHEATS_DIR) $(LIBCONFIG_DIR)
 ERL_MODULES = debugger elfldr engine videomod
 SUBDIRS = $(EE_LIBS) $(ERL_MODULES) loader
 
@@ -12,7 +15,9 @@ subdir_clean = $(SUBDIRS:%=clean-%)
 
 .PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-erl all clean
 
+ifndef VERBOSE
 .SILENT:
+endif
 
 all: $(subdir_list)
 
@@ -30,8 +35,8 @@ clean: $(subdir_clean)
 
 $(subdir_list):
 	echo "* [EE] Building $(@:all-%=%) ..."
-	$(VARS) $(MAKE) -C $(@:all-%=%)
+	$(MAKE) -C $(@:all-%=%)
 
 $(subdir_clean):
 	echo "* [EE] Cleaning $(@:clean-%=%) ..."
-	$(VARS) $(MAKE) -C $(@:clean-%=%) clean
+	$(MAKE) -C $(@:clean-%=%) clean

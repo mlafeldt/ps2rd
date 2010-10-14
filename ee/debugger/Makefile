@@ -4,18 +4,24 @@
 # Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
 ##
 
-ifeq ($(DEBUG),1)
-EE_CFLAGS += -D_DEBUG
-endif
-
 EE_INCS +=
 EE_CFLAGS +=
 EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = debugger.o debugger_rpc.o loadfile.o pattern.o padread_hooks.o \
-	loadmodule_hooks.o syscall_hooks.S
+
+EE_OBJS += debugger.o
+EE_OBJS += debugger_rpc.o
+EE_OBJS += loadfile.o
+EE_OBJS += loadmodule_hooks.o
+EE_OBJS += padread_hooks.o
+EE_OBJS += pattern.o
+EE_OBJS += syscall_hooks.S
+
+ifeq ($(DEBUG),1)
+EE_CFLAGS += -D_DEBUG
+endif
 
 
 all: debugger.erl

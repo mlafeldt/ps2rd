@@ -1,0 +1,17 @@
+#!/bin/sh
+
+VF=PS2RD-VERSION-FILE
+
+version=$(git describe --tags --match "v[0-9]*" --abbrev=4 --dirty 2>/dev/null ||
+	head -n1 CHANGES | cut -f1 -d " ")
+version=$(expr "$version" : v*'\(.*\)')
+
+cur_ver=
+if [ -r "$VF" ]; then
+	cur_ver=$(sed -e 's/^PS2RD_VERSION = //' <$VF)
+fi
+
+if [ "$version" != "$cur_ver" ]; then
+	echo "PS2RD_VERSION = $version"
+	echo "PS2RD_VERSION = $version" >$VF
+fi

@@ -1,38 +1,39 @@
+# Default make target
+all:
+
+# Define VERBOSE=1 to have a more verbose compile.
 #
-# This is the root makefile of PS2rd.
+# Define DEBUG=1 to enable the debug mode. In debug mode, a lot of helpful
+# debug messages are printed to stdout (i.e., to "host:" with ps2link).
 #
+# Define NETLOG=1 to enable netlog support (sending log messages over UDP).
+#
+# Define NO_SMS=1 to not build the network modules from SMS.
 
-VERSION = $(shell git describe --tags --dirty 2>/dev/null || head -n1 CHANGES | cut -f1 -d " ")
-PACKAGE = ps2rd-$(VERSION)
+export VERBOSE DEBUG NETLOG NO_SMS
 
-# Set DEBUG to 1 to enable the debug mode. In debug mode, a lot of helpful debug
-# messages will be printed to "host:" when using ps2link.
-DEBUG = 1
+# Generate version info
+PS2RD-VERSION-FILE: FORCE
+	@./PS2RD-VERSION-GEN
+-include PS2RD-VERSION-FILE
+export PS2RD_VERSION
 
-# Enable or disable netlog support (send log messages over UDP)
-NETLOG = 0
-
-# Set SMS_MODULES to 1 to build PS2rd with the network modules from SMS.
-SMS_MODULES = 1
-
-VARS = DEBUG=$(DEBUG) NETLOG=$(NETLOG) SMS_MODULES=$(SMS_MODULES)
-
+PACKAGE = ps2rd-$(PS2RD_VERSION)
 
 SUBDIRS = ee iop pc
 
 subdir_list  = $(SUBDIRS:%=all-%)
 subdir_clean = $(SUBDIRS:%=clean-%)
 
-.PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-irx all clean
+.PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-irx all clean FORCE
 
+ifndef VERBOSE
 .SILENT:
+endif
 
 all: check $(subdir_list)
 
-gen-version:
-	echo "#define PS2RD_VERSION \"$(VERSION)\"" > ee/loader/version.h
-
-all-ee: copy-irx gen-version
+all-ee: copy-irx
 
 copy-irx: all-iop
 	bin2o iop/debugger/debugger.irx ee/loader/debugger_irx.o _debugger_irx
@@ -41,23 +42,23 @@ copy-irx: all-iop
 	bin2o iop/memdisk/memdisk.irx ee/loader/memdisk_irx.o _memdisk_irx
 	bin2o $(PS2SDK)/iop/irx/usbd.irx ee/loader/usbd_irx.o _usbd_irx
 	bin2o iop/usb_mass/usb_mass.irx ee/loader/usb_mass_irx.o _usb_mass_irx
-	@if [ $(SMS_MODULES) = "1" ]; then \
-		bin2o iop/SMSMAP/SMSMAP.irx ee/loader/ps2smap_sms_irx.o _ps2smap_sms_irx; \
-		bin2o iop/SMSTCPIP/SMSTCPIP.irx ee/loader/ps2ip_sms_irx.o _ps2ip_sms_irx; \
-	fi
+ifndef NO_SMS
+	bin2o iop/SMSMAP/SMSMAP.irx ee/loader/ps2smap_sms_irx.o _ps2smap_sms_irx
+	bin2o iop/SMSTCPIP/SMSTCPIP.irx ee/loader/ps2ip_sms_irx.o _ps2ip_sms_irx
+endif
 	bin2o iop/smap/ps2smap.irx ee/loader/ps2smap_irx.o _ps2smap_irx
 	bin2o $(PS2SDK)/iop/irx/ps2ip.irx ee/loader/ps2ip_irx.o _ps2ip_irx
 
 clean: $(subdir_clean)
 	rm -f ee/loader/*_irx.o
-	rm -f ee/loader/version.h
 	rm -rf release/
+	rm -f PS2RD-VERSION-FILE
 
 $(subdir_list):
-	$(VARS) $(MAKE) -C $(@:all-%=%)
+	$(MAKE) -C $(@:all-%=%)
 
 $(subdir_clean):
-	$(VARS) $(MAKE) -C $(@:clean-%=%) clean
+	$(MAKE) -C $(@:clean-%=%) clean
 
 run: all
 	$(MAKE) -C ee/loader run
