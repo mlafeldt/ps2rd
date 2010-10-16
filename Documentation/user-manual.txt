@@ -1,5 +1,9 @@
-Overview
---------
+PS2rd User's Manual
+___________________
+
+
+Debugging
+=========
 
 The main goal of PS2rd is to provide means to debug commercial PS2 games
 remotely over Ethernet. The system deploys a client-server architecture, where
@@ -12,7 +16,6 @@ Remote debugging capabilities include:
 
 More features will be added as development continues.
 
-
 PS2 server
 ----------
 
@@ -23,11 +26,28 @@ In order to debug games, you need to "hook" them first. This can be done by
 either activating appropriate hook codes or by enabling automatic hooking in
 the configuration file.
 
-
 PC client
 ---------
 
 On the PC side, you can use ntpbclient to issue commands to the server. Look into
 ntpbclient.txt for more information.
 
-Happy debugging!
+
+Cheating
+========
+
+PS2rd includes a cheat system which has many features people are used to from
+commercial products like CB and AR.
+
+The current version allows you to load cheat codes from a text file and to
+automatically or manually activate them for a game.
+
+The configuration file holds a setting named "loader.cheats" which specifies the
+(absolute or relative) path to the cheats file to use, e.g. "mass:cheats.txt".
+
+The cheats file must follow the format described in cheats_format.txt. This
+document also explains the concept of game IDs, and how to use them to auto-
+matically activate cheats for a certain game.
+
+Last but not least, take a look at code_types.txt for a complete list of
+available code types. Note that PS2rd only supports _raw_ codes.
