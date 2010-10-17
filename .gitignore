@@ -6,4 +6,5 @@
 *.o
 *.swp
 /PS2RD-VERSION-FILE
+/config.mak
 /release/

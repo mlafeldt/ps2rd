@@ -1,26 +1,26 @@
 To build the PS2 part of PS2rd, you need a working PS2DEV toolchain with an
-up-to-date version of the PS2SDK.
+up-to-date version of the PS2SDK. The easiest way to get both is:
 
-The easiest way to get both is:
+	$ git clone git://github.com/ps2dev/ps2toolchain.git
+	$ cd ps2toolchain/
+	$ sudo ./toolchain-sudo.sh
 
- $ git clone git://github.com/ps2dev/ps2toolchain.git
- $ cd ps2toolchain/
- $ sudo ./toolchain-sudo.sh
+When everything is set up, go to PS2rd's root directory and run
 
-When everything is set up, go to PS2rd's root directory and run these commands
-in your shell:
-
- $ make clean
- $ make all
-
-(By the way, you can speed up the build process with "make -j jobs".)
+	$ make
 
 This will create the executable ee/loader/ps2rd.elf.
 
-It is recommended to run the ELF with ps2link (you need the high-loading
-version!) and ps2client:
+The beginning of the Makefile documents many variables that affect the way PS2rd
+is built. You can override them either from the command line, or in the
+config.mak file. Take a look at config.mak.sample for a sample configuration.
 
- $ make run
+You can also speed up the build process with "make -j <jobs>", e.g.
 
-If you want to boot it from mass, memory card, etc., make sure that ps2rd.conf
-is placed in the same folder as the ELF.
+	$ make -j4
+
+To directly run the compiled ELF with ps2client, do
+
+	$ make run
+
+Last but not least, note that PS2rd requires a high-loading version of ps2link.

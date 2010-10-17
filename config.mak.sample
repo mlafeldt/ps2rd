@@ -1,0 +1,6 @@
+# PS2rd Makefile configuration, included in main Makefile
+
+VERBOSE =
+DEBUG = 1
+NETLOG =
+NO_SMS =

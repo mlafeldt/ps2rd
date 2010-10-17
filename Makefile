@@ -10,6 +10,8 @@ all:
 #
 # Define NO_SMS=1 to not build the network modules from SMS.
 
+-include config.mak
+
 export VERBOSE DEBUG NETLOG NO_SMS
 
 # Generate version info
