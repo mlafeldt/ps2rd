@@ -1,6 +1,8 @@
 # PS2rd Makefile configuration, included in main Makefile
 
 VERBOSE =
+BUILD_CHECKSRC = 0
+CHECK = sparse
 DEBUG = 1
 NETLOG =
 NO_SMS =

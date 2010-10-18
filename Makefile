@@ -3,6 +3,10 @@ all:
 
 # Define VERBOSE=1 to have a more verbose compile.
 #
+# Run "make C=1" or define BUILD_CHECKSRC=1 to call a source code checker as
+# part of the C compilation. Set CHECK to configure your checker program
+# ("sparse" by default). Note that only re-compiled files are checked.
+#
 # Define DEBUG=1 to enable the debug mode. In debug mode, a lot of helpful
 # debug messages are printed to stdout (i.e., to "host:" with ps2link).
 #
@@ -11,6 +15,18 @@ all:
 # Define NO_SMS=1 to not build the network modules from SMS.
 
 -include config.mak
+
+ifeq ("$(origin C)", "command line")
+  BUILD_CHECKSRC = $(C)
+endif
+ifndef BUILD_CHECKSRC
+  BUILD_CHECKSRC = 0
+endif
+ifndef CHECK
+  CHECK = sparse
+endif
+
+export BUILD_CHECKSRC CHECK
 
 export VERBOSE DEBUG NETLOG NO_SMS
 
@@ -31,6 +47,12 @@ subdir_clean = $(SUBDIRS:%=clean-%)
 
 ifndef VERBOSE
 .SILENT:
+endif
+
+ifeq ($(BUILD_CHECKSRC),1)
+all-ee: CHECK_VARS=REAL_CC=ee-gcc EE_CC=cgcc
+all-iop: CHECK_VARS=REAL_CC=iop-gcc IOP_CC=cgcc
+all-pc: CHECK_VARS=
 endif
 
 all: check $(subdir_list)
@@ -57,7 +79,7 @@ clean: $(subdir_clean)
 	rm -f PS2RD-VERSION-FILE
 
 $(subdir_list):
-	$(MAKE) -C $(@:all-%=%)
+	$(MAKE) $(CHECK_VARS) -C $(@:all-%=%)
 
 $(subdir_clean):
 	$(MAKE) -C $(@:clean-%=%) clean
