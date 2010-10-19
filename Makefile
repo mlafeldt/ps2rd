@@ -7,8 +7,9 @@ all:
 # part of the C compilation. Set CHECK to configure your checker program
 # ("sparse" by default). Note that only re-compiled files are checked.
 #
-# Define DEBUG=1 to enable the debug mode. In debug mode, a lot of helpful
-# debug messages are printed to stdout (i.e., to "host:" with ps2link).
+# Run "make D=1" or define DEBUG=1 to enable the debug mode. In debug mode, a
+# lot of helpful debug messages are printed to stdout (i.e., to "host:" with
+# ps2link).
 #
 # Define NETLOG=1 to enable netlog support (sending log messages over UDP).
 #
@@ -31,6 +32,13 @@ ifndef BUILD_CHECKSRC
 endif
 ifndef CHECK
   CHECK = sparse
+endif
+
+ifeq ("$(origin D)", "command line")
+  DEBUG = $(D)
+endif
+ifndef DEBUG
+  DEBUG = 0
 endif
 
 export BUILD_VERBOSE BUILD_CHECKSRC CHECK
