@@ -34,14 +34,15 @@
 int patch_loadModule(void);
 
 /* modules list to fake loading */
-char *module_tab[3] = {
+static char *module_tab[3] = {
 	"DEV9.IRX",
 	"SMAP.IRX",
 	NULL
 };
 
 /* _sceSifLoadModule prototype */
-int (*_sceSifLoadModule)(const char *path, int arg_len, const char *args, int *modres, int fno);
+static int (*_sceSifLoadModule)(const char *path, int arg_len, const char *args,
+				int *modres, int fno) = NULL;
 
 /*
  * hook function for _sceSifLoadModule
