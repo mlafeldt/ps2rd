@@ -15,6 +15,11 @@ all:
 #
 # Define NO_SMS=1 to not build the network modules from SMS.
 
+# Do not:
+# - use make's built-in rules and variables
+# - print "Entering directory ..."
+MAKEFLAGS += -rR --no-print-directory
+
 -include config.mak
 
 ifeq ("$(origin V)", "command line")
