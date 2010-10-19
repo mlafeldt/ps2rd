@@ -13,28 +13,28 @@ EE_ASFLAGS +=
 
 EE_BIN = ps2rd.elf
 
-EE_OBJS += debugger_erl.o
-EE_OBJS += elfldr_erl.o
-EE_OBJS += engine_erl.o
-EE_OBJS += libkernel_erl.o
-EE_OBJS += libpatches_erl.o
-EE_OBJS += videomod_erl.o
+ERL_OBJS += debugger_erl.o
+ERL_OBJS += elfldr_erl.o
+ERL_OBJS += engine_erl.o
+ERL_OBJS += libkernel_erl.o
+ERL_OBJS += libpatches_erl.o
+ERL_OBJS += videomod_erl.o
 
-EE_OBJS += debugger_irx.o
-EE_OBJS += eesync_irx.o
-EE_OBJS += memdisk_irx.o
-EE_OBJS += ps2dev9_irx.o
-EE_OBJS += ps2ip_irx.o
-EE_OBJS += ps2smap_irx.o
-EE_OBJS += usb_mass_irx.o
-EE_OBJS += usbd_irx.o
+IRX_OBJS += debugger_irx.o
+IRX_OBJS += eesync_irx.o
+IRX_OBJS += memdisk_irx.o
+IRX_OBJS += ps2dev9_irx.o
+IRX_OBJS += ps2ip_irx.o
+IRX_OBJS += ps2smap_irx.o
+IRX_OBJS += usb_mass_irx.o
+IRX_OBJS += usbd_irx.o
 
-EE_OBJS += cheatman.o
-EE_OBJS += configman.o
-EE_OBJS += elfid.o
-EE_OBJS += erlman.o
-EE_OBJS += irxman.o
-EE_OBJS += loader.o
+LDR_OBJS += cheatman.o
+LDR_OBJS += configman.o
+LDR_OBJS += elfid.o
+LDR_OBJS += erlman.o
+LDR_OBJS += irxman.o
+LDR_OBJS += loader.o
 
 EE_LIBS += -lcdvd
 EE_LIBS += -lcheats
@@ -53,14 +53,15 @@ endif
 
 ifndef NO_SMS
 EE_CFLAGS += -D_SMS_MODULES
-EE_OBJS += ps2ip_sms_irx.o ps2smap_sms_irx.o
+IRX_OBJS += ps2ip_sms_irx.o ps2smap_sms_irx.o
 endif
 
+EE_OBJS = $(ERL_OBJS) $(IRX_OBJS) $(LDR_OBJS)
 
 all: loader
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS)
+	rm -f $(EE_BIN) $(LDR_OBJS)
 
 loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
