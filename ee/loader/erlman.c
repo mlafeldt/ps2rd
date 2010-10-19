@@ -263,6 +263,9 @@ int install_erls(const config_t *config, engine_t *engine)
 	 * install debugger
 	 */
 	if (config_get_bool(config, SET_DEBUGGER_INSTALL)) {
+		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
+		debugger_opts_t opts;
+
 		addr = config_get_int(config, SET_DEBUGGER_ADDR);
 		file = &_erl_files[ERL_FILE_DEBUGGER];
 
@@ -283,9 +286,6 @@ int install_erls(const config_t *config, engine_t *engine)
 		}
 
 		/* set debugger options */
-		void (*set_debugger_opts)(debugger_opts_t *opts) = NULL;
-		debugger_opts_t opts;
-
 		GET_SYMBOL(set_debugger_opts, "set_debugger_opts");
 		memset(&opts, 0, sizeof(opts));
 		opts.auto_hook = config_get_bool(config, SET_DEBUGGER_AUTO_HOOK);
