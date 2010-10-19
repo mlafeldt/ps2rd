@@ -15,11 +15,6 @@ all:
 #
 # Define NO_SMS=1 to not build the network modules from SMS.
 
-# Do not:
-# - use make's built-in rules and variables
-# - print "Entering directory ..."
-MAKEFLAGS += -rR --no-print-directory
-
 -include config.mak
 
 ifeq ("$(origin V)", "command line")
@@ -49,6 +44,16 @@ endif
 export BUILD_VERBOSE BUILD_CHECKSRC CHECK
 export DEBUG NETLOG NO_SMS
 
+
+# Do not:
+# - use make's built-in rules and variables
+# - print "Entering directory ..."
+MAKEFLAGS += -rR --no-print-directory
+
+ifndef PS2SDK
+  export PS2SDK = /usr/local/ps2dev/ps2sdk
+endif
+
 # Generate version info
 PS2RD-VERSION-FILE: FORCE
 	@./PS2RD-VERSION-GEN
@@ -74,7 +79,7 @@ all-iop: CHECK_VARS=REAL_CC=iop-gcc IOP_CC=cgcc
 all-pc: CHECK_VARS=
 endif
 
-all: check $(subdir_list)
+all: $(subdir_list)
 
 all-ee: copy-irx
 
@@ -128,9 +133,3 @@ release: all
 		tar -cjf $(PACKAGE).tar.bz2 $(PACKAGE)/; \
 		zip -qr $(PACKAGE).zip $(PACKAGE)/; \
 		sha1sum $(PACKAGE).* > $(PACKAGE).sha1
-
-check:
-	@if [ -z $(PS2SDK) ]; then \
-		echo "PS2SDK env var not set." >&2; \
-		exit 1; \
-	fi
