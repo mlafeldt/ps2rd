@@ -1,7 +1,7 @@
 # Default make target
 all:
 
-# Define VERBOSE=1 to have a more verbose compile.
+# Run "make V=1" or define BUILD_VERBOSE=1 to have a more verbose compile.
 #
 # Run "make C=1" or define BUILD_CHECKSRC=1 to call a source code checker as
 # part of the C compilation. Set CHECK to configure your checker program
@@ -16,6 +16,13 @@ all:
 
 -include config.mak
 
+ifeq ("$(origin V)", "command line")
+  BUILD_VERBOSE = $(V)
+endif
+ifndef BUILD_VERBOSE
+  BUILD_VERBOSE = 0
+endif
+
 ifeq ("$(origin C)", "command line")
   BUILD_CHECKSRC = $(C)
 endif
@@ -26,9 +33,8 @@ ifndef CHECK
   CHECK = sparse
 endif
 
-export BUILD_CHECKSRC CHECK
-
-export VERBOSE DEBUG NETLOG NO_SMS
+export BUILD_VERBOSE BUILD_CHECKSRC CHECK
+export DEBUG NETLOG NO_SMS
 
 # Generate version info
 PS2RD-VERSION-FILE: FORCE
@@ -45,7 +51,7 @@ subdir_clean = $(SUBDIRS:%=clean-%)
 
 .PHONY: $(SUBDIRS) $(subdir_list) $(subdir_clean) copy-irx all clean FORCE
 
-ifndef VERBOSE
+ifneq ($(BUILD_VERBOSE),1)
 .SILENT:
 endif
 

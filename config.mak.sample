@@ -1,6 +1,6 @@
 # PS2rd Makefile configuration, included in main Makefile
 
-VERBOSE =
+BUILD_VERBOSE = 0
 BUILD_CHECKSRC = 0
 CHECK = sparse
 DEBUG = 1
