@@ -27,6 +27,7 @@
 #include <loadfile.h>
 #include "dbgprintf.h"
 #include "configman.h"
+#include "irxman.h"
 
 /* Default IOP modules to load */
 static const char *_modules[] = {
@@ -148,7 +149,7 @@ void install_modules(const config_t *config)
 	ramfile_set(file_ptr++, "debugger", _debugger_irx_start, _debugger_irx_size);
 	ramfile_set(file_ptr++, "memdisk", _memdisk_irx_start, _memdisk_irx_size);
 	ramfile_set(file_ptr++, "eesync", _eesync_irx_start, _eesync_irx_size);
-	ramfile_set(file_ptr, NULL, 0, 0); /* terminator */
+	ramfile_set(file_ptr, NULL, NULL, 0); /* terminator */
 
 	/*
 	 * copy modules to kernel RAM

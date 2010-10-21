@@ -38,9 +38,6 @@
 #include "mypad.h"
 #include "myutil.h"
 
-#define WELCOME_STRING	"Welcome to PS2rd "PS2RD_VERSION"\n"
-#define BUILD_DATE	__DATE__" "__TIME__
-
 #define OPTIONS \
 	"Options:\n" \
 	"START | X  - Start game\n" \
@@ -185,6 +182,8 @@ int main(int argc, char *argv[])
 	const char *boot2 = NULL;
 	int select = 0;
 	game_t *game = NULL;
+	struct padButtonStatus btn;
+	u32 old_pad = 0;
 
 	strcpy(_bootpath, argv[0]);
 	__dirname(_bootpath);
@@ -195,8 +194,8 @@ int main(int argc, char *argv[])
 	init_scr();
 	scr_clear();
 
-	A_PRINTF(WELCOME_STRING);
-	D_PRINTF("Build date: "BUILD_DATE"\n");
+	A_PRINTF("Welcome to PS2rd %s\n", PS2RD_VERSION);
+	D_PRINTF("Build date: %s %s\n", __DATE__, __TIME__);
 	A_PRINTF("Booting from: %s\n", _bootpath);
 	A_PRINTF("Initializing...\n");
 
@@ -243,14 +242,15 @@ int main(int argc, char *argv[])
 	A_PRINTF(OPTIONS);
 	A_PRINTF("Ready.\n");
 
-	struct padButtonStatus btn;
-	u32 old_pad = 0;
 	while (1) {
+		u32 paddata, new_pad;
+
 		padWaitReady(PAD_PORT, PAD_SLOT);
 		if (!padRead(PAD_PORT, PAD_SLOT, &btn))
 			continue;
-		u32 paddata = 0xFFFF ^ btn.btns;
-		u32 new_pad = paddata & ~old_pad;
+
+		paddata = 0xFFFF ^ btn.btns;
+		new_pad = paddata & ~old_pad;
 		old_pad = paddata;
 
 		if ((new_pad & PAD_START) || (new_pad & PAD_CROSS)) {

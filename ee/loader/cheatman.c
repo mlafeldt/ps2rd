@@ -27,6 +27,7 @@
 #include "engine.h"
 #include "mycdvd.h"
 #include "myutil.h"
+#include "cheatman.h"
 
 #define GAME_ID_START	"/ID"
 #define GAME_ID_WC	'?'

@@ -4,7 +4,7 @@ VF=PS2RD-VERSION-FILE
 
 version=$(git describe --tags --match "v[0-9]*" --abbrev=4 --dirty 2>/dev/null ||
 	head -n1 CHANGES | cut -f1 -d " ")
-version=$(expr "$version" : v*'\(.*\)')
+version=$(expr "$version" : v*'\(.*\)' | sed -e 's/-/./g')
 
 cur_ver=
 if [ -r "$VF" ]; then

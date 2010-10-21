@@ -210,7 +210,7 @@ void set_debugger_opts(const debugger_opts_t *opts)
 /*
  * get_ipconfig - get & build ip config to pass to smap driver
  */
-void get_ipconfig(void)
+static void get_ipconfig(void)
 {
 	memset(g_ipconfig, 0, IPCONFIG_MAX_LEN);
 	g_ipconfig_len = 0;
@@ -318,16 +318,15 @@ static int get_module_from_kernel(u32 hash, void *buf)
 /*
  * Get_Mod_Offset - return a module offset in IOPRP img
  */
-int Get_Mod_Offset(romdir_t *romdir_fs, const char *modname)
+static int Get_Mod_Offset(romdir_t *romdir_fs, const char *modname)
 {
 	int offset = 0;
 	int i, modname_len;
 
 	/* scan romdir fs for module */
 	while (strlen(romdir_fs->fileName) > 0) {
-
-		modname_len = strlen(modname);
 		char *p = (char *)romdir_fs->fileName;
+		modname_len = strlen(modname);
 
 		for (i=0; ((i<modname_len) && (*p != 0)) ; i++) {
 			if (modname[i] != *p)
@@ -353,7 +352,7 @@ int Get_Mod_Offset(romdir_t *romdir_fs, const char *modname)
 /*
  * MySifRebootIop - IOP reset function
  */
-int MySifRebootIop(char *ioprp_path)
+static int MySifRebootIop(char *ioprp_path)
 {
  	void   *ioprp_dest;
 	int     ret, fd, ioprp_size, rd_size, rpos, gbuf_offset, rp_size;
@@ -361,6 +360,8 @@ int MySifRebootIop(char *ioprp_path)
 	u8 	   *eesync_ptr = NULL;
 	u32  	qid;
 	SifDmaTransfer_t dmat;
+	int size_memdisk_irx;
+	u8 *memdisk_drv;
 
 	GS_BGCOLOUR = 0xff0000; /* blue */
 
@@ -466,10 +467,10 @@ int MySifRebootIop(char *ioprp_path)
 	fioExit();
 
 	/* we also want to get memdisk in g_buf without loading it */
-	int size_memdisk_irx = get_module_from_kernel(HASH_MEMDISK, g_buf);
+	size_memdisk_irx = get_module_from_kernel(HASH_MEMDISK, g_buf);
 
 	/* Patching memdisk irx */
-	u8 *memdisk_drv = (u8 *)g_buf;
+	memdisk_drv = (u8 *)g_buf;
 	*(u32*)(&memdisk_drv[0x19C]) = (u32)ioprp_dest;
 	*(u32*)(&memdisk_drv[0x1A8]) = ioprp_size;
 	FlushCache(0);

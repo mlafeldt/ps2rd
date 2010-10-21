@@ -101,7 +101,7 @@ int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 	if (!RPCclient_Inited)
 		return -1;
 
-	if((ret = SifCallRpc(&rpcclient, CMD_GETREMOTECMD, rpc_mode, NULL, 0, &getRemoteCmdParam, sizeof(getRemoteCmdParam), 0, 0)) != 0) {
+	if((ret = SifCallRpc(&rpcclient, CMD_GETREMOTECMD, rpc_mode, NULL, 0, &getRemoteCmdParam, sizeof(getRemoteCmdParam), NULL, NULL)) != 0) {
 		return ret;
 	}
 
@@ -136,7 +136,7 @@ int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode)
 
 	sendDataParam.size = size;
 
-	if((ret = SifCallRpc(&rpcclient, CMD_SENDDATA, rpc_mode, &sendDataParam, sizeof(sendDataParam), Rpc_Buffer, 4, 0, 0)) != 0) {
+	if((ret = SifCallRpc(&rpcclient, CMD_SENDDATA, rpc_mode, &sendDataParam, sizeof(sendDataParam), Rpc_Buffer, 4, NULL, NULL)) != 0) {
 		return ret;
 	}
 
@@ -158,7 +158,7 @@ int rpcNTPBEndReply(int rpc_mode)
 	if (!RPCclient_Inited)
 		return -1;
 
-	if((ret = SifCallRpc(&rpcclient, CMD_ENDREPLY, rpc_mode, NULL, 0, Rpc_Buffer, 4, 0, 0)) != 0) {
+	if((ret = SifCallRpc(&rpcclient, CMD_ENDREPLY, rpc_mode, NULL, 0, Rpc_Buffer, 4, NULL, NULL)) != 0) {
 		return ret;
 	}
 

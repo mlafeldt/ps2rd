@@ -274,7 +274,7 @@ int __attribute__((section(".init"))) _init(void)
 /*
  * _fini - Automatically invoked on ERL unload.
  */
-int _fini(void)
+int __attribute__((section(".fini"))) _fini(void)
 {
 	/* Unhook syscall */
 	SetSyscall(__NR_LoadExecPS2, OldLoadExecPS2);
