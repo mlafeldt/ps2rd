@@ -124,8 +124,8 @@ release: all
 	else \
 		cp ee/loader/ps2rd.elf release/$(PACKAGE)/ps2/ps2rd.elf; \
 	fi
-	cp ee/loader/ps2rd.conf release/$(PACKAGE)/ps2/
-	cp ee/loader/cheats.txt release/$(PACKAGE)/ps2/
+	cp ee/loader/ps2rd.conf.sample release/$(PACKAGE)/ps2/ps2rd.conf
+	cp ee/loader/cheats.txt.sample release/$(PACKAGE)/ps2/cheats.txt
 	cp pc/ntpbclient/ntpbclient release/$(PACKAGE)/pc/
 	cp BUGS CHANGES COPYING* CREDITS INSTALL README TODO release/$(PACKAGE)/
 	cp -r Documentation/ release/$(PACKAGE)/
