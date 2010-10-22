@@ -25,11 +25,9 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <string.h>
-
+#include <debug.h>
 #include "pattern.h"
 #include "loadmodule_patterns.h"
-
-#define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
 int patch_loadModule(void);
 
@@ -102,7 +100,7 @@ int patch_loadModule(void)
 	int pattern_found = 0;
 	const pattern_t *pat;
 
-	GS_BGCOLOUR = 0x00a5ff; /* Orange while _sceSifLoadModule pattern search */
+	DEBUG_BGCOLOR(0x00a5ff); /* Orange while _sceSifLoadModule pattern search */
 
 	memscope = 0x01f00000 - start;
 
@@ -116,11 +114,11 @@ int patch_loadModule(void)
 	}
 
 	if (!ptr) {
-		GS_BGCOLOUR = 0x808080; /* Gray, pattern not found */
+		DEBUG_BGCOLOR(0x808080); /* Gray, pattern not found */
 		return 0;
 	}
 
- 	GS_BGCOLOUR = 0xcbc0ff; /* Pink while _sceSifLoadModule patches */
+	DEBUG_BGCOLOR(0xcbc0ff); /* Pink while _sceSifLoadModule patches */
 
 	/* Save original _sceSifLoadModule ptr */
 	_sceSifLoadModule = (void *)ptr;
@@ -154,9 +152,9 @@ int patch_loadModule(void)
 	}
 
 	if (!pattern_found)
-		GS_BGCOLOUR = 0x808080; /* gray, pattern not found */
+		DEBUG_BGCOLOR(0x808080); /* gray, pattern not found */
 	else
-		GS_BGCOLOUR = 0x000000; /* Black, done */
+		DEBUG_BGCOLOR(0x000000); /* Black, done */
 
 	return 1;
 }

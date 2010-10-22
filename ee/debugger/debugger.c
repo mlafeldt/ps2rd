@@ -74,9 +74,6 @@ extern int rpcNTPBSync(int mode, int *cmd, int *result);
 #define __strcpy(dest, src) \
 	strncpy(dest, src, strlen(src))
 
-/* GS macro */
-#define GS_BGCOLOUR	*((vu32*)0x120000e0)
-
 /* reset packet structs */
 typedef struct {
 	u32 psize:8;
@@ -363,7 +360,7 @@ static int MySifRebootIop(char *ioprp_path)
 	int size_memdisk_irx;
 	u8 *memdisk_drv;
 
-	GS_BGCOLOUR = 0xff0000; /* blue */
+	DEBUG_BGCOLOR(0xff0000); /* blue */
 
 	/* Reset IOP */
 	SifInitRpc(0);
@@ -380,11 +377,11 @@ static int MySifRebootIop(char *ioprp_path)
 	sbv_patch_disable_prefix_check();
 
 	/* read IOPRP img and send it on IOP mem */
-	GS_BGCOLOUR = 0x00ffff; /* yellow */
+	DEBUG_BGCOLOR(0x00ffff); /* yellow */
 	fioInit();
 	fd = fioOpen(ioprp_path, O_RDONLY);
 	if (fd < 0) {
-		GS_BGCOLOUR = 0x0000ff; /* red */
+		DEBUG_BGCOLOR(0x0000ff); /* red */
 		while (1){;}
 	}
 
@@ -396,7 +393,7 @@ static int MySifRebootIop(char *ioprp_path)
 	SifInitIopHeap();
 	ioprp_dest = SifAllocIopHeap(ioprp_size);
 	if (!ioprp_dest) {
-		GS_BGCOLOUR = 0x0000ff; /* red */
+		DEBUG_BGCOLOR(0x0000ff); /* red */
 		while (1){;}
 	}
 
@@ -409,7 +406,7 @@ static int MySifRebootIop(char *ioprp_path)
 			rd_size = ioprp_size - rpos;
 		ret = fioRead(fd, g_buf, rd_size);
 		if (ret != rd_size) {
-			GS_BGCOLOUR = 0x0000ff; /* red */
+			DEBUG_BGCOLOR(0x0000ff); /* red */
 			while (1){;}
 		}
 
@@ -479,7 +476,7 @@ static int MySifRebootIop(char *ioprp_path)
 	SifExecModuleBuffer(memdisk_drv, size_memdisk_irx, 0, NULL, &ret);
 	SifLoadModuleAsync("rom0:UDNL", 7, "MDISK0:");
 
-	GS_BGCOLOUR = 0x00ff00; /* lime */
+	DEBUG_BGCOLOR(0x00ff00); /* lime */
 
 	SifExitIopHeap();
 	SifLoadFileExit();
@@ -498,7 +495,7 @@ static int MySifRebootIop(char *ioprp_path)
 	/* sync IOP */
 	while (!SifIopSync()) {;}
 
-	GS_BGCOLOUR = 0xffff00; /* cyan */
+	DEBUG_BGCOLOR(0xffff00); /* cyan */
 
 	SifInitRpc(0);
 	SifLoadFileInit();
@@ -522,7 +519,7 @@ static int MySifRebootIop(char *ioprp_path)
 		if (ret < 0)
 		while (1) ;
 
-		GS_BGCOLOUR = 0xff00ff; /* magenta */
+		DEBUG_BGCOLOR(0xff00ff); /* magenta */
 
 		/* Binding debugger module RPC server */
 		rpcNTPBreset();
@@ -541,7 +538,7 @@ static int MySifRebootIop(char *ioprp_path)
 	if (g_debugger_opts.patch_loadmodule == PATCH_LM_ON)
 		patch_loadModule();
 
-	GS_BGCOLOUR = 0x000000; /* black */
+	DEBUG_BGCOLOR(0x000000); /* black */
 
 	/* set number of SifSetReg hooks to skip */
 	set_reg_hook = 4;

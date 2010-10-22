@@ -33,6 +33,7 @@
 #include <fileio.h>
 #include <io_common.h>
 #include <syscallnr.h>
+#include <debug.h>
 
 char *erl_id = "elfldr";
 #if 0
@@ -41,8 +42,6 @@ char *erl_dependancies[] = {
 	NULL
 };
 #endif
-
-#define GS_BGCOLOUR	*((vu32*)0x120000E0)
 
 /* do not link to strcpy() from libc! */
 #define __strcpy(dest, src) \
@@ -98,7 +97,7 @@ static void loadElf(void)
 	elf_header_t elf_header;
 	elf_pheader_t elf_pheader;
 
-	GS_BGCOLOUR = 0x400040; /* dark purple */
+	DEBUG_BGCOLOR(0x400040); /* dark purple */
 
 	ResetEE(0x7f);
 
@@ -134,7 +133,7 @@ static void loadElf(void)
 		SifLoadModule("rom0:MCSERV", 0, NULL);
 	}
 
-	GS_BGCOLOUR = 0x004000; /* dark green */
+	DEBUG_BGCOLOR(0x004000); /* dark green */
 
 	/* try to load the ELF with SifLoadElf() first */
 	memset(&elf, 0, sizeof(t_ExecData));
@@ -149,7 +148,7 @@ static void loadElf(void)
 		FlushCache(0);
 		FlushCache(2);
 
-		GS_BGCOLOUR = 0x000000; /* black */
+		DEBUG_BGCOLOR(0x000000); /* black */
 
 		/* finally, run game ELF... */
 		ExecPS2((void*)elf.epc, (void*)elf.gp, _argc, _argv);
@@ -157,7 +156,7 @@ static void loadElf(void)
 		SifInitRpc(0);
 	}
 
-	GS_BGCOLOUR = 0x000040; /* dark maroon */
+	DEBUG_BGCOLOR(0x000040); /* dark maroon */
 
 	/* if SifLoadElf() failed, load the ELF manually */
 	fioInit();
@@ -205,12 +204,12 @@ static void loadElf(void)
 	FlushCache(0);
 	FlushCache(2);
 
-	GS_BGCOLOUR = 0x000000; /* black */
+	DEBUG_BGCOLOR(0x000000); /* black */
 
 	/* finally, run game ELF... */
 	ExecPS2((void*)elf_header.entry, NULL, _argc, _argv);
 error:
-	GS_BGCOLOUR = 0x404040; /* dark gray screen: error */
+	DEBUG_BGCOLOR(0x404040); /* dark gray screen: error */
 	SleepThread();
 }
 
@@ -223,7 +222,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	char *p = _argbuf;
 	int i;
 
-	GS_BGCOLOUR = 0x400000; /* dark blue */
+	DEBUG_BGCOLOR(0x400000); /* dark blue */
 
 	/* sometimes, args are stored in kernel RAM */
 	DI();
@@ -248,7 +247,7 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	ee_kmode_exit();
 	EI();
 
-	GS_BGCOLOUR = 0x004040; /* dark olive */
+	DEBUG_BGCOLOR(0x004040); /* dark olive */
 
 	/*
 	 * ExecPS2() does the following for us:
