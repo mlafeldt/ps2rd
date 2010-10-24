@@ -720,6 +720,10 @@ int libconfig_yyget_lineno (yyscan_t yyscanner );
 
 void libconfig_yyset_lineno (int line_number ,yyscan_t yyscanner );
 
+int libconfig_yyget_column  (yyscan_t yyscanner);
+
+void libconfig_yyset_column (int  column_no , yyscan_t yyscanner);
+
 YYSTYPE * libconfig_yyget_lval (yyscan_t yyscanner );
 
 void libconfig_yyset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
@@ -1445,7 +1449,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 				}
 			else
 				/* Can't grow it, we don't own it. */
-				b->yy_ch_buf = 0;
+				b->yy_ch_buf = NULL;
 
 			if ( ! b->yy_ch_buf )
 				YY_FATAL_ERROR(
@@ -1941,7 +1945,7 @@ YY_BUFFER_STATE libconfig_yy_scan_buffer  (char * base, yy_size_t  size , yyscan
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return NULL;
 
 	b = (YY_BUFFER_STATE) libconfig_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
@@ -1950,7 +1954,7 @@ YY_BUFFER_STATE libconfig_yy_scan_buffer  (char * base, yy_size_t  size , yyscan
 	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = NULL;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
@@ -2269,7 +2273,7 @@ static int yy_init_globals (yyscan_t yyscanner)
      * This function is called from libconfig_yylex_destroy(), so don't allocate here.
      */
 
-    yyg->yy_buffer_stack = 0;
+    yyg->yy_buffer_stack = NULL;
     yyg->yy_buffer_stack_top = 0;
     yyg->yy_buffer_stack_max = 0;
     yyg->yy_c_buf_p = (char *) 0;

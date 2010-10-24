@@ -256,6 +256,10 @@ int libconfig_yyget_lineno (yyscan_t yyscanner );
 
 void libconfig_yyset_lineno (int line_number ,yyscan_t yyscanner );
 
+int libconfig_yyget_column  (yyscan_t yyscanner);
+
+void libconfig_yyset_column (int  column_no , yyscan_t yyscanner);
+
 YYSTYPE * libconfig_yyget_lval (yyscan_t yyscanner );
 
 void libconfig_yyset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
