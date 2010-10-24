@@ -50,7 +50,7 @@ export DEBUG NETLOG NO_SMS
 # - print "Entering directory ..."
 MAKEFLAGS += -rR --no-print-directory
 
-ifndef PS2SDK
+ifeq ($(PS2SDK),)
   export PS2SDK = /usr/local/ps2dev/ps2sdk
 endif
 
@@ -60,7 +60,6 @@ PS2RD-VERSION-FILE: FORCE
 -include PS2RD-VERSION-FILE
 export PS2RD_VERSION
 
-PACKAGE = ps2rd-$(PS2RD_VERSION)
 
 SUBDIRS = ee iop pc
 
@@ -74,9 +73,9 @@ ifneq ($(BUILD_VERBOSE),1)
 endif
 
 ifeq ($(BUILD_CHECKSRC),1)
-all-ee: CHECK_VARS=REAL_CC=ee-gcc EE_CC=cgcc
-all-iop: CHECK_VARS=REAL_CC=iop-gcc IOP_CC=cgcc
-all-pc: CHECK_VARS=
+all-ee:  CHECK_VARS= REAL_CC=ee-gcc EE_CC=cgcc
+all-iop: CHECK_VARS= REAL_CC=iop-gcc IOP_CC=cgcc
+all-pc:  CHECK_VARS=
 endif
 
 all: $(subdir_list)
@@ -114,6 +113,7 @@ run: all
 update-doc:
 	pod2text pc/ntpbclient/ntpbclient Documentation/ntpbclient.txt
 
+PACKAGE = ps2rd-$(PS2RD_VERSION)
 release: all
 	echo "* Building $(PACKAGE) release packages ..."
 	rm -rf release
