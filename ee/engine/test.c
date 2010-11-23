@@ -24,13 +24,13 @@
 #include <tamtypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <tap.h>
 
 extern void CodeHandler();
 
 extern u32 maxcodes;
 extern u32 numcodes;
 extern u32 codelist[];
-
 
 static void clear_codes(void)
 {
@@ -62,10 +62,10 @@ static int test_type_0(void)
 	add_code(addr + 3, 0x00000078);
 	CodeHandler();
 
-	if (p[0] != 0x78563412) {
-		printf("test for type 0 failed\n");
-		return -1;
-	}
+	ok(
+		p[0] == 0x78563412,
+		"type 0"
+	);
 
 	return 0;
 }
@@ -81,10 +81,10 @@ static int test_type_1(void)
 	add_code(addr + 0x10000002, 0x00005678);
 	CodeHandler();
 
-	if (p[0] != 0x56781234) {
-		printf("test for type 1 failed\n");
-		return -1;
-	}
+	ok(
+		p[0] == 0x56781234,
+		"type 1"
+	);
 
 	return 0;
 }
@@ -101,10 +101,11 @@ static int test_type_2(void)
 	add_code(addr + 0x20000004, 0x9abcdef0);
 	CodeHandler();
 
-	if (p[0] != 0x12345678 || p[1] != 0x9abcdef0) {
-		printf("test for type 2 failed\n");
-		return -1;
-	}
+	ok(
+		p[0] == 0x12345678 &&
+		p[1] == 0x9abcdef0,
+		"type 2"
+	);
 
 	return 0;
 }
@@ -128,10 +129,12 @@ static int test_type_3(void)
 	add_code(0x12345678, 0x00000000);
 	CodeHandler();
 
-	if (p[0] != 0x3333337e || p[1] != 0x33330951 || p[2] != 0xd269dd70) {
-		printf("test for type 3 failed\n");
-		return -1;
-	}
+	ok(
+		p[0] == 0x3333337e &&
+		p[1] == 0x33330951 &&
+		p[2] == 0xd269dd70,
+		"type 3"
+	);
 
 	return 0;
 }
@@ -147,11 +150,13 @@ static int test_type_4(void)
 	add_code(0x80000000, 0x00100000);
 	CodeHandler();
 
-	if (p[0] != 0x80000000 || p[2] != 0x80100000 ||
-	    p[4] != 0x80200000 || p[6] != 0x80300000) {
-		printf("test for type 4 failed\n");
-		return -1;
-	}
+	ok(
+		p[0] == 0x80000000 &&
+		p[2] == 0x80100000 &&
+		p[4] == 0x80200000 &&
+		p[6] == 0x80300000,
+		"type 4"
+	);
 
 	return 0;
 }
@@ -170,10 +175,10 @@ static int test_type_5(void)
 	add_code((u32)dest, 0x00000000);
 	CodeHandler();
 
-	if (memcmp(source, dest, sizeof(source))) {
-		printf("test for type 5 failed\n");
-		return -1;
-	}
+	ok(
+		!memcmp(source, dest, sizeof(source)),
+		"type 5"
+	);
 
 	return 0;
 }
@@ -195,10 +200,11 @@ static int test_type_6(void)
 	add_code(0x00020000, 0x00000008);
 	CodeHandler();
 
-	if (p[2] != 0x1234ff12 || p[3] != 0x12345678) {
-		printf("test for type 6 failed\n");
-		return -1;
-	}
+	ok(
+		p[2] == 0x1234ff12 &&
+		p[3] == 0x12345678,
+		"type 6"
+	);
 
 	return 0;
 }
@@ -219,10 +225,11 @@ static int test_type_7(void)
 	add_code(addr + 0x70000004, 0x00501234);
 	CodeHandler();
 
-	if (p[0] != 0x562e507e || p[1] != 0x56561c3a) {
-		printf("test for type 7 failed\n");
-		return -1;
-	}
+	ok(
+		p[0] == 0x562e507e &&
+		p[1] == 0x56561c3a,
+		"type 7"
+	);
 
 	return 0;
 }
@@ -239,18 +246,20 @@ static int test_type_c(void)
 	add_code(addr + 0x20000008, 0x22222222);
 	CodeHandler();
 
-	if (p[1] != 0xffffffff || p[2] != 0xffffffff) {
-		printf("test #1 for type C failed\n");
-		return -1;
-	}
+	ok(
+		p[1] == 0xffffffff &&
+		p[2] == 0xffffffff,
+		"type C (1)"
+	);
 
 	p[0] = 0x12345678;
 	CodeHandler();
 
-	if (p[1] != 0x11111111 || p[2] != 0x22222222) {
-		printf("test #2 for type C failed\n");
-		return -1;
-	}
+	ok(
+		p[1] == 0x11111111 &&
+		p[2] == 0x22222222,
+		"type C (2)"
+	);
 
 	return 0;
 }
@@ -289,10 +298,10 @@ static int test_type_d(void)
 	add_code(addr + 0x10000010, 0x00001234);
 	CodeHandler();
 
-	if (p[8] != 0x1234) {
-		printf("test for type D failed\n");
-		return -1;
-	}
+	ok(
+		p[8] == 0x1234,
+		"type D"
+	);
 
 	return 0;
 }
@@ -331,17 +340,17 @@ static int test_type_e(void)
 	add_code(addr + 0x10000010, 0x00001234);
 	CodeHandler();
 
-	if (p[8] != 0x1234) {
-		printf("test for type E failed\n");
-		return -1;
-	}
+	ok(
+		p[8] == 0x1234,
+		"type E"
+	);
 
 	return 0;
 }
 
 int main(int argc, char *argv[])
 {
-	printf("Start testing...\n");
+	plan(NO_PLAN);
 
 	test_type_0();
 	test_type_1();
@@ -355,7 +364,5 @@ int main(int argc, char *argv[])
 	test_type_d();
 	test_type_e();
 
-	printf("Testing done.\n");
-
-	return 0;
+	return exit_status();
 }
