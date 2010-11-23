@@ -1,17 +1,19 @@
-##
-# Makefile for cheat engine
-#
-# Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
-##
-
 EE_INCS +=
-EE_CFLAGS += -D_HOOK_9 -DMAX_HOOKS=5 -DMAX_CODES=100 -DMAX_CALLBACKS=1
+EE_CFLAGS += -D_HOOK_9
+EE_CFLAGS += -DMAX_HOOKS=5
+EE_CFLAGS += -DMAX_CODES=100
+EE_CFLAGS += -DMAX_CALLBACKS=1
 EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = engine_asm.S engine.o
-TEST_OBJS = engine_asm.S test.o $(PS2SDK)/ee/startup/crt0.o
+
+EE_OBJS += engine_asm.S
+EE_OBJS += engine.o
+
+TEST_OBJS += engine_asm.S
+TEST_OBJS += test.o
+TEST_OBJS += $(PS2SDK)/ee/startup/crt0.o
 
 all: engine.erl
 
