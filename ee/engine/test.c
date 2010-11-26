@@ -22,32 +22,11 @@
  */
 
 #include <tamtypes.h>
-#include <stdio.h>
 #include <string.h>
 #include <tap.h>
+#include "engine.h"
 
 extern void CodeHandler();
-
-extern u32 maxcodes;
-extern u32 numcodes;
-extern u32 codelist[];
-
-static void clear_codes(void)
-{
-	int i;
-
-	for (i = 0; i < numcodes * 2; i++)
-		codelist[i] = 0;
-
-	numcodes = 0;
-}
-
-static void add_code(u32 addr, u32 val)
-{
-	codelist[numcodes * 2] = addr;
-	codelist[numcodes * 2 + 1] = val;
-	numcodes++;
-}
 
 static int test_type_0(void)
 {
