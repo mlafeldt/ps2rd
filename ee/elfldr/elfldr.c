@@ -32,15 +32,6 @@
 #include <iopheap.h>
 #include <fileio.h>
 #include <io_common.h>
-#include <syscallnr.h>
-
-char *erl_id = "elfldr";
-#if 0
-char *erl_dependancies[] = {
-	"libkernel",
-	NULL
-};
-#endif
 
 #define GS_BGCOLOUR	*((vu32*)0x120000E0)
 
@@ -84,9 +75,6 @@ typedef struct {
 static int _argc;
 static char *_argv[1 + MAX_ARGS];
 static char _argbuf[256];
-
-static void (*OldLoadExecPS2)(const char *filename, int argc, char *argv[]) = NULL;
-extern void HookLoadExecPS2(const char *filename, int argc, char *argv[]);
 
 /*
  * ELF loader function
@@ -257,27 +245,4 @@ void MyLoadExecPS2(const char *filename, int argc, char *argv[])
 	 * - set up ELF loader thread and run it
 	 */
 	ExecPS2(loadElf, NULL, 0, NULL);
-}
-
-/*
- * _init - Automatically invoked on ERL load.
- */
-int __attribute__((section(".init"))) _init(void)
-{
-	/* Hook syscall */
-	OldLoadExecPS2 = GetSyscallHandler(__NR_LoadExecPS2);
-	SetSyscall(__NR_LoadExecPS2, HookLoadExecPS2);
-
-	return 0;
-}
-
-/*
- * _fini - Automatically invoked on ERL unload.
- */
-int __attribute__((section(".fini"))) _fini(void)
-{
-	/* Unhook syscall */
-	SetSyscall(__NR_LoadExecPS2, OldLoadExecPS2);
-
-	return 0;
 }
