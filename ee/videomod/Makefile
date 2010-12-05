@@ -1,16 +1,13 @@
-##
-# Makefile for videomod
-#
-# Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
-##
-
 EE_INCS +=
 EE_CFLAGS +=
 EE_CXXFLAGS +=
 EE_LDFLAGS +=
 EE_ASFLAGS +=
 EE_LIBS +=
-EE_OBJS = videomod_asm.S videomod.o
+
+EE_OBJS += erl.o
+EE_OBJS += videomod.o
+EE_OBJS += videomod_asm.S
 
 all: videomod.erl
 

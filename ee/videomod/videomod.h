@@ -21,30 +21,13 @@
  * $Id$
  */
 
-#include <tamtypes.h>
+#ifndef _VIDEOMOD_H_
+#define _VIDEOMOD_H_
 
-extern int vmode;
-extern int ydiff_lores;
-extern int ydiff_hires;
+int get_vmode(void);
+void set_vmode(int m);
 
-int get_vmode(void)
-{
-	return vmode;
-}
+void get_ydiff(int *lo, int *hi);
+void set_ydiff(int lo, int hi);
 
-void set_vmode(int m)
-{
-	vmode = m;
-}
-
-void get_ydiff(int *lo, int *hi)
-{
-	*lo = ydiff_lores;
-	*hi = ydiff_hires;
-}
-
-void set_ydiff(int lo, int hi)
-{
-	ydiff_lores = lo;
-	ydiff_hires = hi;
-}
+#endif /* _VIDEOMOD_H_ */
