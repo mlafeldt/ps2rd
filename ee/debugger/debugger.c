@@ -55,10 +55,7 @@ extern int patch_loadModule(void);
 /* debugger_rpc.c functions */
 extern int rpcNTPBinit(void);
 extern int rpcNTPBreset(void);
-extern int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode);
-extern int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode);
-extern int rpcNTPBEndReply(int rpc_mode);
-extern int rpcNTPBSync(int mode, int *cmd, int *result);
+extern int rpcNTPBexecCmd(u8 *buf, int buflen, int rpc_mode);
 
 /* do not link to strcpy() from libc! */
 #define __strcpy(dest, src) \
@@ -117,21 +114,6 @@ typedef struct {
 #define HASH_DEBUGGER	0x0b9bdb62
 #define HASH_MEMDISK	0x03c3b0eb
 #define HASH_EESYNC	0x06bcb043
-
-/* defines for communication with debugger module */
-#define NTPBCMD_SEND_DUMP 		0x300
-
-#define REMOTE_CMD_NONE			0x000
-#define REMOTE_CMD_DUMP			0x100
-#define REMOTE_CMD_HALT			0x201
-#define REMOTE_CMD_RESUME		0x202
-#define REMOTE_CMD_ADDMEMPATCHES	0x501
-#define REMOTE_CMD_CLEARMEMPATCHES	0x502
-#define REMOTE_CMD_ADDRAWCODES		0x601
-#define REMOTE_CMD_CLEARRAWCODES	0x602
-
-/* to control Halted/Resumed game state */
-static int haltState = 0;
 
 /* to control automatic hooking */
 #define AUTO_HOOK_OFF	0
@@ -629,155 +611,13 @@ void NewSifSetReg(u32 regnum, int regval)
 }
 
 /*
- * read_mem: this function reads memory
- */
-static int read_mem(void *addr, int size, void *buf)
-{
-	DIntr();
-	ee_kmode_enter();
-
-	memcpy((void *)buf, (void *)addr, size);
-
-	ee_kmode_exit();
-	EIntr();
-
-	return 0;
-}
-
-/*
- * send_dump: this function send a dump to the client
- */
-static int sendDump(u32 dump_start, u32 dump_end)
-{
-	int r, len, sndSize, dumpSize, dpos, rpos;
-
-	len = dump_end - dump_start;
-
-	/* reducing dump size to fit in buffer */
-	if (len > BUFSIZE)
-		dumpSize = BUFSIZE;
-	else
-		dumpSize = len;
-
-	dpos = 0;
-	while (dpos < len) {
-
-		/* dump mem part */
-		read_mem((void *)(dump_start + dpos), dumpSize, g_buf);
-
-		/* reducing send size for rpc if needed */
-		if (dumpSize > 4096)
-			sndSize = 4096;
-		else
-			sndSize = dumpSize;
-
-		/* sending dump part datas */
-		rpos = 0;
-		while (rpos < dumpSize) {
-			rpcNTPBsendData(NTPBCMD_SEND_DUMP, &g_buf[rpos], sndSize, g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &r);
-			rpos += sndSize;
-			if ((dumpSize - rpos) < 4096)
-				sndSize = dumpSize - rpos;
-		}
-
-		dpos += dumpSize;
-		if ((len - dpos) < BUFSIZE)
-			dumpSize = len - dpos;
-	}
-
-	/* send end of reply message */
-	rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-	rpcNTPBSync(0, NULL, &r);
-
-	return len;
-}
-
-/*
- * execRemoteCmd: this function retrieve a Request sent by the client and fill it
- */
-static int execRemoteCmd(void)
-{
-	u16 remote_cmd;
-	int size;
-	int ret;
-	u8 cmd_buf[64];
-
-	if (g_debugger_opts.rpc_mode == -1)
-		return 0;
-
-	/* get the remote command by RPC */
-	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, g_debugger_opts.rpc_mode);
-	rpcNTPBSync(0, NULL, &ret);
-
-	if (remote_cmd != REMOTE_CMD_NONE) {
-		/* handle Dump requests */
-		if (remote_cmd == REMOTE_CMD_DUMP) {
-			sendDump(*((u32 *)&cmd_buf[0]), *((u32 *)&cmd_buf[4]));
-		}
-		/* handle Halt request */
-		else if (remote_cmd == REMOTE_CMD_HALT) {
-			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);
-			if (!haltState) {
-				haltState = 1;
-				while (haltState)
-					execRemoteCmd();
-			}
-		}
-		/* handle Resume request */
-		else if (remote_cmd == REMOTE_CMD_RESUME) {
-			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);
-			if (haltState) {
-				haltState = 0;
-			}
-		}
-		/* handle raw mem patches adding */
-		else if (remote_cmd == REMOTE_CMD_ADDMEMPATCHES) {
-			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);
-			/*
-			 * TODO ...
-			 */
-		}
-		/* handle raw mem patches clearing */
-		else if (remote_cmd == REMOTE_CMD_CLEARMEMPATCHES) {
-			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);
-			/*
-			 * TODO ...
-			 */
-		}
-		/* handle codes adding */
-		else if (remote_cmd == REMOTE_CMD_ADDRAWCODES) {
-			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);
-			/*
-			 * TODO ...
-			 */
-		}
-		/* handle codes clearing */
-		else if (remote_cmd == REMOTE_CMD_CLEARRAWCODES) {
-			rpcNTPBEndReply(g_debugger_opts.rpc_mode);
-			rpcNTPBSync(0, NULL, &ret);
-			/*
-			 * TODO ...
-			 */
-		}
-	}
-
-	return 1;
-}
-
-/*
  * Constantly called by the cheat engine.
  */
 int debugger_loop(void)
 {
 	/* check/execute remote command */
 	if (debugger_ready)
-		execRemoteCmd();
+		rpcNTPBexecCmd(g_buf, BUFSIZE, g_debugger_opts.rpc_mode);
 
 	return 0;
 }

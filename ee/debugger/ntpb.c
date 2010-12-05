@@ -31,6 +31,18 @@
 #define CMD_SENDDATA	  	0x0e
 #define CMD_ENDREPLY	  	0x0f
 
+/* defines for communication with debugger module */
+#define NTPBCMD_SEND_DUMP 		0x300
+
+#define REMOTE_CMD_NONE			0x000
+#define REMOTE_CMD_DUMP			0x100
+#define REMOTE_CMD_HALT			0x201
+#define REMOTE_CMD_RESUME		0x202
+#define REMOTE_CMD_ADDMEMPATCHES	0x501
+#define REMOTE_CMD_CLEARMEMPATCHES	0x502
+#define REMOTE_CMD_ADDRAWCODES		0x601
+#define REMOTE_CMD_CLEARRAWCODES	0x602
+
 static SifRpcClientData_t rpcclient 	__attribute__((aligned(64)));
 static int Rpc_Buffer[16] 		__attribute__((aligned(64)));
 
@@ -51,6 +63,9 @@ static struct { 	// size = 64
 static unsigned int currentCmd = 0;
 
 static int RPCclient_Inited = 0;
+
+/* to control Halted/Resumed game state */
+static int haltState = 0;
 
 /*
  * rpcNTPBinit: this function init NTPB RPC Client
@@ -93,7 +108,7 @@ int rpcNTPBreset(void)
 /*
  * rpcNTPBgetRemoteCmd: get a NTPB request sent by client to server on IOP
  */
-int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
+static int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 {
 	int ret = 0;
 
@@ -119,7 +134,7 @@ int rpcNTPBgetRemoteCmd(u16 *cmd, u8 *buf, int *size, int rpc_mode)
 /*
  * rpcNTPBsendData: send datas to the PC Client
  */
-int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode)
+static int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode)
 {
 	int ret = 0;
 
@@ -150,7 +165,7 @@ int rpcNTPBsendData(u16 cmd, u8 *buf, int size, int rpc_mode)
 /*
  * rpcNTPBEndReply: Notify the end of reply to the PC Client
  */
-int rpcNTPBEndReply(int rpc_mode)
+static int rpcNTPBEndReply(int rpc_mode)
 {
 	int ret = 0;
 
@@ -172,7 +187,7 @@ int rpcNTPBEndReply(int rpc_mode)
 /*
  * rpcNTPBSync: Sync RPC
  */
-int rpcNTPBSync(int mode, int *cmd, int *result)
+static int rpcNTPBSync(int mode, int *cmd, int *result)
 {
 	int funcIsExecuting, i;
 
@@ -206,6 +221,149 @@ int rpcNTPBSync(int mode, int *cmd, int *result)
 	/* get result */
 	if(result)
 		*result = *(int*)Rpc_Buffer;
+
+	return 1;
+}
+
+/*
+ * read_mem: this function reads memory
+ */
+static int read_mem(void *addr, int size, void *buf)
+{
+	DIntr();
+	ee_kmode_enter();
+
+	memcpy((void *)buf, (void *)addr, size);
+
+	ee_kmode_exit();
+	EIntr();
+
+	return 0;
+}
+
+/*
+ * send_dump: this function send a dump to the client
+ */
+static int sendDump(u32 dump_start, u32 dump_end, u8 *buf, int buflen, int rpc_mode)
+{
+	int r, len, sndSize, dumpSize, dpos, rpos;
+
+	len = dump_end - dump_start;
+
+	/* reducing dump size to fit in buffer */
+	if (len > buflen)
+		dumpSize = buflen;
+	else
+		dumpSize = len;
+
+	dpos = 0;
+	while (dpos < len) {
+
+		/* dump mem part */
+		read_mem((void *)(dump_start + dpos), dumpSize, buf);
+
+		/* reducing send size for rpc if needed */
+		if (dumpSize > 4096)
+			sndSize = 4096;
+		else
+			sndSize = dumpSize;
+
+		/* sending dump part datas */
+		rpos = 0;
+		while (rpos < dumpSize) {
+			rpcNTPBsendData(NTPBCMD_SEND_DUMP, &buf[rpos], sndSize, rpc_mode);
+			rpcNTPBSync(0, NULL, &r);
+			rpos += sndSize;
+			if ((dumpSize - rpos) < 4096)
+				sndSize = dumpSize - rpos;
+		}
+
+		dpos += dumpSize;
+		if ((len - dpos) < buflen)
+			dumpSize = len - dpos;
+	}
+
+	/* send end of reply message */
+	rpcNTPBEndReply(rpc_mode);
+	rpcNTPBSync(0, NULL, &r);
+
+	return len;
+}
+
+/*
+ * Retrieve a Request sent by the client and fill it
+ */
+int rpcNTPBexecCmd(u8 *buf, int buflen, int rpc_mode)
+{
+	u16 remote_cmd;
+	int size;
+	int ret;
+	u8 cmd_buf[64];
+
+	if (rpc_mode == -1)
+		return 0;
+
+	/* get the remote command by RPC */
+	rpcNTPBgetRemoteCmd(&remote_cmd, cmd_buf, &size, rpc_mode);
+	rpcNTPBSync(0, NULL, &ret);
+
+	if (remote_cmd != REMOTE_CMD_NONE) {
+		/* handle Dump requests */
+		if (remote_cmd == REMOTE_CMD_DUMP) {
+			sendDump(*((u32*)&cmd_buf[0]), *((u32*)&cmd_buf[4]),
+				buf, buflen, rpc_mode);
+		}
+		/* handle Halt request */
+		else if (remote_cmd == REMOTE_CMD_HALT) {
+			rpcNTPBEndReply(rpc_mode);
+			rpcNTPBSync(0, NULL, &ret);
+			if (!haltState) {
+				haltState = 1;
+				while (haltState)
+					rpcNTPBexecCmd(buf, buflen, rpc_mode);
+			}
+		}
+		/* handle Resume request */
+		else if (remote_cmd == REMOTE_CMD_RESUME) {
+			rpcNTPBEndReply(rpc_mode);
+			rpcNTPBSync(0, NULL, &ret);
+			if (haltState) {
+				haltState = 0;
+			}
+		}
+		/* handle raw mem patches adding */
+		else if (remote_cmd == REMOTE_CMD_ADDMEMPATCHES) {
+			rpcNTPBEndReply(rpc_mode);
+			rpcNTPBSync(0, NULL, &ret);
+			/*
+			 * TODO ...
+			 */
+		}
+		/* handle raw mem patches clearing */
+		else if (remote_cmd == REMOTE_CMD_CLEARMEMPATCHES) {
+			rpcNTPBEndReply(rpc_mode);
+			rpcNTPBSync(0, NULL, &ret);
+			/*
+			 * TODO ...
+			 */
+		}
+		/* handle codes adding */
+		else if (remote_cmd == REMOTE_CMD_ADDRAWCODES) {
+			rpcNTPBEndReply(rpc_mode);
+			rpcNTPBSync(0, NULL, &ret);
+			/*
+			 * TODO ...
+			 */
+		}
+		/* handle codes clearing */
+		else if (remote_cmd == REMOTE_CMD_CLEARRAWCODES) {
+			rpcNTPBEndReply(rpc_mode);
+			rpcNTPBSync(0, NULL, &ret);
+			/*
+			 * TODO ...
+			 */
+		}
+	}
 
 	return 1;
 }
