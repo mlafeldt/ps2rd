@@ -10,8 +10,10 @@ EE_LIBS += -ltap
 
 EE_OBJS += engine_asm.S
 EE_OBJS += engine.o
+EE_OBJS += erl.o
 
 TEST_OBJS += engine_asm.S
+TEST_OBJS += engine.o
 TEST_OBJS += test.o
 TEST_OBJS += $(PS2SDK)/ee/startup/crt0.o
 
