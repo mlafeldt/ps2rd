@@ -1,9 +1,3 @@
-##
-# Makefile for debugger
-#
-# Copyright (C) 2009-2010 Mathias Lafeldt <misfire@debugon.org>
-##
-
 EE_INCS +=
 EE_CFLAGS +=
 EE_CXXFLAGS +=
@@ -12,9 +6,10 @@ EE_ASFLAGS +=
 EE_LIBS +=
 
 EE_OBJS += debugger.o
-EE_OBJS += debugger_rpc.o
+EE_OBJS += erl.o
 EE_OBJS += loadfile.o
 EE_OBJS += loadmodule_hooks.o
+EE_OBJS += ntpb.o
 EE_OBJS += padread_hooks.o
 EE_OBJS += pattern.o
 EE_OBJS += syscall_hooks.S
@@ -23,11 +18,10 @@ ifeq ($(DEBUG),1)
 EE_CFLAGS += -D_DEBUG
 endif
 
-
 all: debugger.erl
 
 clean:
-	rm -f *.o debugger.erl
+	rm -f *.o *.erl *.erl
 
 debugger.erl: $(EE_OBJS)
 	$(EE_CC) -mno-crt0 -nostartfiles -o $@ $(EE_OBJS) $(EE_CFLAGS) \

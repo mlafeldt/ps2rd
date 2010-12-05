@@ -43,20 +43,10 @@
  * - manage code and hook list of cheat engine
  */
 
-char *erl_id = "debugger";
-#if 0
-char *erl_dependancies[] = {
-	"libkernel",
-	"libpatches",
-	NULL
-};
-#endif
-
 /* loadfile.c function */
 extern int SifLoadModuleAsync(const char *path, int arg_len, const char *args);
 
 /* padread_hooks.c functions */
-extern void clear_autohook_tab(void);
 extern int patch_padRead(void);
 
 /* loadmodule_hooks.c functions */
@@ -92,9 +82,6 @@ typedef struct {
 	char arg[0x50];
 } _sceSifCmdResetData __attribute__((aligned(16)));
 
-/* for syscall hooks */
-extern void HookSifSetReg(u32 register_num, int register_value);
-extern u32 HookSifSetDma(SifDmaTransfer_t *sdd, s32 len);
 extern u32 (*OldSifSetDma)(SifDmaTransfer_t *sdd, s32 len);
 extern int (*OldSifSetReg)(u32 register_num, int register_value);
 
@@ -205,6 +192,19 @@ void set_debugger_opts(const debugger_opts_t *opts)
 	__strcpy(g_debugger_opts.ipconfig.ip, opts->ipconfig.ip);
 	__strcpy(g_debugger_opts.ipconfig.netmask, opts->ipconfig.netmask);
 	__strcpy(g_debugger_opts.ipconfig.gateway, opts->ipconfig.gateway);
+}
+
+void init_debugger_opts(void)
+{
+	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
+	g_debugger_opts.patch_loadmodule = PATCH_LM_OFF;
+	g_debugger_opts.unhook_iop_reset = 0;
+	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
+	g_debugger_opts.load_modules = LOAD_MODULES_ON;
+
+	__strcpy(g_debugger_opts.ipconfig.ip, "192.168.0.10");
+	__strcpy(g_debugger_opts.ipconfig.netmask, "255.255.255.0");
+	__strcpy(g_debugger_opts.ipconfig.gateway, "192.168.0.1");
 }
 
 /*
@@ -771,50 +771,7 @@ static int execRemoteCmd(void)
 }
 
 /*
- * _init - Automatically invoked on ERL load.
- */
-int __attribute__((section(".init"))) _init(void)
-{
-	/* Set default debugger options */
-	g_debugger_opts.auto_hook = AUTO_HOOK_OFF;
-	g_debugger_opts.patch_loadmodule = PATCH_LM_OFF;
-	g_debugger_opts.unhook_iop_reset = 0;
-	g_debugger_opts.rpc_mode = RPC_M_NOWAIT;
-	g_debugger_opts.load_modules = LOAD_MODULES_ON;
-
-	/* set default IP settings */
-	__strcpy(g_debugger_opts.ipconfig.ip, "192.168.0.10");
-	__strcpy(g_debugger_opts.ipconfig.netmask, "255.255.255.0");
-	__strcpy(g_debugger_opts.ipconfig.gateway, "192.168.0.1");
-
-	/* clear auto-hook addresses table */
-	clear_autohook_tab();
-
-	/* Hook syscalls */
-	OldSifSetDma = GetSyscallHandler(__NR_SifSetDma);
-	SetSyscall(__NR_SifSetDma, HookSifSetDma);
-
-	OldSifSetReg = GetSyscallHandler(__NR_SifSetReg);
-	SetSyscall(__NR_SifSetReg, HookSifSetReg);
-
-	return 0;
-}
-
-/*
- * _fini - Automatically invoked on ERL unload.
- */
-int __attribute__((section(".fini"))) _fini(void)
-{
-	/* Unhook syscalls */
-	SetSyscall(__NR_SifSetDma, OldSifSetDma);
-
-	SetSyscall(__NR_SifSetReg, OldSifSetReg);
-
-	return 0;
-}
-
-/*
- * debugger_loop - Constantly called by the cheat engine.
+ * Constantly called by the cheat engine.
  */
 int debugger_loop(void)
 {
