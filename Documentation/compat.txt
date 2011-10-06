@@ -2,7 +2,7 @@ There're still games you can't hack with PS2rd, but we're working hard on
 improving compatibility.
 
 A list of working games can be found here:
-http://wiki.github.com/misfire/ps2rd/compatibility-list
+http://wiki.github.com/mlafeldt/ps2rd/compatibility-list
 
 By definition, a game is compatible and deserves the status "Working" when you
 can dump memory at pretty much any point. There're also games that are only
