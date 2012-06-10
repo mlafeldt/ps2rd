@@ -5,6 +5,7 @@
 *.irx
 *.o
 *.swp
+/.vagrant
 /PS2RD-VERSION-FILE
 /config.mak
 /release/
