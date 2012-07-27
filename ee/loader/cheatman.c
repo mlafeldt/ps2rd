@@ -131,15 +131,23 @@ void activate_cheats(const game_t *game, engine_t *engine)
 {
 	cheat_t *cheat = NULL;
 	code_t *code = NULL;
+	int nextCodeCanBeHook = 1;
 
 	CHEATS_FOREACH(cheat, &game->cheats) {
 		CODES_FOREACH(code, &cheat->codes) {
 			D_PRINTF("%08X %08X\n", code->addr, code->val);
-			/* TODO improve check for hook */
-			if ((code->addr & 0xfe000000) == 0x90000000)
+			if (((code->addr & 0xfe000000) == 0x90000000) && nextCodeCanBeHook == 1)
+			{
 				engine->add_hook(code->addr, code->val);
+			}
 			else
 				engine->add_code(code->addr, code->val);
+			
+			// Discard any false positives from being possible hooks
+			if((code->addr & 0xf0000000) == 0x40000000 || 0x30000000)
+				nextCodeCanBeHook = 0;
+			else
+				nextCodeCanBeHook = 1;
 		}
 	}
 }
