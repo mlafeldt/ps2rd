@@ -1,13 +1,12 @@
 To build the PS2 part of PS2rd, you need a working PS2DEV toolchain with an
-up-to-date version of the PS2SDK. The easiest way to get both is:
-
-	$ git clone git://github.com/ps2dev/ps2toolchain.git
-	$ cd ps2toolchain/
-	$ sudo ./toolchain-sudo.sh
+up-to-date version of the PS2SDK. The easiest way to get both is docker-ps2dev:
+https://github.com/mlafeldt/docker-ps2dev
 
 When everything is set up, go to PS2rd's root directory and run
 
 	$ make
+
+Or "./docker-make" if you're using docker-ps2dev.
 
 This will create the executable ee/loader/ps2rd.elf.
 

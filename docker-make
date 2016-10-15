@@ -1,0 +1,3 @@
+#!/bin/bash
+DOCKER_IMAGE=mlafeldt/ps2dev:2011
+exec docker run -it --rm -v "$PWD:/src" "$DOCKER_IMAGE" make "$@"
