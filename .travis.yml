@@ -1,0 +1,14 @@
+language: c
+
+sudo: required
+
+services:
+  - docker
+
+script:
+  - ./docker-make V=1
+  - ls -lh ee/loader/ps2rd.elf
+
+branches:
+  only:
+    - master
