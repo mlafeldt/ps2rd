@@ -1,3 +1,12 @@
 #!/bin/bash
+
+set -e
+set -o pipefail
+
 DOCKER_IMAGE=mlafeldt/ps2dev:2011
+
+if test "$1" == "--pull"; then
+    exec docker pull "$DOCKER_IMAGE"
+fi
+
 exec docker run -it --rm -v "$PWD:/src" "$DOCKER_IMAGE" make "$@"
