@@ -1,4 +1,5 @@
 *.a
+*.bin
 *.elf
 *.erl
 *.exe
