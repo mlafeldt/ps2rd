@@ -77,7 +77,7 @@ extern int libconfig_yylex_init_extra(struct scan_context *scan_ctx,
 
 /* ------------------------------------------------------------------------- */
 
-static void __config_locale_override()
+static void __config_locale_override(void)
 {
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) \
   && ! defined(__MINGW32__)
@@ -106,7 +106,7 @@ static void __config_locale_override()
 
 /* ------------------------------------------------------------------------- */
 
-static void __config_locale_restore()
+static void __config_locale_restore(void)
 {
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) \
   && ! defined(__MINGW32__)

@@ -9,4 +9,6 @@
 /.vagrant
 /PS2RD-VERSION-FILE
 /config.mak
+/ee/loader/cheats.txt
+/ee/loader/ps2rd.conf
 /release/

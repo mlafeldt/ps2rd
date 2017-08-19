@@ -25,14 +25,12 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <string.h>
-
+#include <debug.h>
 #include "pattern.h"
 #include "padread_patterns.h"
 
 /* from debugger.c */
 extern int debugger_loop(void);
-
-#define GS_BGCOLOUR	*((vu32*)0x120000e0)
 
 /* for hook addresses */
 #define HOOKS_BASE	 	0x000fff00
@@ -136,7 +134,7 @@ int patch_padRead(void)
 	int pattern_found = 0;
 	const pattern_t *pat;
 
-	GS_BGCOLOUR = 0x800080; /* Purple while padRead pattern search */
+	DEBUG_BGCOLOR(0x800080); /* Purple while padRead pattern search */
 
 	memscope = 0x01f00000 - start;
 
@@ -152,11 +150,11 @@ int patch_padRead(void)
 	}
 
 	if (!ptr) {
-		GS_BGCOLOUR = 0x808080; /* Gray, pattern not found */
+		DEBUG_BGCOLOR(0x808080); /* Gray, pattern not found */
 		return 0;
 	}
 
- 	GS_BGCOLOUR = 0x008000; /* Green while padRead patches */
+	DEBUG_BGCOLOR(0x008000); /* Green while padRead patches */
 
 	/* Save original scePadRead ptr */
 	if (scePadRead_style == 2)
@@ -202,9 +200,9 @@ int patch_padRead(void)
 	}
 
 	if (!pattern_found)
-		GS_BGCOLOUR = 0x808080; /* gray, pattern not found */
+		DEBUG_BGCOLOR(0x808080); /* gray, pattern not found */
 	else
-		GS_BGCOLOUR = 0x000000; /* Black, done */
+		DEBUG_BGCOLOR(0x000000); /* Black, done */
 
 	return 1;
 }
