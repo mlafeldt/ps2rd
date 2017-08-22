@@ -6,17 +6,11 @@ When everything is set up, go to PS2rd's root directory and run
 
 	$ make
 
-Or "./docker-make" if you're using docker-ps2dev.
-
 This will create the executable ee/loader/ps2rd.elf.
 
 The beginning of the Makefile documents many variables that affect the way PS2rd
 is built. You can override them either from the command line, or in the
 config.mak file. Take a look at config.mak.sample for a sample configuration.
-
-You can also speed up the build process with "make -j <jobs>", e.g.
-
-	$ make -j4
 
 To directly run the compiled ELF with ps2client, do
 

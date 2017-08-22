@@ -6,7 +6,7 @@ services:
   - docker
 
 script:
-  - ./docker-make V=1
+  - make V=1
   - ls -lh ee/loader/ps2rd.elf
 
 branches:
