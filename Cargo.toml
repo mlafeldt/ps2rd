@@ -1,0 +1,6 @@
+[package]
+name = "ps2rd"
+version = "0.1.0"
+authors = ["Mathias Lafeldt <mathias.lafeldt@gmail.com>"]
+
+[dependencies]
