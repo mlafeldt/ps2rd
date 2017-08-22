@@ -58,7 +58,7 @@ endif
 
 EE_OBJS = $(ERL_OBJS) $(IRX_OBJS) $(LDR_OBJS)
 
-all: loader
+all: loader cheats.txt ps2rd.conf
 
 clean:
 	rm -f $(EE_BIN) $(LDR_OBJS)
@@ -68,6 +68,9 @@ loader: $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
 loader.o: mycdvd.h mypad.h myutil.h dbgprintf.h ../../PS2RD-VERSION-FILE
+
+cheats.txt ps2rd.conf:
+	cp $@.sample $@
 
 pack:
 	ps2-packer $(EE_BIN) $(EE_BIN).2 -v
