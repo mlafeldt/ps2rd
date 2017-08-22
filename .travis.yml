@@ -1,4 +1,4 @@
-language: c
+language: rust
 
 sudo: required
 
@@ -8,6 +8,8 @@ services:
 script:
   - make V=1
   - ls -lh ee/loader/ps2rd.elf
+  - cargo build --verbose
+  - cargo test --verbose
 
 branches:
   only:
