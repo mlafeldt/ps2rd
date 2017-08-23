@@ -2,8 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mlafeldt/ps2rd.svg?branch=master)](https://travis-ci.org/mlafeldt/ps2rd)
 
-PS2rd is a collection of tools to remotely debug PS2 applications, including
-commercial PS2 games.
+PS2rd provides a collection of tools to remotely debug PS2 games.
 
 Features:
 
