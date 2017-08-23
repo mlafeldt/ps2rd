@@ -7,7 +7,7 @@ LIBCONFIG = $(CURDIR)/$(LIBCONFIG_DIR)
 export LIBCONFIG
 
 EE_LIBS = $(LIBCHEATS_DIR) $(LIBCONFIG_DIR)
-ERL_MODULES = debugger elfldr engine videomod
+ERL_MODULES = debugger elfldr engine
 SUBDIRS = $(EE_LIBS) $(ERL_MODULES) loader
 
 subdir_list  = $(SUBDIRS:%=all-%)

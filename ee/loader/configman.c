@@ -149,35 +149,6 @@ void config_build(config_t *config)
 #ifdef ELFLDR_ADDR
 	config_setting_set_int(set, ELFLDR_ADDR);
 #endif
-	/*
-	 * videomod section
-	 */
-	group = config_setting_add(root, "videomod", CONFIG_TYPE_GROUP);
-
-	set = config_setting_add(group, "install", CONFIG_TYPE_BOOL);
-#ifdef VIDEOMOD_INSTALL
-	config_setting_set_bool(set, VIDEOMOD_INSTALL);
-#endif
-	set = config_setting_add(group, "addr", CONFIG_TYPE_INT);
-#ifdef VIDEOMOD_ADDR
-	config_setting_set_int(set, VIDEOMOD_ADDR);
-#endif
-	set = config_setting_add(group, "vmode", CONFIG_TYPE_INT);
-#ifdef VIDEOMOD_VMODE
-	config_setting_set_int(set, VIDEOMOD_VMODE);
-#endif
-	set = config_setting_add(group, "yfix", CONFIG_TYPE_BOOL);
-#ifdef VIDEOMOD_YFIX
-	config_setting_set_bool(set, VIDEOMOD_YFIX);
-#endif
-	set = config_setting_add(group, "ydiff_lores", CONFIG_TYPE_INT);
-#ifdef VIDEOMOD_YDIFF_LORES
-	config_setting_set_int(set, VIDEOMOD_YDIFF_LORES);
-#endif
-	set = config_setting_add(group, "ydiff_hires", CONFIG_TYPE_INT);
-#ifdef VIDEOMOD_YDIFF_HIRES
-	config_setting_set_int(set, VIDEOMOD_YDIFF_HIRES);
-#endif
 }
 
 /**
@@ -238,12 +209,4 @@ void config_print(const config_t *config)
 	/* elfldr */
 	PRINT_BOOL(SET_ELFLDR_INSTALL);
 	PRINT_HEX(SET_ELFLDR_ADDR);
-
-	/* videomod */
-	PRINT_BOOL(SET_VIDEOMOD_INSTALL);
-	PRINT_HEX(SET_VIDEOMOD_ADDR);
-	PRINT_INT(SET_VIDEOMOD_VMODE);
-	PRINT_BOOL(SET_VIDEOMOD_YFIX);
-	PRINT_INT(SET_VIDEOMOD_YDIFF_LORES);
-	PRINT_INT(SET_VIDEOMOD_YDIFF_HIRES);
 }

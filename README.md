@@ -11,7 +11,6 @@ Features:
 * [Planned] Write data to PS2 memory
 * [Planned] Set breakpoints/watchpoints
 * Powerful cheat system similar to CB or AR
-* Video mode patcher
 * Compatible with Open PS2 Loader
 
 Requirements:

@@ -18,7 +18,6 @@ ERL_OBJS += elfldr_erl.o
 ERL_OBJS += engine_erl.o
 ERL_OBJS += libkernel_erl.o
 ERL_OBJS += libpatches_erl.o
-ERL_OBJS += videomod_erl.o
 
 IRX_OBJS += debugger_irx.o
 IRX_OBJS += eesync_irx.o

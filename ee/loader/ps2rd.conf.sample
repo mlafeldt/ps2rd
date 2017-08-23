@@ -46,12 +46,3 @@ elfldr: {
 	install = true;
 	addr = 0x000ff000;
 };
-
-videomod: {
-	install = false;
-	addr = 0x000fe000;
-	vmode = 2; # force NTSC
-	yfix = true;
-	ydiff_lores = -10; # +24 for NTSC2PAL
-	ydiff_hires = -50; # +44 for NTSC2PAL
-};
