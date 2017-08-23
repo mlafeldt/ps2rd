@@ -32,7 +32,7 @@ N: Mathias Lafeldt
 E: misfire@debugon.org
 D: project maintainer and core developer
 D: common/libcheats/
-D: ee/debugger|elfldr|engine|libcheats|loader|videomod
+D: ee/debugger|elfldr|engine|libcheats|loader
 D: iop/netlog
 S: Germany
 

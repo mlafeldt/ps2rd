@@ -91,26 +91,6 @@
 #define ELFLDR_ADDR		0x000ff000
 #endif
 
-#ifndef VIDEOMOD_INSTALL
-#define VIDEOMOD_INSTALL	0
-#endif
-#ifndef VIDEOMOD_ADDR
-#define VIDEOMOD_ADDR		0x000fe000
-#endif
-#ifndef VIDEOMOD_VMODE
-#define VIDEOMOD_VMODE		2
-#endif
-#ifndef VIDEOMOD_YFIX
-#define VIDEOMOD_YFIX		1
-#endif
-#ifndef VIDEOMOD_YDIFF_LORES
-#define VIDEOMOD_YDIFF_LORES	0
-#endif
-#ifndef VIDEOMOD_YDIFF_HIRES
-#define VIDEOMOD_YDIFF_HIRES	0
-#endif
-
-
 /* Keys to access different settings in configuration */
 #define SET_IOP_RESET			"loader.iop_reset"
 #define SET_SBV_PATCHES			"loader.sbv_patches"
@@ -134,12 +114,6 @@
 #define SET_SDKLIBS_ADDR		"sdklibs.addr"
 #define SET_ELFLDR_INSTALL		"elfldr.install"
 #define SET_ELFLDR_ADDR			"elfldr.addr"
-#define SET_VIDEOMOD_INSTALL		"videomod.install"
-#define SET_VIDEOMOD_ADDR		"videomod.addr"
-#define SET_VIDEOMOD_VMODE		"videomod.vmode"
-#define SET_VIDEOMOD_YFIX		"videomod.yfix"
-#define SET_VIDEOMOD_YDIFF_LORES	"videomod.ydiff_lores"
-#define SET_VIDEOMOD_YDIFF_HIRES	"videomod.ydiff_hires"
 
 
 void config_build(config_t *config);

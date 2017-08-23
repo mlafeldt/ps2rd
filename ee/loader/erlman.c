@@ -24,7 +24,6 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <erl.h>
-#include <hwbp.h>
 #include <string.h>
 #include "configman.h"
 #include "erlman.h"
@@ -62,7 +61,6 @@ enum {
 	ERL_FILE_LIBPATCHES,
 	ERL_FILE_DEBUGGER,
 	ERL_FILE_ELFLDR,
-	ERL_FILE_VIDEOMOD,
 
 	ERL_FILE_NUM /* number of files */
 };
@@ -77,7 +75,6 @@ extern u8  _libdebug_erl_start[];
 extern u8  _libpatches_erl_start[];
 extern u8  _debugger_erl_start[];
 extern u8  _elfldr_erl_start[];
-extern u8  _videomod_erl_start[];
 
 static erl_file_t _erl_files[ERL_FILE_NUM] = {
 	[ERL_FILE_ENGINE] = {
@@ -110,10 +107,6 @@ static erl_file_t _erl_files[ERL_FILE_NUM] = {
 		.name = "elfldr.erl",
 		.start = _elfldr_erl_start,
 	},
-	[ERL_FILE_VIDEOMOD] = {
-		.name = "videomod.erl",
-		.start = _videomod_erl_start,
-	}
 };
 
 static int __install_erl(erl_file_t *file, u32 addr)
@@ -228,38 +221,6 @@ int install_erls(const config_t *config, engine_t *engine)
 	}
 
 	/*
-	 * install videomod
-	 */
-	if (config_get_bool(config, SET_VIDEOMOD_INSTALL)) {
-		void (*set_vmode)(int m) = NULL;
-		addr = config_get_int(config, SET_VIDEOMOD_ADDR);
-		file = &_erl_files[ERL_FILE_VIDEOMOD];
-
-		if (__install_erl(file, addr) < 0)
-			return -1;
-
-		GET_SYMBOL(set_vmode, "set_vmode");
-		set_vmode(config_get_int(config, SET_VIDEOMOD_VMODE));
-
-		if (config_get_bool(config, SET_VIDEOMOD_YFIX)) {
-			void (*set_ydiff)(int lo, int hi) = NULL;
-			void (*YPosHandler)(void) = NULL;
-
-			GET_SYMBOL(set_ydiff, "set_ydiff");
-			GET_SYMBOL(YPosHandler, "YPosHandler");
-
-			set_ydiff(config_get_int(config, SET_VIDEOMOD_YDIFF_LORES),
-				config_get_int(config, SET_VIDEOMOD_YDIFF_HIRES));
-
-			/* trap writes to GS registers DISPLAY1 and DISPLAY2 */
-			install_debug_handler(YPosHandler);
-			InitBPC();
-			SetDataAddrBP(0x12000080, 0xFFFFFFDF, BPC_DWE | BPC_DUE);
-			D_PRINTF("%s: y-fix breakpoint set\n", __FUNCTION__);
-		}
-	}
-
-	/*
 	 * install debugger
 	 */
 	if (config_get_bool(config, SET_DEBUGGER_INSTALL)) {
@@ -327,11 +288,6 @@ void uninstall_erls(void)
 	for (i = 0; i < ERL_FILE_NUM; i++) {
 		file = &_erl_files[i];
 		if (file->erl != NULL) {
-			if (i == ERL_FILE_VIDEOMOD) {
-				/* disable y-fix breakpoint */
-				InitBPC();
-				install_debug_handler(NULL);
-			}
 			__uninstall_erl(file);
 		}
 	}
